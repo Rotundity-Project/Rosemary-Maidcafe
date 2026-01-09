@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
 import { useGame } from '@/components/game/GameProvider';
 import { SeatGrid } from './Seat';
 import { MaidCard } from './MaidCard';
+import { MaidDetailPanel } from './MaidDetailPanel';
 import { CustomerCard } from './CustomerCard';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
+import { MaidRole } from '@/types';
 
 export function CafeView() {
   const { state, dispatch } = useGame();
@@ -32,6 +33,15 @@ export function CafeView() {
     dispatch({
       type: 'SELECT_MAID',
       maidId: selectedMaidId === maidId ? null : maidId,
+    });
+  };
+
+  // Handle maid role change
+  const handleRoleChange = (maidId: string, role: MaidRole) => {
+    dispatch({
+      type: 'ASSIGN_ROLE',
+      maidId,
+      role,
     });
   };
 
@@ -198,9 +208,45 @@ export function CafeView() {
       {/* Selected Details Panel */}
       {(selectedCustomer || selectedMaid) && (
         <div className="border-t border-gray-100 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Selected Customer Details */}
-            {selectedCustomer && (
+          {/* Selected Customer Details - Full width */}
+          {selectedCustomer && !selectedMaid && (
+            <Card variant="outlined">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <span>👤</span>
+                  <span>顾客详情</span>
+                </div>
+              </CardHeader>
+              <CardBody>
+                <CustomerCard
+                  customer={selectedCustomer}
+                  selected
+                />
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Selected Maid Details - Full width */}
+          {selectedMaid && !selectedCustomer && (
+            <Card variant="outlined">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <span>👧</span>
+                  <span>女仆详情</span>
+                </div>
+              </CardHeader>
+              <CardBody>
+                <MaidDetailPanel
+                  maid={selectedMaid}
+                  onRoleChange={handleRoleChange}
+                />
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Both selected - Two columns */}
+          {selectedCustomer && selectedMaid && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card variant="outlined">
                 <CardHeader>
                   <div className="flex items-center gap-2">
@@ -215,10 +261,6 @@ export function CafeView() {
                   />
                 </CardBody>
               </Card>
-            )}
-
-            {/* Selected Maid Details */}
-            {selectedMaid && (
               <Card variant="outlined">
                 <CardHeader>
                   <div className="flex items-center gap-2">
@@ -227,14 +269,14 @@ export function CafeView() {
                   </div>
                 </CardHeader>
                 <CardBody>
-                  <MaidCard
+                  <MaidDetailPanel
                     maid={selectedMaid}
-                    selected
+                    onRoleChange={handleRoleChange}
                   />
                 </CardBody>
               </Card>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>
