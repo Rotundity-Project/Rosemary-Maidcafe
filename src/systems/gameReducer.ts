@@ -121,9 +121,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.statistics,
           totalDaysPlayed: state.statistics.totalDaysPlayed + 1,
         },
-        // 重置女仆状态
+        // 重置女仆状态，恢复体力
         maids: state.maids.map(maid => ({
           ...maid,
+          stamina: 100, // 新的一天体力恢复满
           status: {
             isWorking: false,
             currentTask: null,
@@ -217,7 +218,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
               status: {
                 ...maid.status,
                 isWorking: true,
-                currentTask: 'serving',
+                currentTask: '服务中',
                 servingCustomerId: action.customerId,
               },
             }

@@ -154,18 +154,21 @@ export function checkLevelUp(maid: Maid): Maid {
 
 /**
  * 更新女仆体力
- * 工作时消耗体力，休息时恢复体力
+ * 工作时消耗体力，休息或空闲时恢复体力
  * Requirements: 2.8
  */
 export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
   let newStamina = maid.stamina;
   
   if (maid.role === 'resting') {
-    // 休息时每分钟恢复2点体力
+    // 休息角色时每分钟恢复2点体力
     newStamina = maid.stamina + (deltaMinutes * 2);
   } else if (maid.status.isWorking) {
     // 工作时每分钟消耗0.5点体力
     newStamina = maid.stamina - (deltaMinutes * 0.5);
+  } else {
+    // 空闲时（不工作也不是休息角色）每分钟恢复0.5点体力
+    newStamina = maid.stamina + (deltaMinutes * 0.5);
   }
   
   return {
