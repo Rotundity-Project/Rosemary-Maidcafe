@@ -67,6 +67,7 @@ export function generateRandomMaid(usedImages: string[] = []): Maid {
     role: 'server', // 默认角色
     status: {
       isWorking: false,
+      isResting: false,
       currentTask: null,
       servingCustomerId: null,
     },
@@ -160,14 +161,14 @@ export function checkLevelUp(maid: Maid): Maid {
 export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
   let newStamina = maid.stamina;
   
-  if (maid.role === 'resting') {
-    // 休息角色时每分钟恢复2点体力
+  if (maid.status.isResting) {
+    // 休息时每分钟恢复2点体力
     newStamina = maid.stamina + (deltaMinutes * 2);
   } else if (maid.status.isWorking) {
     // 工作时每分钟消耗0.5点体力
     newStamina = maid.stamina - (deltaMinutes * 0.5);
   } else {
-    // 空闲时（不工作也不是休息角色）每分钟恢复0.5点体力
+    // 空闲时每分钟恢复0.5点体力
     newStamina = maid.stamina + (deltaMinutes * 0.5);
   }
   

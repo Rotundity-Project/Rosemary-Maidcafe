@@ -7,12 +7,13 @@ export interface MaidStats {
   speed: number;    // 移动和服务速度 (1-100)
 }
 
-export type MaidRole = 'greeter' | 'server' | 'barista' | 'entertainer' | 'resting';
+export type MaidRole = 'greeter' | 'server' | 'barista' | 'entertainer';
 
 export type MaidPersonality = 'cheerful' | 'cool' | 'shy' | 'energetic' | 'elegant';
 
 export interface MaidStatus {
   isWorking: boolean;
+  isResting: boolean;  // 是否在休息
   currentTask: string | null;
   servingCustomerId: string | null;
 }
@@ -251,6 +252,7 @@ export type GameAction =
   | { type: 'FIRE_MAID'; maidId: string }
   | { type: 'ASSIGN_ROLE'; maidId: string; role: MaidRole }
   | { type: 'UPDATE_MAID'; maidId: string; updates: Partial<Maid> }
+  | { type: 'TOGGLE_MAID_REST'; maidId: string }  // 切换休息状态
   
   // 顾客管理
   | { type: 'SPAWN_CUSTOMER'; customer: Customer }

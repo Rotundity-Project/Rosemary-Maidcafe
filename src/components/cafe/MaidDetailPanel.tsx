@@ -8,6 +8,7 @@ import { calculateEfficiency } from '@/systems/maidSystem';
 interface MaidDetailPanelProps {
   maid: Maid;
   onRoleChange: (maidId: string, role: MaidRole) => void;
+  onToggleRest: (maidId: string) => void;
 }
 
 const roleLabels: Record<MaidRole, string> = {
@@ -15,7 +16,6 @@ const roleLabels: Record<MaidRole, string> = {
   server: '服务员',
   barista: '咖啡师',
   entertainer: '表演者',
-  resting: '休息',
 };
 
 const roleIcons: Record<MaidRole, string> = {
@@ -23,7 +23,6 @@ const roleIcons: Record<MaidRole, string> = {
   server: '🍽️',
   barista: '☕',
   entertainer: '🎤',
-  resting: '💤',
 };
 
 const personalityLabels: Record<MaidPersonality, string> = {
@@ -42,10 +41,11 @@ const personalityEmojis: Record<MaidPersonality, string> = {
   elegant: '🥰',
 };
 
-export function MaidDetailPanel({ maid, onRoleChange }: MaidDetailPanelProps) {
+export function MaidDetailPanel({ maid, onRoleChange, onToggleRest }: MaidDetailPanelProps) {
   const efficiency = calculateEfficiency(maid);
   const isLowStamina = maid.stamina < 20;
   const isWorking = maid.status.isWorking;
+  const isResting = maid.status.isResting;
 
   const availableRoles: MaidRole[] = ['server', 'greeter', 'barista', 'entertainer'];
 
@@ -65,6 +65,11 @@ export function MaidDetailPanel({ maid, onRoleChange }: MaidDetailPanelProps) {
             <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full">
               Lv.{maid.level}
             </span>
+            {isResting && (
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                💤 休息中
+              </span>
+            )}
           </div>
           <div className="text-sm text-gray-500 mt-1">
             {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
@@ -109,7 +114,7 @@ export function MaidDetailPanel({ maid, onRoleChange }: MaidDetailPanelProps) {
         </div>
       </div>
 
-      {/* Right: Role Selection - 2x2 Grid */}
+      {/* Right: Role Selection + Rest Button */}
       <div className="flex-shrink-0">
         <div className="text-sm font-medium text-gray-700 mb-2">设置职位</div>
         <div className="grid grid-cols-2 gap-2">
@@ -117,14 +122,14 @@ export function MaidDetailPanel({ maid, onRoleChange }: MaidDetailPanelProps) {
             <button
               key={role}
               onClick={() => onRoleChange(maid.id, role)}
-              disabled={isWorking}
+              disabled={isWorking || isResting}
               className={`
                 px-4 py-3 rounded-xl transition-all text-sm flex flex-col items-center gap-1 min-w-[80px]
-                ${maid.role === role 
+                ${maid.role === role && !isResting
                   ? 'bg-pink-500 text-white shadow-md' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }
-                ${isWorking ? 'opacity-50 cursor-not-allowed' : ''}
+                ${(isWorking || isResting) ? 'opacity-50 cursor-not-allowed' : ''}
               `}
             >
               <span className="text-xl">{roleIcons[role]}</span>
@@ -132,9 +137,27 @@ export function MaidDetailPanel({ maid, onRoleChange }: MaidDetailPanelProps) {
             </button>
           ))}
         </div>
+        
+        {/* Rest Button */}
+        <button
+          onClick={() => onToggleRest(maid.id)}
+          disabled={isWorking}
+          className={`
+            w-full mt-2 px-4 py-2 rounded-xl transition-all text-sm flex items-center justify-center gap-2
+            ${isResting 
+              ? 'bg-green-500 text-white shadow-md' 
+              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+            }
+            ${isWorking ? 'opacity-50 cursor-not-allowed' : ''}
+          `}
+        >
+          <span>{isResting ? '🌟' : '💤'}</span>
+          <span className="font-medium">{isResting ? '结束休息' : '安排休息'}</span>
+        </button>
+        
         {isWorking && (
           <div className="text-xs text-yellow-600 mt-2">
-            ⚠️ 工作中，无法切换职位
+            ⚠️ 工作中，无法操作
           </div>
         )}
       </div>

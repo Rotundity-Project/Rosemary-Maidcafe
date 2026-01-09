@@ -45,12 +45,20 @@ export function CafeView() {
     });
   };
 
+  // Handle maid rest toggle
+  const handleToggleRest = (maidId: string) => {
+    dispatch({
+      type: 'TOGGLE_MAID_REST',
+      maidId,
+    });
+  };
+
   // Get waiting customers (not yet seated)
   const waitingCustomers = customers.filter(c => c.status === 'waiting_seat');
   
   // Get active maids (not resting)
-  const activeMaids = maids.filter(m => m.role !== 'resting');
-  const restingMaids = maids.filter(m => m.role === 'resting');
+  const activeMaids = maids.filter(m => !m.status.isResting);
+  const restingMaids = maids.filter(m => m.status.isResting);
 
   // Get selected customer and maid details
   const selectedCustomer = selectedCustomerId 
@@ -239,6 +247,7 @@ export function CafeView() {
                 <MaidDetailPanel
                   maid={selectedMaid}
                   onRoleChange={handleRoleChange}
+                  onToggleRest={handleToggleRest}
                 />
               </CardBody>
             </Card>
@@ -272,6 +281,7 @@ export function CafeView() {
                   <MaidDetailPanel
                     maid={selectedMaid}
                     onRoleChange={handleRoleChange}
+                    onToggleRest={handleToggleRest}
                   />
                 </CardBody>
               </Card>

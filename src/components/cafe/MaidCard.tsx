@@ -17,7 +17,6 @@ const roleLabels: Record<MaidRole, string> = {
   server: '服务员',
   barista: '咖啡师',
   entertainer: '表演者',
-  resting: '休息中',
 };
 
 const roleColors: Record<MaidRole, string> = {
@@ -25,7 +24,6 @@ const roleColors: Record<MaidRole, string> = {
   server: 'bg-blue-100 text-blue-700',
   barista: 'bg-amber-100 text-amber-700',
   entertainer: 'bg-purple-100 text-purple-700',
-  resting: 'bg-gray-100 text-gray-700',
 };
 
 const taskLabels: Record<string, string> = {
@@ -40,7 +38,6 @@ const roleIcons: Record<MaidRole, string> = {
   server: '🍽️',
   barista: '☕',
   entertainer: '🎭',
-  resting: '💤',
 };
 
 const personalityEmojis: Record<MaidPersonality, string> = {
@@ -58,7 +55,7 @@ export function MaidCard({
   compact = false,
 }: MaidCardProps) {
   const isLowStamina = maid.stamina < 20;
-  const isResting = maid.role === 'resting';
+  const isResting = maid.status.isResting;
   const isWorking = maid.status.isWorking;
 
   if (compact) {

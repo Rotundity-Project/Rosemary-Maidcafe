@@ -127,6 +127,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           stamina: 100, // 新的一天体力恢复满
           status: {
             isWorking: false,
+            isResting: false,
             currentTask: null,
             servingCustomerId: null,
           },
@@ -177,6 +178,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         maids: state.maids.map(maid =>
           maid.id === action.maidId
             ? { ...maid, ...action.updates }
+            : maid
+        ),
+      };
+    }
+
+    case 'TOGGLE_MAID_REST': {
+      return {
+        ...state,
+        maids: state.maids.map(maid =>
+          maid.id === action.maidId
+            ? {
+                ...maid,
+                status: {
+                  ...maid.status,
+                  isResting: !maid.status.isResting,
+                  isWorking: false,
+                  currentTask: null,
+                  servingCustomerId: null,
+                },
+              }
             : maid
         ),
       };

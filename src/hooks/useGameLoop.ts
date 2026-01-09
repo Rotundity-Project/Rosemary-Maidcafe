@@ -100,7 +100,7 @@ export function useGameLoop(
       
       if (updatedMaid.stamina !== maid.stamina) {
         // 体力归零时自动切换为休息
-        if (updatedMaid.stamina <= 0 && maid.role !== 'resting') {
+        if (updatedMaid.stamina <= 0 && !maid.status.isResting) {
           dispatchRef.current({
             type: 'UPDATE_MAID',
             maidId: maid.id,
@@ -108,15 +108,11 @@ export function useGameLoop(
               stamina: 0,
               status: {
                 isWorking: false,
+                isResting: true,
                 currentTask: null,
                 servingCustomerId: null,
               },
             },
-          });
-          dispatchRef.current({
-            type: 'ASSIGN_ROLE',
-            maidId: maid.id,
-            role: 'resting',
           });
           dispatchRef.current({
             type: 'ADD_NOTIFICATION',
@@ -127,7 +123,31 @@ export function useGameLoop(
               timestamp: Date.now(),
             },
           });
-        } else {
+        } 
+        // 体力恢复到50%以上且正在休息，自动结束休息
+        else if (updatedMaid.stamina >= 50 && maid.status.isResting) {
+          dispatchRef.current({
+            type: 'UPDATE_MAID',
+            maidId: maid.id,
+            updates: { 
+              stamina: updatedMaid.stamina,
+              status: {
+                ...maid.status,
+                isResting: false,
+              },
+            },
+          });
+          dispatchRef.current({
+            type: 'ADD_NOTIFICATION',
+            notification: {
+              id: `maid_recovered_${maid.id}_${Date.now()}`,
+              type: 'success',
+              message: `${maid.name} 体力恢复，已返回工作岗位`,
+              timestamp: Date.now(),
+            },
+          });
+        }
+        else {
           dispatchRef.current({
             type: 'UPDATE_MAID',
             maidId: maid.id,
@@ -202,7 +222,7 @@ export function useGameLoop(
     // 找到空闲的女仆（不在休息、没有正在服务的客人、体力足够）
     const availableMaids = currentState.maids.filter(
       (m: Maid) => 
-        m.role !== 'resting' && 
+        !m.status.isResting && 
         !m.status.isWorking && 
         m.status.servingCustomerId === null &&
         m.stamina >= 10 // 体力至少10%才能工作
