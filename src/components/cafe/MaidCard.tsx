@@ -28,6 +28,13 @@ const roleColors: Record<MaidRole, string> = {
   resting: 'bg-gray-100 text-gray-700',
 };
 
+const taskLabels: Record<string, string> = {
+  serving: '服务中',
+  greeting: '迎宾中',
+  preparing: '准备中',
+  entertaining: '表演中',
+};
+
 const roleIcons: Record<MaidRole, string> = {
   greeter: '👋',
   server: '🍽️',
@@ -121,7 +128,9 @@ export function MaidCard({
             {maid.name}
           </div>
           <div className="text-xs text-gray-500">
-            {maid.status.currentTask || (isResting ? '正在休息' : '待命中')}
+            {maid.status.currentTask 
+              ? (taskLabels[maid.status.currentTask] || maid.status.currentTask)
+              : (isResting ? '正在休息' : '待命中')}
           </div>
         </div>
       </div>

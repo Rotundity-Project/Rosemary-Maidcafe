@@ -218,7 +218,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
               status: {
                 ...maid.status,
                 isWorking: true,
-                currentTask: '服务中',
+                currentTask: 'serving',
                 servingCustomerId: action.customerId,
               },
             }
