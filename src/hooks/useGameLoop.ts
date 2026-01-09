@@ -4,7 +4,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { GameState, GameAction, Customer, Maid } from '@/types';
 import { GAME_CONSTANTS } from '@/data/initialState';
 import { generateCustomer, generateOrder, updatePatience, shouldCustomerLeave, handlePatienceTimeout } from '@/systems/customerSystem';
-import { updateMaidStamina } from '@/systems/maidSystem';
+import { updateMaidStamina, calculateEfficiency } from '@/systems/maidSystem';
+import { checkAchievements } from '@/systems/achievementSystem';
 
 /**
  * 游戏循环配置
@@ -155,6 +156,84 @@ export function useGameLoop(
   }, []);
 
   /**
+   * 自动分配女仆服务客人
+   * 找到空闲的女仆并分配给等待服务的客人
+   */
+  const handleAutoAssignMaids = useCallback((currentState: GameState) => {
+    // 找到需要服务的客人（刚入座，等待女仆来点餐）
+    const waitingCustomers = currentState.customers.filter(
+      (c: Customer) => c.status === 'seated'
+    );
+    
+    if (waitingCustomers.length === 0) {
+      return;
+    }
+    
+    // 找到空闲的女仆（不在休息、没有正在服务的客人、体力足够）
+    const availableMaids = currentState.maids.filter(
+      (m: Maid) => 
+        m.role !== 'resting' && 
+        !m.status.isWorking && 
+        m.status.servingCustomerId === null &&
+        m.stamina >= 10 // 体力至少10%才能工作
+    );
+    
+    if (availableMaids.length === 0) {
+      return;
+    }
+    
+    // 按效率排序女仆（效率高的优先）
+    const sortedMaids = [...availableMaids].sort((a, b) => {
+      return calculateEfficiency(b) - calculateEfficiency(a);
+    });
+    
+    // 按耐心排序客人（耐心低的优先服务）
+    const sortedCustomers = [...waitingCustomers].sort((a, b) => {
+      return a.patience - b.patience;
+    });
+    
+    // 分配女仆服务客人
+    const assignCount = Math.min(sortedMaids.length, sortedCustomers.length);
+    for (let i = 0; i < assignCount; i++) {
+      const maid = sortedMaids[i];
+      const customer = sortedCustomers[i];
+      
+      dispatchRef.current({
+        type: 'SERVE_CUSTOMER',
+        maidId: maid.id,
+        customerId: customer.id,
+      });
+    }
+  }, []);
+
+  /**
+   * 检查并解锁成就
+   */
+  const handleAchievementCheck = useCallback((currentState: GameState) => {
+    const unlockedIds = checkAchievements(currentState.statistics, currentState.achievements);
+    
+    for (const achievementId of unlockedIds) {
+      const achievement = currentState.achievements.find(a => a.id === achievementId);
+      if (achievement) {
+        dispatchRef.current({
+          type: 'UNLOCK_ACHIEVEMENT',
+          achievementId,
+        });
+        
+        dispatchRef.current({
+          type: 'ADD_NOTIFICATION',
+          notification: {
+            id: `achievement_${achievementId}_${Date.now()}`,
+            type: 'achievement',
+            message: `🏆 成就解锁：${achievement.name}！奖励 ${achievement.reward} 金币`,
+            timestamp: Date.now(),
+          },
+        });
+      }
+    }
+  }, []);
+
+  /**
    * 重置循环计时器
    */
   const resetTimers = useCallback(() => {
@@ -206,6 +285,12 @@ export function useGameLoop(
             
             // 更新顾客耐心
             handleCustomerPatience(currentState, GAME_CONSTANTS.TIME_INCREMENT);
+            
+            // 自动分配女仆服务客人
+            handleAutoAssignMaids(stateRef.current);
+            
+            // 检查成就
+            handleAchievementCheck(stateRef.current);
           }
         }
         
@@ -233,7 +318,7 @@ export function useGameLoop(
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [handleTimeTick, handleMaidUpdates, handleCustomerPatience, handleCustomerSpawn]);
+  }, [handleTimeTick, handleMaidUpdates, handleCustomerPatience, handleAutoAssignMaids, handleAchievementCheck, handleCustomerSpawn]);
 
   /**
    * 启动游戏循环（兼容旧接口）
