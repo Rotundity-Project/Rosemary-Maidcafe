@@ -144,7 +144,7 @@ export function SettingsPanel() {
         <CardHeader>ℹ️ 关于</CardHeader>
         <CardBody>
           <div className="text-sm text-gray-600 space-y-2">
-            <p>🌿 迷迭香咖啡厅 v2.0</p>
+            <p>🌿 迷迭香咖啡厅 v0.1.0</p>
             <p>一款二次元风格的女仆咖啡厅经营模拟游戏</p>
             <p className="text-xs text-gray-400">游戏数据自动保存到浏览器本地存储</p>
           </div>
