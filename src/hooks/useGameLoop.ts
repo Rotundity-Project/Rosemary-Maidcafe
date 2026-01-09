@@ -99,11 +99,41 @@ export function useGameLoop(
       const updatedMaid = updateMaidStamina(maid, deltaMinutes);
       
       if (updatedMaid.stamina !== maid.stamina) {
-        dispatchRef.current({
-          type: 'UPDATE_MAID',
-          maidId: maid.id,
-          updates: { stamina: updatedMaid.stamina },
-        });
+        // 体力归零时自动切换为休息
+        if (updatedMaid.stamina <= 0 && maid.role !== 'resting') {
+          dispatchRef.current({
+            type: 'UPDATE_MAID',
+            maidId: maid.id,
+            updates: { 
+              stamina: 0,
+              status: {
+                isWorking: false,
+                currentTask: null,
+                servingCustomerId: null,
+              },
+            },
+          });
+          dispatchRef.current({
+            type: 'ASSIGN_ROLE',
+            maidId: maid.id,
+            role: 'resting',
+          });
+          dispatchRef.current({
+            type: 'ADD_NOTIFICATION',
+            notification: {
+              id: `maid_exhausted_${maid.id}_${Date.now()}`,
+              type: 'warning',
+              message: `${maid.name} 体力耗尽，已自动安排休息`,
+              timestamp: Date.now(),
+            },
+          });
+        } else {
+          dispatchRef.current({
+            type: 'UPDATE_MAID',
+            maidId: maid.id,
+            updates: { stamina: updatedMaid.stamina },
+          });
+        }
       }
     });
   }, []);
