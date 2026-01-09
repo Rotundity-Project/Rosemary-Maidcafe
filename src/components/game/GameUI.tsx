@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGame } from './GameProvider';
 import { useGameLoopControls } from './GameLoop';
 import { TopBar } from '@/components/ui/TopBar';
@@ -28,7 +28,7 @@ import { hireCostByLevel } from '@/data/maidNames';
  */
 export function GameUI() {
   const { state, dispatch } = useGame();
-  const { startNewDay } = useGameLoopControls();
+  const { startNewDay, isBusinessHours } = useGameLoopControls();
   
   // Modal states
   const [showHireMaidModal, setShowHireMaidModal] = useState(false);
@@ -37,6 +37,18 @@ export function GameUI() {
   const [showSaveLoadModal, setShowSaveLoadModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
   const [customersServedToday, setCustomersServedToday] = useState(0);
+  
+  // Track previous business hours state to detect end of day
+  const prevIsBusinessHoursRef = useRef(isBusinessHours);
+  
+  // Show daily summary modal when business hours end
+  useEffect(() => {
+    // Detect transition from business hours to non-business hours
+    if (prevIsBusinessHoursRef.current && !isBusinessHours) {
+      setShowDailySummaryModal(true);
+    }
+    prevIsBusinessHoursRef.current = isBusinessHours;
+  }, [isBusinessHours]);
 
   // Handle notification dismiss
   const handleDismissNotification = useCallback((notificationId: string) => {
