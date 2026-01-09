@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌿 迷迭香咖啡厅
 
-## Getting Started
+一款基于 Next.js 开发的模拟经营女仆咖啡厅游戏。雇佣可爱的女仆、服务各类顾客、升级设施、解锁菜单，打造属于你的梦想咖啡厅！
 
-First, run the development server:
+## ✨ 游戏特色
+
+- 🎀 **女仆养成** - 雇佣不同性格的女仆，培养她们的技能，分配合适的工作岗位
+- ☕ **顾客服务** - 接待普通顾客、VIP、美食评论家等，满足他们的需求获得好评
+- 📋 **菜单经营** - 解锁30+种饮品和甜点，设置价格，打造人气菜单
+- 🏠 **设施升级** - 扩大咖啡厅规模，购买装饰，升级设备，解锁新区域
+- 🎲 **随机事件** - 体验各种随机事件和季节活动，让每一天都充满惊喜
+- 🏆 **成就系统** - 完成各种挑战，解锁20+成就，获得丰厚奖励
+- 💾 **本地存档** - 游戏数据自动保存到浏览器，支持导入导出
+
+## 🚀 快速开始
+
+### 环境要求
+
+- Node.js 18+
+- npm 或 yarn
+
+### 安装运行
 
 ```bash
+# 克隆项目
+git clone <repository-url>
+cd rosemary-maidcafe
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开浏览器访问 [http://localhost:3000](http://localhost:3000) 开始游戏。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 构建部署
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 构建生产版本
+npm run build
 
-## Learn More
+# 启动生产服务器
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🎮 游戏玩法
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 基本操作
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **空格键** - 暂停/继续游戏
+- **点击女仆** - 查看详情和分配任务
+- **点击顾客** - 查看订单和满意度
+- **底部导航** - 切换不同管理面板
 
-## Deploy on Vercel
+### 游戏流程
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **开始新游戏** - 初始资金1000金币，4个座位
+2. **雇佣女仆** - 在女仆面板招募你的第一位员工
+3. **开始营业** - 点击播放按钮，顾客会自动到来
+4. **服务顾客** - 女仆会自动服务顾客，赚取金币
+5. **升级发展** - 用赚到的钱解锁菜单、升级设施
+6. **日结算** - 每天21:00营业结束，查看当日收益
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 女仆属性
+
+| 属性 | 说明 |
+|------|------|
+| 魅力 | 影响顾客满意度和小费 |
+| 技能 | 影响服务速度和质量 |
+| 体力 | 工作消耗，低于20%效率减半 |
+| 速度 | 影响移动和服务速度 |
+
+### 顾客类型
+
+| 类型 | 特点 |
+|------|------|
+| 普通顾客 | 标准需求和奖励 |
+| VIP顾客 | 高奖励但要求更高 |
+| 美食评论家 | 影响声望，需要完美服务 |
+| 团体顾客 | 订单量大，需要多人服务 |
+
+## 🛠️ 技术栈
+
+- **框架**: Next.js 16 + React 19
+- **语言**: TypeScript
+- **样式**: Tailwind CSS 4
+- **状态管理**: React Context + useReducer
+- **数据存储**: localStorage
+- **测试**: Vitest
+
+## 📁 项目结构
+
+```
+src/
+├── app/                 # Next.js 页面
+├── components/          # React 组件
+│   ├── cafe/           # 咖啡厅视图组件
+│   ├── game/           # 游戏核心组件
+│   ├── modals/         # 弹窗组件
+│   ├── panels/         # 管理面板组件
+│   └── ui/             # 通用UI组件
+├── data/               # 游戏数据
+├── hooks/              # 自定义Hooks
+├── systems/            # 游戏系统逻辑
+├── types/              # TypeScript类型
+└── utils/              # 工具函数
+```
+
+## 📝 开发命令
+
+```bash
+npm run dev      # 启动开发服务器
+npm run build    # 构建生产版本
+npm run start    # 启动生产服务器
+npm run lint     # 代码检查
+npm run test     # 运行测试
+```
+
+## 🎨 自定义
+
+### 添加新菜单项
+
+编辑 `src/data/menuItems.ts`，按照现有格式添加新的菜单项。
+
+### 添加新事件
+
+编辑 `src/data/events.ts`，添加新的随机事件或季节事件。
+
+### 添加新成就
+
+编辑 `src/data/achievements.ts`，定义新的成就条件和奖励。
+
+## 📄 许可证
+
+MIT License
+
+---
+
+🌸 享受经营你的女仆咖啡厅吧！
