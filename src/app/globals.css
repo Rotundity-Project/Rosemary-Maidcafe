@@ -1,26 +1,1605 @@
 @import "tailwindcss";
 
+/* ============================================
+   迷迭香咖啡厅 - 游戏主题样式
+   ============================================ */
+
+/* ============================================
+   CSS 变量 - 白色二次元主题
+   ============================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 主背景 - 纯白 */
+  --background: #FFFFFF;
+  --foreground: #2D3748;
+  
+  /* 次要背景 - 极浅灰 */
+  --background-secondary: #FAFAFA;
+  
+  /* 主题色 - 柔和粉色 (二次元女仆咖啡厅主题) */
+  --primary-50: #FFF5F7;
+  --primary-100: #FFEBEF;
+  --primary-200: #FFD6E0;
+  --primary-300: #FFB3C6;
+  --primary-400: #FF8FAB;
+  --primary-500: #FF6B8A;
+  --primary-600: #FF4D6D;
+  --primary-700: #E63E5C;
+  --primary-800: #C9354F;
+  --primary-900: #A62D43;
+  
+  /* 金币颜色 */
+  --gold-light: #FEF7E0;
+  --gold: #F5B041;
+  --gold-dark: #D4940A;
+  
+  /* 声望颜色 */
+  --reputation-light: #F3E8FF;
+  --reputation: #A78BFA;
+  --reputation-dark: #8B5CF6;
+  
+  /* 季节颜色 */
+  --season-spring: #10b981;
+  --season-summer: #f59e0b;
+  --season-autumn: #f97316;
+  --season-winter: #3b82f6;
+  
+  /* 状态颜色 */
+  --stamina-high: #22c55e;
+  --stamina-medium: #eab308;
+  --stamina-low: #ef4444;
+  
+  --patience-high: #3b82f6;
+  --patience-medium: #eab308;
+  --patience-low: #ef4444;
+  
+  --mood-high: #FF6B8A;
+  --mood-medium: #eab308;
+  --mood-low: #ef4444;
+  
+  /* 卡片和表面 - 白色带微妙阴影 */
+  --surface: #FFFFFF;
+  --surface-hover: #FAFAFA;
+  --surface-active: #F5F5F5;
+  --border: #EDF2F7;
+  --border-light: #F7FAFC;
+  
+  /* 文字颜色 */
+  --text-primary: #2D3748;
+  --text-secondary: #718096;
+  --text-muted: #A0AEC0;
+  
+  /* 阴影 - 柔和效果 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
+/* 深色模式 - 保持白色主题一致性 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 保持与浅色模式相同的白色主题 */
+    --background: #FFFFFF;
+    --foreground: #2D3748;
+    
+    --surface: #FFFFFF;
+    --surface-hover: #FAFAFA;
+    --surface-active: #F5F5F5;
+    --border: #EDF2F7;
+    --border-light: #F7FAFC;
+    
+    --text-primary: #2D3748;
+    --text-secondary: #718096;
+    --text-muted: #A0AEC0;
+  }
+}
+
+/* Tailwind 主题内联配置 */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary-500);
+  --color-gold: var(--gold);
+  --color-reputation: var(--reputation);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   基础样式 - 白色二次元主题
+   ============================================ */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background: #FFFFFF;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
+
+/* 选择文本颜色 - 柔和粉色 */
+::selection {
+  background-color: var(--primary-200);
+  color: var(--primary-800);
+}
+
+/* 滚动条样式 - 浅色主题 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAFAFA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-200);
+  border-radius: 4px;
+  border: 2px solid #FAFAFA;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-300);
+}
+
+/* 深色模式下保持浅色滚动条 */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #FAFAFA;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-200);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-300);
+  }
+}
+
+
+/* ============================================
+   动画关键帧
+   ============================================ */
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 淡出动画 */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 从上滑入 */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从下滑入 */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从左滑入 */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 从右滑入 */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 缩放弹入 */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 缩放弹出 */
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* 轻微弹跳 */
+@keyframes bounceLight {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 心跳动画 */
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+/* 摇晃动画 */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* 旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 闪烁动画 */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 发光动画 */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--primary-400), 0 0 10px var(--primary-300);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--primary-400), 0 0 20px var(--primary-300), 0 0 30px var(--primary-200);
+  }
+}
+
+/* 金币闪光 */
+@keyframes goldShimmer {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--gold), 0 0 10px var(--gold-light);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--gold), 0 0 25px var(--gold-light);
+  }
+}
+
+/* 进度条流动 */
+@keyframes progressFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 浮动动画 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* 成就解锁动画 */
+@keyframes achievementUnlock {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 通知滑入 */
+@keyframes notificationSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 通知滑出 */
+@keyframes notificationSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+
+/* ============================================
+   动画工具类
+   ============================================ */
+
+/* 基础动画 */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+.animate-slide-in-top {
+  animation: slideInFromTop 0.3s ease-out forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.3s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.2s ease-out forwards;
+}
+
+/* 循环动画 */
+.animate-bounce-loop {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-bounce-light {
+  animation: bounceLight 0.6s ease-in-out infinite;
+}
+
+.animate-pulse-loop {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-gold-shimmer {
+  animation: goldShimmer 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 特殊动画 */
+.animate-achievement {
+  animation: achievementUnlock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-notification-in {
+  animation: notificationSlideIn 0.3s ease-out forwards;
+}
+
+.animate-notification-out {
+  animation: notificationSlideOut 0.3s ease-out forwards;
+}
+
+/* 动画延迟 */
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+/* 动画时长 */
+.animation-duration-150 {
+  animation-duration: 150ms;
+}
+
+.animation-duration-200 {
+  animation-duration: 200ms;
+}
+
+.animation-duration-300 {
+  animation-duration: 300ms;
+}
+
+.animation-duration-500 {
+  animation-duration: 500ms;
+}
+
+.animation-duration-700 {
+  animation-duration: 700ms;
+}
+
+.animation-duration-1000 {
+  animation-duration: 1000ms;
+}
+
+/* 悬停动画 */
+.hover-bounce:hover {
+  animation: bounceLight 0.4s ease-in-out;
+}
+
+.hover-glow:hover {
+  animation: glow 1s ease-in-out;
+}
+
+.hover-shake:hover {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* 过渡效果 */
+.transition-fast {
+  transition: all 0.15s ease-out;
+}
+
+.transition-normal {
+  transition: all 0.3s ease-out;
+}
+
+.transition-slow {
+  transition: all 0.5s ease-out;
+}
+
+
+/* ============================================
+   游戏特定组件样式 - 白色二次元主题
+   ============================================ */
+
+/* 座位样式 - 柔和白色风格 */
+.seat {
+  @apply relative rounded-2xl border-2 transition-all duration-200;
+  background: #FFFFFF;
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.seat:hover {
+  border-color: var(--primary-300);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.seat.occupied {
+  border-color: var(--primary-400);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-50) 100%);
+  box-shadow: var(--shadow);
+}
+
+.seat.selected {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100), var(--shadow-md);
+}
+
+/* 深色模式下保持白色主题 */
+@media (prefers-color-scheme: dark) {
+  .seat {
+    background: #FFFFFF;
+    border-color: var(--border);
+  }
+  
+  .seat.occupied {
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-50) 100%);
+  }
+}
+
+/* 女仆卡片 - 二次元风格 */
+.maid-card {
+  @apply relative rounded-2xl p-4 transition-all duration-200;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.maid-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  border-color: var(--primary-200);
+}
+
+.maid-card.selected {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100), var(--shadow-md);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-50) 100%);
+}
+
+.maid-card.resting {
+  opacity: 0.75;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+}
+
+/* 顾客卡片 - 柔和风格 */
+.customer-card {
+  @apply relative rounded-2xl p-3 transition-all duration-200;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.customer-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.customer-card.vip {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--gold-light) 100%);
+  box-shadow: 0 2px 12px rgba(245, 176, 65, 0.15);
+}
+
+.customer-card.critic {
+  border-color: var(--reputation);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--reputation-light) 100%);
+  box-shadow: 0 2px 12px rgba(167, 139, 250, 0.15);
+}
+
+.customer-card.impatient {
+  animation: shake 0.5s ease-in-out;
+  border-color: var(--stamina-low);
+}
+
+/* 菜单项卡片 - 白色二次元风格 */
+.menu-item-card {
+  @apply relative rounded-xl p-3 transition-all duration-200;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.menu-item-card:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--primary-200);
+  transform: translateY(-1px);
+}
+
+.menu-item-card.locked {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.menu-item-card.seasonal {
+  border-color: var(--season-spring);
+  background: linear-gradient(135deg, #FFFFFF 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.menu-item-card.popular {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--gold-light) 100%);
+}
+
+/* 进度条增强 */
+.progress-bar-animated {
+  background: linear-gradient(
+    90deg,
+    var(--primary-400) 0%,
+    var(--primary-500) 50%,
+    var(--primary-400) 100%
+  );
+  background-size: 200% 100%;
+  animation: progressFlow 2s linear infinite;
+}
+
+/* 金币显示 */
+.gold-display {
+  @apply inline-flex items-center gap-1 font-semibold;
+  color: var(--gold-dark);
+}
+
+.gold-display.large {
+  @apply text-2xl;
+}
+
+.gold-display.gain {
+  color: var(--stamina-high);
+  animation: bounceLight 0.4s ease-out;
+}
+
+.gold-display.loss {
+  color: var(--stamina-low);
+  animation: shake 0.4s ease-out;
+}
+
+/* 声望显示 */
+.reputation-display {
+  @apply inline-flex items-center gap-1 font-semibold;
+  color: var(--reputation-dark);
+}
+
+/* 状态徽章 - 白色主题 */
+.status-badge {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-badge.working {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.status-badge.resting {
+  background: #F5F5F5;
+  color: #718096;
+}
+
+.status-badge.low-stamina {
+  background: #FEE2E2;
+  color: #DC2626;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 深色模式下保持白色主题徽章样式 */
+@media (prefers-color-scheme: dark) {
+  .status-badge.working {
+    background: var(--primary-100);
+    color: var(--primary-700);
+  }
+  
+  .status-badge.resting {
+    background: #F5F5F5;
+    color: #718096;
+  }
+  
+  .status-badge.low-stamina {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+}
+
+/* 季节指示器 */
+.season-indicator {
+  @apply inline-flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium;
+}
+
+.season-indicator.spring {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--season-spring);
+}
+
+.season-indicator.summer {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--season-summer);
+}
+
+.season-indicator.autumn {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--season-autumn);
+}
+
+.season-indicator.winter {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--season-winter);
+}
+
+
+/* ============================================
+   响应式断点和布局
+   ============================================ */
+
+/* 移动端优先的响应式容器 */
+.game-container {
+  @apply w-full min-h-screen;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 游戏主布局 */
+.game-layout {
+  @apply flex flex-col min-h-screen;
+}
+
+.game-header {
+  @apply sticky top-0 z-40;
+}
+
+.game-main {
+  @apply flex-1 overflow-hidden;
+}
+
+.game-nav {
+  @apply sticky bottom-0 z-40;
+}
+
+/* 面板网格 - 移动端 */
+.panel-grid {
+  @apply grid gap-4 p-4;
+  grid-template-columns: 1fr;
+}
+
+/* 面板网格 - 平板 */
+@media (min-width: 640px) {
+  .panel-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 面板网格 - 桌面 */
+@media (min-width: 1024px) {
+  .panel-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 面板网格 - 大屏 */
+@media (min-width: 1280px) {
+  .panel-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 咖啡厅座位网格 - 响应式 */
+.seat-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 480px) {
+  .seat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 640px) {
+  .seat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .seat-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .seat-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 菜单网格 */
+.menu-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 480px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .menu-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 女仆列表 */
+.maid-list {
+  @apply grid gap-4;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .maid-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .maid-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 成就网格 */
+.achievement-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 480px) {
+  .achievement-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .achievement-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .achievement-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 统计卡片网格 */
+.stats-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 财务图表容器 */
+.chart-container {
+  @apply w-full;
+  height: 200px;
+}
+
+@media (min-width: 640px) {
+  .chart-container {
+    height: 250px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chart-container {
+    height: 300px;
+  }
+}
+
+/* 隐藏元素 - 响应式 */
+.hide-mobile {
+  @apply hidden;
+}
+
+@media (min-width: 640px) {
+  .hide-mobile {
+    @apply block;
+  }
+}
+
+.hide-tablet {
+  @apply hidden;
+}
+
+@media (min-width: 1024px) {
+  .hide-tablet {
+    @apply block;
+  }
+}
+
+.show-mobile-only {
+  @apply block;
+}
+
+@media (min-width: 640px) {
+  .show-mobile-only {
+    @apply hidden;
+  }
+}
+
+/* 文字截断 - 响应式 */
+.text-truncate {
+  @apply truncate;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+/* ============================================
+   模态框和弹窗样式 - 白色二次元主题
+   ============================================ */
+
+/* 模态框背景 */
+.modal-backdrop {
+  @apply fixed inset-0 z-50;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 模态框内容 */
+.modal-content {
+  @apply relative rounded-2xl shadow-2xl;
+  background: #FFFFFF;
+  animation: scaleIn 0.2s ease-out;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-content.closing {
+  animation: scaleOut 0.2s ease-out forwards;
+}
+
+/* 每日总结模态框 */
+.daily-summary-modal {
+  @apply max-w-lg w-full mx-4;
+}
+
+.daily-summary-modal .summary-stat {
+  @apply flex items-center justify-between py-2;
+  border-bottom: 1px solid var(--border);
+}
+
+.daily-summary-modal .summary-stat:last-child {
+  border-bottom: none;
+}
+
+/* 事件模态框 */
+.event-modal {
+  @apply max-w-md w-full mx-4;
+}
+
+.event-modal.positive {
+  border-top: 4px solid var(--stamina-high);
+}
+
+.event-modal.negative {
+  border-top: 4px solid var(--stamina-low);
+}
+
+.event-modal.seasonal {
+  border-top: 4px solid var(--gold);
+}
+
+/* 雇佣女仆模态框 */
+.hire-modal {
+  @apply max-w-2xl w-full mx-4;
+}
+
+.hire-modal .candidate-card {
+  @apply p-4 rounded-2xl border-2 border-transparent cursor-pointer transition-all duration-200;
+  background: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.hire-modal .candidate-card:hover {
+  border-color: var(--primary-200);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.hire-modal .candidate-card.selected {
+  border-color: var(--primary-500);
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-50) 100%);
+  box-shadow: 0 0 0 3px var(--primary-100), var(--shadow-md);
+}
+
+/* ============================================
+   通知样式 - 白色二次元主题
+   ============================================ */
+
+.notification-container {
+  @apply fixed z-50 pointer-events-none;
+  top: 80px;
+  right: 16px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+}
+
+@media (min-width: 640px) {
+  .notification-container {
+    right: 24px;
+    width: 360px;
+  }
+}
+
+.notification-item {
+  @apply pointer-events-auto mb-3 rounded-2xl shadow-lg border;
+  animation: notificationSlideIn 0.3s ease-out;
+  background: #FFFFFF;
+}
+
+.notification-item.exiting {
+  animation: notificationSlideOut 0.3s ease-out forwards;
+}
+
+.notification-item.info {
+  background: linear-gradient(135deg, #FFFFFF 0%, #DBEAFE 100%);
+  border-color: #93C5FD;
+}
+
+.notification-item.success {
+  background: linear-gradient(135deg, #FFFFFF 0%, #D1FAE5 100%);
+  border-color: #6EE7B7;
+}
+
+.notification-item.warning {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%);
+  border-color: #FCD34D;
+}
+
+.notification-item.error {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FEE2E2 100%);
+  border-color: #FCA5A5;
+}
+
+.notification-item.achievement {
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--reputation-light) 100%);
+  border-color: var(--reputation);
+  animation: achievementUnlock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ============================================
+   工具提示 - 白色二次元主题
+   ============================================ */
+
+.tooltip {
+  @apply absolute z-50 px-3 py-1.5 text-xs font-medium rounded-xl shadow-lg;
+  @apply opacity-0 invisible transition-all duration-200;
+  @apply pointer-events-none;
+  background: var(--text-primary);
+  color: #FFFFFF;
+}
+
+.tooltip-trigger:hover .tooltip {
+  @apply opacity-100 visible;
+}
+
+.tooltip.top {
+  @apply bottom-full left-1/2 -translate-x-1/2 mb-2;
+}
+
+.tooltip.bottom {
+  @apply top-full left-1/2 -translate-x-1/2 mt-2;
+}
+
+.tooltip.left {
+  @apply right-full top-1/2 -translate-y-1/2 mr-2;
+}
+
+.tooltip.right {
+  @apply left-full top-1/2 -translate-y-1/2 ml-2;
+}
+
+/* ============================================
+   加载状态 - 白色二次元主题
+   ============================================ */
+
+.loading-spinner {
+  @apply inline-block w-5 h-5 border-2 rounded-full;
+  border-color: var(--primary-200);
+  border-top-color: var(--primary-500);
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner.sm {
+  @apply w-4 h-4;
+}
+
+.loading-spinner.lg {
+  @apply w-8 h-8;
+}
+
+.loading-dots {
+  @apply inline-flex gap-1;
+}
+
+.loading-dots span {
+  @apply w-2 h-2 rounded-full;
+  background: var(--primary-400);
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 骨架屏 - 白色主题 */
+.skeleton {
+  background: linear-gradient(90deg, #F5F5F5 25%, #EEEEEE 50%, #F5F5F5 75%);
+  background-size: 200% 100%;
+  animation: progressFlow 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  @apply h-4 rounded;
+}
+
+.skeleton-avatar {
+  @apply w-10 h-10 rounded-full;
+}
+
+.skeleton-card {
+  @apply h-24 rounded-xl;
+}
+
+
+/* ============================================
+   按钮和交互元素增强 - 白色二次元主题
+   ============================================ */
+
+/* 主要按钮悬停效果 */
+.btn-primary {
+  @apply relative overflow-hidden rounded-xl;
+  background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-500) 100%);
+  box-shadow: 0 2px 8px rgba(255, 107, 138, 0.3);
+}
+
+.btn-primary::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--primary-400) 100%);
+}
+
+.btn-primary:hover::before {
+  @apply opacity-100;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(255, 107, 138, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* 图标按钮 - 白色主题 */
+.btn-icon {
+  @apply inline-flex items-center justify-center p-2 rounded-xl transition-all duration-200;
+  @apply text-gray-500;
+  background: transparent;
+}
+
+.btn-icon:hover {
+  color: var(--primary-600);
+}
+
+.btn-icon:hover {
+  background: var(--primary-50);
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* 导航按钮 - 白色二次元风格 */
+.nav-btn {
+  @apply flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200;
+  @apply text-gray-500;
+  background: transparent;
+}
+
+.nav-btn:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.nav-btn.active {
+  color: var(--primary-600);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-btn .nav-icon {
+  @apply text-xl;
+}
+
+.nav-btn .nav-label {
+  @apply text-xs font-medium;
+}
+
+/* 标签按钮 - 白色主题 */
+.tab-btn {
+  @apply px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200;
+  @apply text-gray-600;
+  background: transparent;
+}
+
+.tab-btn:hover {
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.tab-btn.active {
+  color: var(--primary-600);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   表单元素 - 白色二次元主题
+   ============================================ */
+
+.input {
+  @apply w-full px-3 py-2 rounded-xl border transition-all duration-200;
+  background: #FFFFFF;
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.input:focus {
+  @apply outline-none;
+  border-color: var(--primary-300);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.input:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  background: #FAFAFA;
+}
+
+.input-error {
+  border-color: #EF4444;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.label {
+  @apply block text-sm font-medium mb-1;
+  color: var(--text-primary);
+}
+
+.helper-text {
+  @apply text-xs mt-1;
+  color: var(--text-muted);
+}
+
+.error-text {
+  @apply text-xs mt-1;
+  color: #EF4444;
+}
+
+/* 滑块 */
+.slider {
+  @apply w-full h-2 rounded-full appearance-none cursor-pointer;
+  background: var(--border);
+}
+
+.slider::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 rounded-full cursor-pointer;
+  background: var(--primary-500);
+  box-shadow: var(--shadow);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: var(--primary-600);
+}
+
+/* ============================================
+   辅助工具类
+   ============================================ */
+
+/* 玻璃态效果 - 白色主题 */
+.glass {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* 渐变背景 */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+}
+
+.gradient-reputation {
+  background: linear-gradient(135deg, var(--reputation-light) 0%, var(--reputation) 100%);
+}
+
+/* 文字渐变 */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 分割线 - 白色主题 */
+.divider {
+  border-top: 1px solid var(--border);
+}
+
+.divider-vertical {
+  border-left: 1px solid var(--border);
+  height: 100%;
+}
+
+/* 空状态 - 白色主题 */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.empty-state-icon {
+  @apply text-5xl mb-4;
+  opacity: 0.5;
+  color: var(--primary-300);
+}
+
+.empty-state-title {
+  @apply text-lg font-medium mb-2;
+  color: var(--text-primary);
+}
+
+.empty-state-description {
+  @apply text-sm;
+  color: var(--text-secondary);
+}
+
+/* 徽章 - 白色二次元主题 */
+.badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-primary {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.badge-success {
+  background: #D1FAE5;
+  color: #047857;
+}
+
+.badge-warning {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.badge-danger {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.badge-info {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+/* 数字徽章 - 白色主题 */
+.badge-count {
+  @apply inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-xs font-bold;
+  background: var(--primary-500);
+  color: #FFFFFF;
+}
+
+/* 头像 - 白色二次元主题 */
+.avatar {
+  @apply relative inline-flex items-center justify-center rounded-full overflow-hidden;
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar-sm {
+  @apply w-8 h-8 text-sm;
+}
+
+.avatar-md {
+  @apply w-10 h-10 text-base;
+}
+
+.avatar-lg {
+  @apply w-14 h-14 text-xl;
+}
+
+.avatar-xl {
+  @apply w-20 h-20 text-2xl;
+}
+
+/* 头像状态指示器 */
+.avatar-status {
+  @apply absolute bottom-0 right-0 w-3 h-3 rounded-full;
+  border: 2px solid #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar-status.online {
+  @apply bg-green-500;
+}
+
+.avatar-status.busy {
+  @apply bg-yellow-500;
+}
+
+.avatar-status.offline {
+  @apply bg-gray-400;
+}
+
+/* ============================================
+   打印样式
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .modal-backdrop,
+  .notification-container {
+    display: none !important;
+  }
+}
+
