@@ -79,7 +79,7 @@ export function useGameLoop(
     const order = generateOrder(newCustomer, currentState.menuItems, currentState.season);
     
     // 分配座位
-    const seatId = `seat_${occupiedSeats + 1}`;
+    const seatId = `seat-${occupiedSeats + 1}`;
     
     const customerWithOrder: Customer = {
       ...newCustomer,
