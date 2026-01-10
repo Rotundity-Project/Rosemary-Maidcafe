@@ -130,24 +130,26 @@ export function FacilityPanel() {
         />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-100">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`
-              px-4 py-2 text-sm font-medium transition-colors
-              border-b-2 -mb-px
-              ${activeTab === tab.id
-                ? 'border-pink-500 text-pink-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-              }
-            `}
-          >
-            {tab.icon} {tab.label}
-          </button>
-        ))}
+      {/* Tabs - 支持水平滚动 */}
+      <div className="overflow-x-auto scrollbar-hide scroll-touch-x -mx-4 px-4">
+        <div className="flex gap-2 border-b border-gray-100 min-w-max">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap
+                border-b-2 -mb-px touch-target
+                ${activeTab === tab.id
+                  ? 'border-pink-500 text-pink-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                }
+              `}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -264,7 +266,7 @@ function UpgradeTab({
               size="lg"
               onClick={onUpgrade}
               disabled={!canUpgrade}
-              className="w-full max-w-xs"
+              className="w-full sm:max-w-xs"
             >
               {gold >= upgradeCost ? '⬆️ 升级咖啡厅' : '💰 金币不足'}
             </Button>
@@ -326,7 +328,7 @@ function DecorationsTab({ decorations, gold, onBuy }: DecorationsTabProps) {
               return (
                 <div
                   key={decoration.id}
-                  className="p-3 border border-gray-100 rounded-xl flex items-center justify-between"
+                  className="p-3 border border-gray-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                 >
                   <div>
                     <div className="font-medium text-gray-800">
@@ -341,6 +343,7 @@ function DecorationsTab({ decorations, gold, onBuy }: DecorationsTabProps) {
                     size="sm"
                     onClick={() => onBuy(decoration.id)}
                     disabled={!canAfford}
+                    className="w-full sm:w-auto"
                   >
                     💰 {decoration.cost}
                   </Button>
@@ -408,7 +411,7 @@ function EquipmentTab({ equipment, gold, onUpgrade }: EquipmentTabProps) {
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="text-sm">
                     <span className="text-gray-500">当前效果: </span>
                     <span className="text-green-600">+{currentBonus}%</span>
@@ -425,6 +428,7 @@ function EquipmentTab({ equipment, gold, onUpgrade }: EquipmentTabProps) {
                       size="sm"
                       onClick={() => onUpgrade(equip.id)}
                       disabled={!canAfford}
+                      className="w-full sm:w-auto"
                     >
                       💰 {upgradeCost}
                     </Button>

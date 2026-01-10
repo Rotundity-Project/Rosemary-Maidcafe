@@ -86,7 +86,7 @@ describe('Game Reducer Integration Tests', () => {
       experience: 0,
       level: 1,
       role: 'server',
-      status: { isWorking: false, currentTask: null, servingCustomerId: null },
+      status: { isWorking: false, isResting: false, currentTask: null, servingCustomerId: null },
       mood: 80,
       stamina: 100,
       hireDate: Date.now(),

@@ -100,8 +100,8 @@ export function HireMaidModal({
         </span>
       </div>
 
-      {/* Candidates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      {/* Candidates Grid - Single column on mobile, 3 columns on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4">
         {candidates.map((candidate) => (
           <CandidateCard
             key={candidate.id}
@@ -114,13 +114,13 @@ export function HireMaidModal({
         ))}
       </div>
 
-      {/* Actions */}
-      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-        <Button variant="secondary" onClick={refreshCandidates}>
+      {/* Actions - Stack on mobile, row on desktop */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t border-gray-100">
+        <Button variant="secondary" onClick={refreshCandidates} className="w-full sm:w-auto">
           🔄 刷新候选人
         </Button>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={onClose}>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto order-2 sm:order-1">
             取消
           </Button>
           {selectedCandidate && (
@@ -128,6 +128,7 @@ export function HireMaidModal({
               variant="primary"
               onClick={() => handleHire(selectedCandidate)}
               disabled={!canAfford}
+              className="w-full sm:w-auto order-1 sm:order-2"
             >
               {canAfford ? `雇佣 ${selectedCandidate.name}` : '金币不足'}
             </Button>
@@ -153,46 +154,56 @@ function CandidateCard({ maid, isSelected, canAfford, onSelect, onHire }: Candid
     <div
       onClick={onSelect}
       className={`
-        p-4 rounded-xl cursor-pointer transition-all duration-200
-        border-2
+        p-3 sm:p-4 rounded-xl cursor-pointer transition-all duration-200
+        border-2 touch-target
         ${isSelected
           ? 'border-pink-500 bg-pink-50 shadow-lg'
-          : 'border-gray-100 hover:border-pink-300 hover:shadow-md'
+          : 'border-gray-100 hover:border-pink-300 hover:shadow-md active:bg-gray-50'
         }
       `}
     >
-      {/* Avatar and Name */}
-      <div className="flex flex-col items-center mb-3">
-        <MaidAvatar src={maid.avatar} name={maid.name} size="xl" className="mb-2" />
-        <div className="font-bold text-gray-900">
-          {maid.name}
+      {/* Mobile: Horizontal layout, Desktop: Vertical layout */}
+      <div className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-0">
+        {/* Avatar */}
+        <div className="flex-shrink-0">
+          <MaidAvatar src={maid.avatar} name={maid.name} size="xl" className="sm:mb-2" />
         </div>
-        <div className="flex items-center justify-center gap-1 mt-1">
-          <span className="text-sm">{personalityEmojis[maid.personality]}</span>
-          <span className="text-sm text-gray-500">
-            {personalityLabels[maid.personality]}
-          </span>
+        
+        {/* Info Section */}
+        <div className="flex-1 sm:flex-none sm:w-full">
+          {/* Name and Personality */}
+          <div className="sm:text-center mb-2 sm:mb-3">
+            <div className="font-bold text-gray-900">
+              {maid.name}
+            </div>
+            <div className="flex items-center sm:justify-center gap-1 mt-1">
+              <span className="text-sm">{personalityEmojis[maid.personality]}</span>
+              <span className="text-sm text-gray-500">
+                {personalityLabels[maid.personality]}
+              </span>
+            </div>
+          </div>
+
+          {/* Stats - Compact on mobile */}
+          <div className="grid grid-cols-4 sm:grid-cols-2 gap-2 text-xs">
+            <StatItem label="💕" value={maid.stats.charm} color="pink" compact />
+            <StatItem label="⭐" value={maid.stats.skill} color="blue" compact />
+            <StatItem label="💪" value={maid.stats.stamina} color="green" compact />
+            <StatItem label="⚡" value={maid.stats.speed} color="yellow" compact />
+          </div>
+
+          {/* Total Stats - Mobile only inline */}
+          <div className="text-center text-xs text-gray-500 mt-2 sm:mb-3">
+            总属性: <span className="font-bold text-purple-600">
+              {maid.stats.charm + maid.stats.skill + maid.stats.stamina + maid.stats.speed}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Personality Description */}
-      <div className="text-xs text-gray-500 mb-3 p-2 bg-gray-50 rounded-lg text-center min-h-[3rem]">
+      {/* Personality Description - Hidden on mobile for space */}
+      <div className="hidden sm:block text-xs text-gray-500 mb-3 p-2 bg-gray-50 rounded-lg text-center min-h-[3rem]">
         {personalityDescriptions[maid.personality]}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-1 mb-3 text-xs">
-        <StatItem label="💕 魅力" value={maid.stats.charm} color="pink" />
-        <StatItem label="⭐ 技能" value={maid.stats.skill} color="blue" />
-        <StatItem label="💪 体质" value={maid.stats.stamina} color="green" />
-        <StatItem label="⚡ 速度" value={maid.stats.speed} color="yellow" />
-      </div>
-
-      {/* Total Stats */}
-      <div className="text-center text-xs text-gray-500 mb-3">
-        总属性: <span className="font-bold text-purple-600">
-          {maid.stats.charm + maid.stats.skill + maid.stats.stamina + maid.stats.speed}
-        </span>
       </div>
 
       {/* Hire Button */}
@@ -204,7 +215,7 @@ function CandidateCard({ maid, isSelected, canAfford, onSelect, onHire }: Candid
           onHire();
         }}
         disabled={!canAfford}
-        className="w-full"
+        className="w-full mt-2 sm:mt-0"
       >
         {canAfford ? '雇佣' : '金币不足'}
       </Button>
@@ -217,9 +228,10 @@ interface StatItemProps {
   label: string;
   value: number;
   color: 'pink' | 'blue' | 'green' | 'yellow';
+  compact?: boolean;
 }
 
-function StatItem({ label, value, color }: StatItemProps) {
+function StatItem({ label, value, color, compact }: StatItemProps) {
   const colorClasses = {
     pink: 'bg-pink-50',
     blue: 'bg-blue-50',

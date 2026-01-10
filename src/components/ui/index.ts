@@ -4,6 +4,8 @@ export type { ButtonVariant, ButtonSize } from './Button';
 
 export { Modal, ConfirmModal } from './Modal';
 
+export { BottomDrawer } from './BottomDrawer';
+
 export { 
   ProgressBar, 
   StaminaBar, 
@@ -15,6 +17,8 @@ export type { ProgressBarColor, ProgressBarSize } from './ProgressBar';
 
 export { Card, CardHeader, CardBody, CardFooter, StatCard } from './Card';
 
+export { CollapsibleCard } from './CollapsibleCard';
+
 export { 
   NotificationItem, 
   NotificationContainer, 
@@ -23,7 +27,7 @@ export {
 
 export { TopBar } from './TopBar';
 
-export { Navigation, NavigationVertical, NavigationBottom } from './Navigation';
+export { Navigation, NavigationVertical, NavigationBottom, NavigationSide } from './Navigation';
 
 export { MaidAvatar } from './MaidAvatar';
 export type { MaidAvatarSize } from './MaidAvatar';

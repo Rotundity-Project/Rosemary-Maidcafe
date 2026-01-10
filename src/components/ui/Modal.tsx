@@ -16,10 +16,10 @@ interface ModalProps {
 }
 
 const sizeStyles: Record<string, string> = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
+  sm: 'sm:max-w-sm',
+  md: 'sm:max-w-md',
+  lg: 'sm:max-w-lg',
+  xl: 'sm:max-w-xl',
 };
 
 export function Modal({
@@ -45,6 +45,7 @@ export function Modal({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
+      // Lock background scroll when modal is open
       document.body.style.overflow = 'hidden';
     }
 
@@ -57,7 +58,7 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -65,14 +66,18 @@ export function Modal({
         aria-hidden="true"
       />
 
-      {/* Modal Content */}
+      {/* Modal Content - Mobile: full screen, Desktop: centered with max-width */}
       <div
         className={`
-          relative w-full mx-4 ${sizeStyles[size]}
-          bg-white
-          rounded-2xl shadow-2xl
+          relative w-full ${sizeStyles[size]}
+          bg-white shadow-2xl
           transform transition-all duration-200
           animate-in fade-in zoom-in-95
+          /* Mobile: full screen with safe area */
+          fixed inset-0 sm:relative sm:inset-auto
+          sm:rounded-2xl sm:mx-4
+          flex flex-col
+          max-h-screen sm:max-h-[90vh]
         `}
         role="dialog"
         aria-modal="true"
@@ -80,11 +85,11 @@ export function Modal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
             {title && (
               <h2
                 id="modal-title"
-                className="text-lg font-semibold text-gray-800"
+                className="text-base sm:text-lg font-semibold text-gray-800"
               >
                 {title}
               </h2>
@@ -92,7 +97,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="touch-target p-2 -mr-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
                 aria-label="关闭"
               >
                 <svg
@@ -113,14 +118,14 @@ export function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
+        {/* Body - Scrollable area */}
+        <div className="px-4 sm:px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 safe-area-bottom">
             {footer}
           </div>
         )}

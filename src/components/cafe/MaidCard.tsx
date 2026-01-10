@@ -138,7 +138,7 @@ export function MaidCard({
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-4 gap-1 text-xs text-center">
+      <div className="grid grid-cols-4 gap-2 text-xs text-center">
         <div className="bg-pink-50 rounded-lg p-1">
           <div className="text-pink-600">💕</div>
           <div className="text-gray-600">{maid.stats.charm}</div>

@@ -26,8 +26,9 @@ const sizeConfig: Record<MaidAvatarSize, { container: string; width: number; hei
  * 支持多种尺寸 (sm, md, lg, xl)
  * 添加圆角和阴影效果
  * 添加加载失败回退显示
+ * 使用 loading="lazy" 实现图片懒加载
  * 
- * Requirements: 1.4, 1.5
+ * Requirements: 1.4, 1.5, 7.2
  */
 export function MaidAvatar({
   src,
@@ -100,7 +101,7 @@ export function MaidAvatar({
           setHasError(true);
           setIsLoading(false);
         }}
-        priority={size === 'xl' || size === 'lg'}
+        loading="lazy"
       />
     </div>
   );

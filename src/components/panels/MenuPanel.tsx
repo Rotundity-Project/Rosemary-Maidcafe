@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem, MenuCategory, Season } from '@/types';
 import { useGame } from '@/components/game/GameProvider';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { BottomDrawer } from '@/components/ui/BottomDrawer';
 import { GAME_CONSTANTS } from '@/data/initialState';
 
 const categoryLabels: Record<MenuCategory, string> = {
@@ -43,6 +44,19 @@ export function MenuPanel() {
   const [selectedCategory, setSelectedCategory] = useState<FilterCategory>('all');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [showUnlocked, setShowUnlocked] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+
+  // Detect mobile viewport (< 768px as per Requirements 4.2)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const categories: FilterCategory[] = ['all', 'drinks', 'desserts', 'main', 'special'];
 
@@ -62,6 +76,18 @@ export function MenuPanel() {
 
   const handleSetPrice = (itemId: string, price: number) => {
     dispatch({ type: 'SET_ITEM_PRICE', itemId, price });
+  };
+
+  const handleSelectItem = (item: MenuItem) => {
+    setSelectedItem(item);
+    // On mobile, show the bottom drawer when selecting an item
+    if (isMobile) {
+      setShowMobileDetail(true);
+    }
+  };
+
+  const handleCloseMobileDetail = () => {
+    setShowMobileDetail(false);
   };
 
   const unlockedCount = state.menuItems.filter((i) => i.unlocked).length;
@@ -118,8 +144,8 @@ export function MenuPanel() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        {/* Menu Items List */}
-        <div className="flex-1 min-h-0 overflow-auto">
+        {/* Menu Items List - Full width on mobile, flex-1 on desktop */}
+        <div className="flex-1 min-h-0 overflow-auto w-full">
           <Card className="h-full">
             <CardHeader>
               {showUnlocked ? '已解锁菜单' : '可解锁菜单'}
@@ -139,7 +165,7 @@ export function MenuPanel() {
                       currentSeason={state.season}
                       gold={state.finance.gold}
                       selected={selectedItem?.id === item.id}
-                      onClick={() => setSelectedItem(item)}
+                      onClick={() => handleSelectItem(item)}
                       onUnlock={() => handleUnlockItem(item.id)}
                     />
                   ))}
@@ -149,8 +175,8 @@ export function MenuPanel() {
           </Card>
         </div>
 
-        {/* Item Details */}
-        {selectedItem && (
+        {/* Item Details - Desktop only (side panel) */}
+        {selectedItem && !isMobile && (
           <div className="w-full lg:w-80">
             <MenuItemDetailCard
               item={state.menuItems.find((i) => i.id === selectedItem.id) || selectedItem}
@@ -162,6 +188,25 @@ export function MenuPanel() {
           </div>
         )}
       </div>
+
+      {/* Item Details - Mobile only (Bottom Drawer) */}
+      {isMobile && selectedItem && (
+        <BottomDrawer
+          isOpen={showMobileDetail}
+          onClose={handleCloseMobileDetail}
+          title={`${selectedItem.name} 详情`}
+          height="auto"
+        >
+          <MenuItemDetailCard
+            item={state.menuItems.find((i) => i.id === selectedItem.id) || selectedItem}
+            currentSeason={state.season}
+            gold={state.finance.gold}
+            onUnlock={() => handleUnlockItem(selectedItem.id)}
+            onSetPrice={handleSetPrice}
+            isMobile={true}
+          />
+        </BottomDrawer>
+      )}
     </div>
   );
 }
@@ -260,6 +305,7 @@ interface MenuItemDetailCardProps {
   gold: number;
   onUnlock: () => void;
   onSetPrice: (itemId: string, price: number) => void;
+  isMobile?: boolean;
 }
 
 function MenuItemDetailCard({
@@ -268,6 +314,7 @@ function MenuItemDetailCard({
   gold,
   onUnlock,
   onSetPrice,
+  isMobile = false,
 }: MenuItemDetailCardProps) {
   const minPrice = Math.floor(item.basePrice * GAME_CONSTANTS.MIN_PRICE_MULTIPLIER);
   const maxPrice = Math.floor(item.basePrice * GAME_CONSTANTS.MAX_PRICE_MULTIPLIER);
@@ -281,113 +328,125 @@ function MenuItemDetailCard({
     }
   };
 
+  const content = (
+    <>
+      {/* Header */}
+      <div className="text-center mb-4">
+        <div className="text-6xl mb-2">{item.icon}</div>
+        <h3 className="text-lg font-bold text-gray-800">
+          {item.name}
+        </h3>
+        <div className="text-sm text-gray-500">{item.nameEn}</div>
+      </div>
+
+      {/* Category and Season */}
+      <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+        <span className="text-sm px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+          {categoryIcons[item.category]} {categoryLabels[item.category]}
+        </span>
+        {item.season && (
+          <span className={`text-sm px-2 py-1 rounded-full ${
+            isSeasonalAvailable
+              ? 'bg-green-100 text-green-700'
+              : 'bg-amber-100 text-amber-700'
+          }`}>
+            {seasonIcons[item.season]} {seasonLabels[item.season]}限定
+          </span>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="space-y-2 mb-4 p-3 bg-gray-50 rounded-xl">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">基础价格</span>
+          <span className="font-medium">💰 {item.basePrice}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">制作时间</span>
+          <span className="font-medium">⏱️ {item.prepTime}秒</span>
+        </div>
+        {item.unlocked && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500">人气度</span>
+            <span className="font-medium">🔥 {item.popularity}%</span>
+          </div>
+        )}
+      </div>
+
+      {item.unlocked ? (
+        <>
+          {/* Price Adjustment */}
+          <div className="mb-4">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              调整价格
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">{minPrice}</span>
+              <input
+                type="range"
+                min={minPrice}
+                max={maxPrice}
+                value={item.currentPrice}
+                onChange={handlePriceChange}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500 touch-target"
+              />
+              <span className="text-sm text-gray-500">{maxPrice}</span>
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-lg font-bold text-pink-600">
+                💰 {item.currentPrice}
+              </span>
+            </div>
+          </div>
+
+          {/* Popularity */}
+          <div className="mb-4">
+            <ProgressBar
+              value={item.popularity}
+              max={100}
+              color="pink"
+              size="md"
+              showLabel
+              label="人气度"
+            />
+          </div>
+
+          {/* Status */}
+          <div className="text-center text-sm text-green-600">
+            ✅ 已解锁
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Unlock Button */}
+          <div className="text-center">
+            <div className="text-sm text-gray-500 mb-2">
+              解锁费用: 💰 {item.unlockCost}
+            </div>
+            <Button
+              variant="primary"
+              onClick={onUnlock}
+              disabled={!canAfford}
+              className="w-full"
+            >
+              {canAfford ? '🔓 解锁菜单' : '💰 金币不足'}
+            </Button>
+          </div>
+        </>
+      )}
+    </>
+  );
+
+  // On mobile, return content directly (it's inside BottomDrawer)
+  if (isMobile) {
+    return <div className="pb-4">{content}</div>;
+  }
+
+  // On desktop, wrap in Card
   return (
     <Card className="h-full">
       <CardBody>
-        {/* Header */}
-        <div className="text-center mb-4">
-          <div className="text-6xl mb-2">{item.icon}</div>
-          <h3 className="text-lg font-bold text-gray-800">
-            {item.name}
-          </h3>
-          <div className="text-sm text-gray-500">{item.nameEn}</div>
-        </div>
-
-        {/* Category and Season */}
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="text-sm px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-            {categoryIcons[item.category]} {categoryLabels[item.category]}
-          </span>
-          {item.season && (
-            <span className={`text-sm px-2 py-1 rounded-full ${
-              isSeasonalAvailable
-                ? 'bg-green-100 text-green-700'
-                : 'bg-amber-100 text-amber-700'
-            }`}>
-              {seasonIcons[item.season]} {seasonLabels[item.season]}限定
-            </span>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="space-y-2 mb-4 p-3 bg-gray-50 rounded-xl">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">基础价格</span>
-            <span className="font-medium">💰 {item.basePrice}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">制作时间</span>
-            <span className="font-medium">⏱️ {item.prepTime}秒</span>
-          </div>
-          {item.unlocked && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">人气度</span>
-              <span className="font-medium">🔥 {item.popularity}%</span>
-            </div>
-          )}
-        </div>
-
-        {item.unlocked ? (
-          <>
-            {/* Price Adjustment */}
-            <div className="mb-4">
-              <div className="text-sm font-medium text-gray-700 mb-2">
-                调整价格
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{minPrice}</span>
-                <input
-                  type="range"
-                  min={minPrice}
-                  max={maxPrice}
-                  value={item.currentPrice}
-                  onChange={handlePriceChange}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
-                />
-                <span className="text-sm text-gray-500">{maxPrice}</span>
-              </div>
-              <div className="text-center mt-2">
-                <span className="text-lg font-bold text-pink-600">
-                  💰 {item.currentPrice}
-                </span>
-              </div>
-            </div>
-
-            {/* Popularity */}
-            <div className="mb-4">
-              <ProgressBar
-                value={item.popularity}
-                max={100}
-                color="pink"
-                size="md"
-                showLabel
-                label="人气度"
-              />
-            </div>
-
-            {/* Status */}
-            <div className="text-center text-sm text-green-600">
-              ✅ 已解锁
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Unlock Button */}
-            <div className="text-center">
-              <div className="text-sm text-gray-500 mb-2">
-                解锁费用: 💰 {item.unlockCost}
-              </div>
-              <Button
-                variant="primary"
-                onClick={onUnlock}
-                disabled={!canAfford}
-                className="w-full"
-              >
-                {canAfford ? '🔓 解锁菜单' : '💰 金币不足'}
-              </Button>
-            </div>
-          </>
-        )}
+        {content}
       </CardBody>
     </Card>
   );

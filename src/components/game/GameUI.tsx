@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGame } from './GameProvider';
 import { useGameLoopControls } from './GameLoop';
 import { TopBar } from '@/components/ui/TopBar';
-import { Navigation, NavigationBottom } from '@/components/ui/Navigation';
+import { Navigation, NavigationBottom, NavigationSide } from '@/components/ui/Navigation';
 import { NotificationContainer } from '@/components/ui/Notification';
 import { CafeView } from '@/components/cafe/CafeView';
 import { MaidPanel } from '@/components/panels/MaidPanel';
@@ -122,12 +122,18 @@ export function GameUI() {
       {/* Navigation - Requirements: 9.3 */}
       <Navigation />
       
-      {/* Main Content Area - Requirements: 9.1 */}
-      <main className="flex-1 overflow-auto pb-16 sm:pb-0">
-        {renderActivePanel()}
-      </main>
+      {/* Main Content Area with Side Navigation for Landscape - Requirements: 8.3, 9.1 */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Side Navigation for Landscape Mode */}
+        <NavigationSide />
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto pb-16 sm:pb-0">
+          {renderActivePanel()}
+        </main>
+      </div>
       
-      {/* Bottom Navigation for Mobile */}
+      {/* Bottom Navigation for Mobile (hidden in landscape) */}
       <NavigationBottom />
       
       {/* Notifications - Requirements: 9.8 */}

@@ -14,14 +14,15 @@ export function TopBar() {
   };
 
   return (
-    <header className="bg-white border-b border-pink-100 px-4 py-3 shadow-sm">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <header className="bg-white border-b border-pink-100 px-2 sm:px-4 py-2 sm:py-3 shadow-sm">
+      {/* Desktop layout (>= 640px): Single row */}
+      <div className="hidden sm:flex items-center justify-between max-w-7xl mx-auto">
         {/* Left section - Game title and day */}
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-pink-500">
             🌿 迷迭香咖啡厅
           </h1>
-          <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <span className="font-medium">{formatDay(day)}</span>
             <span className="text-pink-200">|</span>
             <span className="flex items-center gap-1">
@@ -46,9 +47,7 @@ export function TopBar() {
             leftIcon={isPaused ? <PlayIcon /> : <PauseIcon />}
             className={isPaused ? '' : 'bg-pink-100 hover:bg-pink-200 text-pink-700 border-pink-200'}
           >
-            <span className="hidden sm:inline">
-              {isPaused ? '继续' : '暂停'}
-            </span>
+            {isPaused ? '继续' : '暂停'}
           </Button>
         </div>
 
@@ -69,11 +68,62 @@ export function TopBar() {
               {reputation}
             </span>
           </div>
+        </div>
+      </div>
 
-          {/* Mobile day/season display */}
-          <div className="flex sm:hidden items-center gap-1 text-sm">
-            <span>{getSeasonIcon(season)}</span>
-            <span className="text-gray-600">D{day}</span>
+      {/* Mobile layout (< 640px): Compact two-row layout */}
+      <div className="flex sm:hidden flex-col gap-2 max-w-7xl mx-auto">
+        {/* Row 1: Icon, Time, Pause button */}
+        <div className="flex items-center justify-between">
+          {/* Left: Game icon only (no title text on mobile) */}
+          <div className="flex items-center">
+            <span className="text-xl" aria-label="迷迭香咖啡厅">🌿</span>
+          </div>
+
+          {/* Center: Time display */}
+          <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-2 py-1 border border-pink-100">
+            <span className="text-base">🕐</span>
+            <span className="font-mono text-base font-semibold text-gray-800">
+              {formatGameTime(time)}
+            </span>
+          </div>
+
+          {/* Right: Pause button with touch-target size */}
+          <button
+            onClick={handleTogglePause}
+            className={`touch-target flex items-center justify-center rounded-lg transition-all duration-150 active:scale-95 ${
+              isPaused 
+                ? 'bg-pink-500 text-white' 
+                : 'bg-pink-100 text-pink-700 border border-pink-200'
+            }`}
+            aria-label={isPaused ? '继续游戏' : '暂停游戏'}
+          >
+            {isPaused ? <PlayIcon /> : <PauseIcon />}
+          </button>
+        </div>
+
+        {/* Row 2: Resources (Gold, Reputation, Day/Season) */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Gold */}
+          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 flex-1 justify-center">
+            <span className="text-sm">💰</span>
+            <span className="font-semibold text-yellow-700 text-sm">
+              {formatGold(finance.gold)}
+            </span>
+          </div>
+
+          {/* Reputation */}
+          <div className="flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-lg border border-purple-100 flex-1 justify-center">
+            <span className="text-sm">⭐</span>
+            <span className="font-semibold text-purple-700 text-sm">
+              {reputation}
+            </span>
+          </div>
+
+          {/* Day/Season */}
+          <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 flex-1 justify-center">
+            <span className="text-sm">{getSeasonIcon(season)}</span>
+            <span className="text-gray-600 text-sm font-medium">D{day}</span>
           </div>
         </div>
       </div>

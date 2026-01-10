@@ -135,14 +135,30 @@ interface SeatGridProps {
   onSeatClick?: (seatId: string) => void;
   onCustomerClick?: (customerId: string) => void;
   selectedCustomerId?: string | null;
+  isLandscape?: boolean;
 }
 
+/**
+ * SeatGrid - Displays cafe seats in a responsive grid layout
+ * 
+ * Responsive column counts per design spec (Property 11):
+ * - < 480px (xs): 2 columns
+ * - 480px - 640px (sm): 3 columns  
+ * - 640px - 768px (md): 4 columns
+ * - 768px - 1024px (lg): 5 columns
+ * - >= 1024px (xl): 6 columns
+ * 
+ * Landscape mode: 4 columns with compact spacing
+ * 
+ * Requirements: 3.4, 8.2
+ */
 export function SeatGrid({
   maxSeats,
   customers,
   onSeatClick,
   onCustomerClick,
   selectedCustomerId,
+  isLandscape = false,
 }: SeatGridProps) {
   // Create seat IDs
   const seatIds = Array.from({ length: maxSeats }, (_, i) => `seat-${i + 1}`);
@@ -155,18 +171,19 @@ export function SeatGrid({
     }
   });
 
-  // Responsive grid - more columns on larger screens
-  // sm: 2 cols, md: 3 cols, lg: 4 cols, xl: 5 cols
-  const gridClass = maxSeats <= 4 
-    ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-4'
-    : maxSeats <= 8
-    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
-    : maxSeats <= 12
-    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'
-    : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6';
+  // Responsive grid columns based on viewport width
+  // xs (<480px): 2 cols, sm (480-640px): 3 cols, md (640-768px): 4 cols, 
+  // lg (768-1024px): 5 cols, xl (>=1024px): 6 cols
+  // Landscape mode: 4 columns with compact spacing
+  const gridClass = isLandscape 
+    ? 'grid-cols-4 gap-1' 
+    : 'grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2';
 
   return (
-    <div className={`grid ${gridClass} gap-2`}>
+    <div 
+      className={`grid ${gridClass}`}
+      data-testid="seat-grid"
+    >
       {seatIds.map(seatId => (
         <Seat
           key={seatId}

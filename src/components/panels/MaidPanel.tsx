@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Maid, MaidRole, MaidPersonality } from '@/types';
 import { useGame } from '@/components/game/GameProvider';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
 import { StaminaBar, MoodBar, ExperienceBar } from '@/components/ui/ProgressBar';
+import { BottomDrawer } from '@/components/ui/BottomDrawer';
 import { generateRandomMaid, getMaxMaids, getExperienceForLevel } from '@/systems/maidSystem';
 import { personalityDescriptions, hireCostByLevel } from '@/data/maidNames';
 import { getAllUsedImages } from '@/data/maidImages';
@@ -53,6 +54,19 @@ export function MaidPanel() {
   const [selectedMaid, setSelectedMaid] = useState<Maid | null>(null);
   const [showHireModal, setShowHireModal] = useState(false);
   const [candidates, setCandidates] = useState<Maid[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const maxMaids = getMaxMaids(state.facility.cafeLevel);
   const canHireMore = state.maids.length < maxMaids;
@@ -61,6 +75,14 @@ export function MaidPanel() {
   const handleSelectMaid = (maid: Maid) => {
     setSelectedMaid(maid);
     dispatch({ type: 'SELECT_MAID', maidId: maid.id });
+    // On mobile, show the bottom drawer when selecting a maid
+    if (isMobile) {
+      setShowMobileDetail(true);
+    }
+  };
+
+  const handleCloseMobileDetail = () => {
+    setShowMobileDetail(false);
   };
 
   const handleAssignRole = (maidId: string, role: MaidRole) => {
@@ -134,8 +156,8 @@ export function MaidPanel() {
       </Button>
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
-        {/* Maid List */}
-        <div className="flex-1 min-h-0 overflow-auto">
+        {/* Maid List - Full width on mobile, flex-1 on desktop */}
+        <div className="flex-1 min-h-0 overflow-auto w-full">
           <Card className="h-full">
             <CardHeader>已雇佣女仆</CardHeader>
             <CardBody>
@@ -146,7 +168,7 @@ export function MaidPanel() {
                   <p className="text-sm">点击上方按钮雇佣第一位女仆吧！</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   {state.maids.map((maid) => (
                     <MaidListItem
                       key={maid.id}
@@ -161,8 +183,8 @@ export function MaidPanel() {
           </Card>
         </div>
 
-        {/* Maid Details */}
-        {selectedMaid && (
+        {/* Maid Details - Desktop only (side panel) */}
+        {selectedMaid && !isMobile && (
           <div className="w-full lg:w-80">
             <MaidDetailCard
               maid={state.maids.find((m) => m.id === selectedMaid.id) || selectedMaid}
@@ -173,6 +195,25 @@ export function MaidPanel() {
           </div>
         )}
       </div>
+
+      {/* Maid Details - Mobile only (Bottom Drawer) */}
+      {isMobile && selectedMaid && (
+        <BottomDrawer
+          isOpen={showMobileDetail}
+          onClose={handleCloseMobileDetail}
+          title={`${selectedMaid.name} 详情`}
+          height="auto"
+        >
+          <MaidDetailCard
+            maid={state.maids.find((m) => m.id === selectedMaid.id) || selectedMaid}
+            onAssignRole={handleAssignRole}
+            onFire={handleFireMaid}
+            onToggleRest={handleToggleRest}
+            onClose={handleCloseMobileDetail}
+            isMobile={true}
+          />
+        </BottomDrawer>
+      )}
 
       {/* Hire Modal */}
       {showHireModal && (
@@ -259,9 +300,11 @@ interface MaidDetailCardProps {
   onAssignRole: (maidId: string, role: MaidRole) => void;
   onFire: (maidId: string) => void;
   onToggleRest: (maidId: string) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
 }
 
-function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest }: MaidDetailCardProps) {
+function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isMobile = false }: MaidDetailCardProps) {
   const [showFireConfirm, setShowFireConfirm] = useState(false);
   const expForNextLevel = getExperienceForLevel(maid.level);
   const expProgress = (maid.experience / expForNextLevel) * 100;
@@ -269,146 +312,167 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest }: MaidDetail
   const roles: MaidRole[] = ['greeter', 'server', 'barista', 'entertainer'];
   const isResting = maid.status.isResting;
 
+  const handleFire = (maidId: string) => {
+    onFire(maidId);
+    // Close the drawer after firing on mobile
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  // For mobile, render without Card wrapper since it's inside BottomDrawer
+  const content = (
+    <>
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-4">
+        <div className="relative flex-shrink-0">
+          <MaidAvatar src={maid.avatar} name={maid.name} size="xl" />
+          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
+            <span className="text-lg">{personalityEmojis[maid.personality]}</span>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-lg font-bold text-gray-800">
+              {maid.name}
+            </h3>
+            <span className="text-sm px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+              Lv.{maid.level}
+            </span>
+            {isResting && (
+              <span className="text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                💤 休息中
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-gray-500 mt-1">
+            {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
+          </div>
+        </div>
+      </div>
+
+      {/* Personality Description */}
+      <div className="text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-xl">
+        {personalityDescriptions[maid.personality]}
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="p-2 bg-pink-50 rounded-xl text-center">
+          <div className="text-pink-600">💕 魅力</div>
+          <div className="text-lg font-bold text-gray-800">
+            {maid.stats.charm}
+          </div>
+        </div>
+        <div className="p-2 bg-blue-50 rounded-xl text-center">
+          <div className="text-blue-600">⭐ 技能</div>
+          <div className="text-lg font-bold text-gray-800">
+            {maid.stats.skill}
+          </div>
+        </div>
+        <div className="p-2 bg-green-50 rounded-xl text-center">
+          <div className="text-green-600">💪 体质</div>
+          <div className="text-lg font-bold text-gray-800">
+            {maid.stats.stamina}
+          </div>
+        </div>
+        <div className="p-2 bg-yellow-50 rounded-xl text-center">
+          <div className="text-yellow-600">⚡ 速度</div>
+          <div className="text-lg font-bold text-gray-800">
+            {maid.stats.speed}
+          </div>
+        </div>
+      </div>
+
+      {/* Status Bars */}
+      <div className="space-y-2 mb-4">
+        <StaminaBar value={maid.stamina} showLabel size="sm" />
+        <MoodBar value={maid.mood} showLabel size="sm" />
+        <ExperienceBar value={expProgress} showLabel size="sm" />
+      </div>
+
+      {/* Role Assignment */}
+      <div className="mb-4">
+        <div className="text-sm font-medium text-gray-700 mb-2">
+          分配角色
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {roles.map((role) => (
+            <button
+              key={role}
+              onClick={() => onAssignRole(maid.id, role)}
+              disabled={isResting}
+              className={`
+                px-3 py-1.5 rounded-xl text-sm font-medium
+                transition-all duration-200 border touch-target
+                ${maid.role === role
+                  ? roleColors[role] + ' border-current'
+                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                }
+                ${isResting ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              {roleIcons[role]} {roleLabels[role]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Rest Toggle Button */}
+      <div className="mb-4">
+        <Button
+          variant={isResting ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => onToggleRest(maid.id)}
+          className="w-full"
+        >
+          {isResting ? '🔔 结束休息' : '💤 安排休息'}
+        </Button>
+      </div>
+
+      {/* Fire Button */}
+      {!showFireConfirm ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowFireConfirm(true)}
+          className="w-full text-red-500 hover:bg-red-50"
+        >
+          解雇女仆
+        </Button>
+      ) : (
+        <div className="flex gap-2">
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => handleFire(maid.id)}
+            className="flex-1"
+          >
+            确认解雇
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowFireConfirm(false)}
+            className="flex-1"
+          >
+            取消
+          </Button>
+        </div>
+      )}
+    </>
+  );
+
+  // On mobile, return content directly (it's inside BottomDrawer)
+  if (isMobile) {
+    return <div className="pb-4">{content}</div>;
+  }
+
+  // On desktop, wrap in Card
   return (
     <Card className="h-full">
       <CardBody>
-        {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className="relative flex-shrink-0">
-            <MaidAvatar src={maid.avatar} name={maid.name} size="xl" />
-            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
-              <span className="text-lg">{personalityEmojis[maid.personality]}</span>
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-bold text-gray-800">
-                {maid.name}
-              </h3>
-              <span className="text-sm px-2 py-0.5 rounded bg-purple-100 text-purple-700">
-                Lv.{maid.level}
-              </span>
-              {isResting && (
-                <span className="text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-600">
-                  💤 休息中
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-gray-500 mt-1">
-              {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
-            </div>
-          </div>
-        </div>
-
-        {/* Personality Description */}
-        <div className="text-sm text-gray-500 mb-4 p-2 bg-gray-50 rounded-xl">
-          {personalityDescriptions[maid.personality]}
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="p-2 bg-pink-50 rounded-xl text-center">
-            <div className="text-pink-600">💕 魅力</div>
-            <div className="text-lg font-bold text-gray-800">
-              {maid.stats.charm}
-            </div>
-          </div>
-          <div className="p-2 bg-blue-50 rounded-xl text-center">
-            <div className="text-blue-600">⭐ 技能</div>
-            <div className="text-lg font-bold text-gray-800">
-              {maid.stats.skill}
-            </div>
-          </div>
-          <div className="p-2 bg-green-50 rounded-xl text-center">
-            <div className="text-green-600">💪 体质</div>
-            <div className="text-lg font-bold text-gray-800">
-              {maid.stats.stamina}
-            </div>
-          </div>
-          <div className="p-2 bg-yellow-50 rounded-xl text-center">
-            <div className="text-yellow-600">⚡ 速度</div>
-            <div className="text-lg font-bold text-gray-800">
-              {maid.stats.speed}
-            </div>
-          </div>
-        </div>
-
-        {/* Status Bars */}
-        <div className="space-y-2 mb-4">
-          <StaminaBar value={maid.stamina} showLabel size="sm" />
-          <MoodBar value={maid.mood} showLabel size="sm" />
-          <ExperienceBar value={expProgress} showLabel size="sm" />
-        </div>
-
-        {/* Role Assignment */}
-        <div className="mb-4">
-          <div className="text-sm font-medium text-gray-700 mb-2">
-            分配角色
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {roles.map((role) => (
-              <button
-                key={role}
-                onClick={() => onAssignRole(maid.id, role)}
-                disabled={isResting}
-                className={`
-                  px-3 py-1.5 rounded-xl text-sm font-medium
-                  transition-all duration-200 border
-                  ${maid.role === role
-                    ? roleColors[role] + ' border-current'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                  }
-                  ${isResting ? 'opacity-50 cursor-not-allowed' : ''}
-                `}
-              >
-                {roleIcons[role]} {roleLabels[role]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Rest Toggle Button */}
-        <div className="mb-4">
-          <Button
-            variant={isResting ? 'primary' : 'secondary'}
-            size="sm"
-            onClick={() => onToggleRest(maid.id)}
-            className="w-full"
-          >
-            {isResting ? '🔔 结束休息' : '💤 安排休息'}
-          </Button>
-        </div>
-
-        {/* Fire Button */}
-        {!showFireConfirm ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowFireConfirm(true)}
-            className="w-full text-red-500 hover:bg-red-50"
-          >
-            解雇女仆
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onFire(maid.id)}
-              className="flex-1"
-            >
-              确认解雇
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowFireConfirm(false)}
-              className="flex-1"
-            >
-              取消
-            </Button>
-          </div>
-        )}
+        {content}
       </CardBody>
     </Card>
   );
@@ -513,7 +577,7 @@ function CandidateCard({ maid, canAfford, onHire }: CandidateCardProps) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-1 mb-3 text-xs">
+      <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
         <div className="flex items-center justify-between p-1.5 bg-pink-50 rounded-lg">
           <span>💕 魅力</span>
           <span className="font-bold">{maid.stats.charm}</span>

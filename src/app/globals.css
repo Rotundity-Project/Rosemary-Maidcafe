@@ -113,6 +113,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 减少动画偏好时禁用平滑滚动 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background: #FFFFFF;
   color: var(--foreground);
@@ -1603,3 +1610,483 @@ body {
   }
 }
 
+
+/* ============================================
+   移动端工具类 - Mobile Utilities
+   ============================================ */
+
+/* 触摸目标最小尺寸 - 确保可交互元素至少 44x44px */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* 扩展触摸目标 - 48x48px 用于更重要的交互元素 */
+.touch-target-lg {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* 安全区域适配 - iPhone 刘海屏和底部指示器 */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-y {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-all {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 移动端全屏 Modal */
+.modal-mobile-fullscreen {
+  @apply fixed inset-0;
+}
+
+@media (min-width: 640px) {
+  .modal-mobile-fullscreen {
+    @apply relative inset-auto;
+  }
+}
+
+/* 可点击元素间距 - 确保相邻元素间距至少 8px */
+.clickable-gap {
+  gap: 8px;
+}
+
+.clickable-gap-x {
+  column-gap: 8px;
+}
+
+.clickable-gap-y {
+  row-gap: 8px;
+}
+
+/* 触摸反馈效果 */
+.touch-feedback {
+  @apply transition-all duration-150;
+}
+
+.touch-feedback:active {
+  @apply scale-95 opacity-80;
+}
+
+/* 移动端滚动优化 */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+.scroll-touch-x {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
+/* 禁止文本选择 - 用于游戏交互元素 */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 移动端隐藏滚动条但保持滚动功能 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 横屏模式检测辅助类 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-hide {
+    display: none !important;
+  }
+  
+  .landscape-show {
+    display: block !important;
+  }
+  
+  .landscape-flex {
+    display: flex !important;
+  }
+}
+
+@media (orientation: portrait) {
+  .portrait-hide {
+    display: none !important;
+  }
+  
+  .portrait-show {
+    display: block !important;
+  }
+}
+
+/* ============================================
+   减少动画偏好支持 (Reduced Motion Preference)
+   Requirements: 7.1
+   ============================================ */
+
+/* 当用户偏好减少动画时，禁用或减少所有动画 */
+@media (prefers-reduced-motion: reduce) {
+  /* 全局动画禁用 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* 禁用特定动画类 */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-slide-in-top,
+  .animate-slide-in-bottom,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-bounce-loop,
+  .animate-bounce-light,
+  .animate-pulse-loop,
+  .animate-heartbeat,
+  .animate-shake,
+  .animate-spin-slow,
+  .animate-blink,
+  .animate-glow,
+  .animate-gold-shimmer,
+  .animate-float,
+  .animate-achievement,
+  .animate-notification-in,
+  .animate-notification-out {
+    animation: none !important;
+  }
+  
+  /* 禁用悬停动画 */
+  .hover-bounce:hover,
+  .hover-glow:hover,
+  .hover-shake:hover {
+    animation: none !important;
+  }
+  
+  /* 禁用过渡效果 */
+  .transition-fast,
+  .transition-normal,
+  .transition-slow {
+    transition: none !important;
+  }
+  
+  /* 禁用加载动画 */
+  .loading-spinner {
+    animation: none !important;
+  }
+  
+  .loading-dots span {
+    animation: none !important;
+  }
+  
+  /* 禁用骨架屏动画 */
+  .skeleton {
+    animation: none !important;
+    background: #F5F5F5 !important;
+  }
+  
+  /* 禁用进度条动画 */
+  .progress-bar-animated {
+    animation: none !important;
+  }
+  
+  /* 禁用卡片悬停变换 */
+  .seat:hover,
+  .maid-card:hover,
+  .customer-card:hover,
+  .menu-item-card:hover {
+    transform: none !important;
+  }
+  
+  /* 禁用按钮变换 */
+  .btn-primary:hover,
+  .btn-primary:active {
+    transform: none !important;
+  }
+  
+  /* 禁用触摸反馈动画 */
+  .touch-feedback:active {
+    transform: none !important;
+  }
+  
+  /* 底部抽屉立即显示/隐藏 */
+  .bottom-drawer {
+    transition: none !important;
+  }
+  
+  /* 模态框立即显示/隐藏 */
+  .modal-backdrop {
+    animation: none !important;
+  }
+  
+  .modal-content {
+    animation: none !important;
+  }
+  
+  .modal-content.closing {
+    animation: none !important;
+  }
+  
+  /* 通知立即显示/隐藏 */
+  .notification-item {
+    animation: none !important;
+  }
+  
+  .notification-item.exiting {
+    animation: none !important;
+  }
+}
+
+/* 工具类：仅在用户允许动画时应用 */
+.motion-safe {
+  /* 默认无动画 */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-safe {
+    /* 用户允许动画时恢复 */
+    animation: inherit;
+    transition: inherit;
+  }
+}
+
+/* 工具类：强制禁用动画 */
+.motion-reduce {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* 底部固定导航栏容器 */
+.fixed-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 z-40;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 底部抽屉基础样式 */
+.bottom-drawer {
+  @apply fixed bottom-0 left-0 right-0 z-50;
+  @apply rounded-t-2xl shadow-xl;
+  background: #FFFFFF;
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.bottom-drawer.open {
+  transform: translateY(0);
+}
+
+.bottom-drawer-handle {
+  @apply w-10 h-1 mx-auto mt-2 mb-3 rounded-full;
+  background: var(--border);
+}
+
+/* 移动端卡片紧凑样式 */
+.card-compact {
+  @apply p-3;
+}
+
+@media (min-width: 640px) {
+  .card-compact {
+    @apply p-4;
+  }
+}
+
+/* 移动端文字大小调整 */
+.text-mobile-sm {
+  @apply text-xs;
+}
+
+@media (min-width: 640px) {
+  .text-mobile-sm {
+    @apply text-sm;
+  }
+}
+
+.text-mobile-base {
+  @apply text-sm;
+}
+
+@media (min-width: 640px) {
+  .text-mobile-base {
+    @apply text-base;
+  }
+}
+
+
+
+/* ============================================
+   横屏模式支持 (Landscape Mode Support)
+   Requirements: 8.1, 8.2, 8.3
+   ============================================ */
+
+/* 横屏模式检测 - 高度小于500px且为横屏方向 */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* 横屏模式下的主布局调整 */
+  .game-layout-landscape {
+    @apply flex flex-row;
+  }
+  
+  /* 横屏模式下隐藏底部导航 */
+  .nav-bottom-landscape-hide {
+    display: none !important;
+  }
+  
+  /* 横屏模式下显示侧边导航 */
+  .nav-side-landscape-show {
+    display: flex !important;
+  }
+  
+  /* 横屏模式下的主内容区域 */
+  .main-content-landscape {
+    @apply flex-1 overflow-auto;
+    padding-bottom: 0 !important;
+  }
+  
+  /* 横屏模式下的 CafeView 左右分栏布局 */
+  .cafe-view-landscape {
+    @apply flex flex-row gap-2;
+    height: calc(100vh - 60px); /* 减去 TopBar 高度 */
+  }
+  
+  .cafe-view-landscape .cafe-main {
+    @apply flex-1 overflow-auto;
+  }
+  
+  .cafe-view-landscape .cafe-sidebar {
+    @apply w-64 flex-shrink-0 overflow-auto;
+  }
+  
+  /* 横屏模式下的座位网格 - 更紧凑 */
+  .seat-grid-landscape {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* 横屏模式下的卡片更紧凑 */
+  .card-landscape-compact {
+    @apply p-2;
+  }
+  
+  .card-landscape-compact .card-header {
+    @apply py-1 px-2;
+  }
+  
+  .card-landscape-compact .card-body {
+    @apply p-2;
+  }
+}
+
+/* 侧边导航栏样式 - 横屏模式 */
+.nav-side-landscape {
+  @apply hidden flex-col bg-white border-r border-pink-100 z-40;
+  width: 56px;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .nav-side-landscape {
+    @apply flex;
+  }
+}
+
+.nav-side-landscape .nav-item {
+  @apply flex flex-col items-center justify-center gap-0.5;
+  @apply min-w-[44px] min-h-[44px] px-1 py-1.5;
+  @apply transition-all duration-200;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.nav-side-landscape .nav-item.active {
+  @apply text-pink-600 bg-pink-50;
+}
+
+.nav-side-landscape .nav-item:not(.active) {
+  @apply text-gray-500;
+}
+
+.nav-side-landscape .nav-item:hover:not(.active) {
+  @apply text-pink-500 bg-pink-50/50;
+}
+
+.nav-side-landscape .nav-icon {
+  @apply text-lg;
+}
+
+.nav-side-landscape .nav-label {
+  @apply text-[8px] font-medium leading-tight;
+}
+
+/* 横屏模式下的 TopBar 调整 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .topbar-landscape {
+    @apply py-1;
+  }
+  
+  .topbar-landscape .topbar-content {
+    @apply gap-2;
+  }
+  
+  .topbar-landscape .topbar-item {
+    @apply text-xs;
+  }
+}
+
+/* 横屏模式下的 Modal 调整 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-landscape {
+    @apply max-h-[90vh] overflow-auto;
+  }
+  
+  .modal-landscape .modal-content {
+    @apply max-h-[85vh];
+  }
+}
+
+/* 横屏模式下的面板调整 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .panel-landscape {
+    @apply p-2;
+  }
+  
+  .panel-landscape .panel-header {
+    @apply py-1 text-sm;
+  }
+  
+  .panel-landscape .panel-grid {
+    gap: 0.5rem;
+  }
+}

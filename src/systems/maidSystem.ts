@@ -206,9 +206,10 @@ export function assignRole(maid: Maid, role: MaidRole): Maid {
     role,
     status: {
       ...maid.status,
-      isWorking: role !== 'resting',
-      currentTask: role === 'resting' ? null : maid.status.currentTask,
-      servingCustomerId: role === 'resting' ? null : maid.status.servingCustomerId,
+      isWorking: true,
+      isResting: false,
+      currentTask: maid.status.currentTask,
+      servingCustomerId: maid.status.servingCustomerId,
     },
   };
 }
