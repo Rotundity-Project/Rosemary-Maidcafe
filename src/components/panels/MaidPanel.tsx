@@ -273,24 +273,29 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest }: MaidDetail
     <Card className="h-full">
       <CardBody>
         {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
-          <div className="relative">
+        <div className="flex items-start gap-4 mb-4">
+          <div className="relative flex-shrink-0">
             <MaidAvatar src={maid.avatar} name={maid.name} size="xl" />
             <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
               <span className="text-lg">{personalityEmojis[maid.personality]}</span>
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">
-              {maid.name}
-            </h3>
-            <div className="flex items-center gap-2 mt-1">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-lg font-bold text-gray-800">
+                {maid.name}
+              </h3>
               <span className="text-sm px-2 py-0.5 rounded bg-purple-100 text-purple-700">
                 Lv.{maid.level}
               </span>
-              <span className="text-sm text-gray-500">
-                {personalityLabels[maid.personality]}
-              </span>
+              {isResting && (
+                <span className="text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                  💤 休息中
+                </span>
+              )}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
             </div>
           </div>
         </div>

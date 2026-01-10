@@ -1,7 +1,6 @@
 'use client';
 
 import { Maid, MaidRole, MaidPersonality } from '@/types';
-import { StaminaBar } from '@/components/ui/ProgressBar';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
 import { calculateEfficiency } from '@/systems/maidSystem';
 
@@ -50,143 +49,180 @@ export function MaidDetailPanel({ maid, onRoleChange, onToggleRest }: MaidDetail
   const availableRoles: MaidRole[] = ['server', 'greeter', 'barista', 'entertainer'];
 
   return (
-    <div className="flex flex-col md:flex-row gap-6">
-      {/* Left: Avatar + Basic Info */}
-      <div className="flex gap-4 md:w-56 flex-shrink-0">
-        <div className="relative">
+    <div className="space-y-4">
+      {/* Header: Avatar + Info */}
+      <div className="flex gap-4">
+        <div className="relative flex-shrink-0">
           <MaidAvatar src={maid.avatar} name={maid.name} size="lg" />
-          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
-            <span className="text-base">{personalityEmojis[maid.personality]}</span>
+          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+            <span className="text-sm">{personalityEmojis[maid.personality]}</span>
           </div>
         </div>
-        <div className="flex-1">
+        
+        <div className="flex-1 min-w-0">
+          {/* Name Row */}
           <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-800">{maid.name}</span>
-            <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full">
+            <span className="font-bold text-gray-800 text-lg">{maid.name}</span>
+            <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">
               Lv.{maid.level}
             </span>
-            {isResting && (
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                💤 休息中
-              </span>
-            )}
           </div>
-          <div className="text-sm text-gray-500 mt-1">
-            {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
+          
+          {/* Status Row */}
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-gray-500">
+              {personalityLabels[maid.personality]}性格
+            </span>
+            <span className="text-gray-300">·</span>
+            <span className={`text-sm ${isResting ? 'text-gray-400' : 'text-pink-500'}`}>
+              {isResting ? '💤 休息中' : `${roleIcons[maid.role]} ${roleLabels[maid.role]}`}
+            </span>
           </div>
-          <div className="mt-3">
-            <div className="text-xs text-gray-500 mb-1">体力 {Math.round(maid.stamina)}%</div>
-            <StaminaBar value={maid.stamina} size="sm" />
-          </div>
-          <div className="mt-2">
-            <div className="text-xs text-gray-500 mb-1">经验 {maid.experience}/{maid.level * 100}</div>
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-pink-400 to-pink-500 rounded-full"
-                style={{ width: `${(maid.experience / (maid.level * 100)) * 100}%` }}
-              />
-            </div>
+
+          {/* Bars */}
+          <div className="mt-3 space-y-2">
+            <ProgressRow 
+              label="体力" 
+              value={maid.stamina} 
+              color="bg-gradient-to-r from-green-400 to-green-500"
+              warning={isLowStamina}
+            />
+            <ProgressRow 
+              label="心情" 
+              value={maid.mood} 
+              color="bg-gradient-to-r from-pink-400 to-pink-500"
+            />
+            <ProgressRow 
+              label="经验" 
+              value={(maid.experience / (maid.level * 100)) * 100} 
+              color="bg-gradient-to-r from-purple-400 to-purple-500"
+              showValue={`${maid.experience}/${maid.level * 100}`}
+            />
           </div>
         </div>
       </div>
 
-      {/* Middle: Stats Grid - 2x3 */}
-      <div className="flex-1 max-w-md">
-        <div className="grid grid-cols-3 gap-2">
-          <StatBox label="魅力" value={maid.stats.charm} icon="💕" color="pink" />
-          <StatBox label="技能" value={maid.stats.skill} icon="⭐" color="blue" />
-          <StatBox label="体质" value={maid.stats.stamina} icon="💪" color="green" />
-          <StatBox label="速度" value={maid.stats.speed} icon="⚡" color="yellow" />
-          <StatBox 
-            label="效率" 
-            value={Math.round(efficiency)} 
-            icon={isLowStamina ? "⚠️" : "📊"} 
-            color={isLowStamina ? "red" : "purple"} 
-            suffix="%" 
-          />
-          <StatBox 
-            label="心情" 
-            value={Math.round(maid.mood)} 
-            icon={maid.mood >= 80 ? '😊' : maid.mood >= 50 ? '😐' : '😢'} 
-            color="pink" 
-            suffix="%" 
-          />
-        </div>
+      {/* Stats: Compact 2-row grid */}
+      <div className="grid grid-cols-6 gap-1.5">
+        <StatBadge icon="💕" label="魅力" value={maid.stats.charm} />
+        <StatBadge icon="⭐" label="技能" value={maid.stats.skill} />
+        <StatBadge icon="💪" label="体质" value={maid.stats.stamina} />
+        <StatBadge icon="⚡" label="速度" value={maid.stats.speed} />
+        <StatBadge 
+          icon={isLowStamina ? "⚠️" : "📊"} 
+          label="效率" 
+          value={Math.round(efficiency)} 
+          suffix="%" 
+          warning={isLowStamina}
+        />
+        <StatBadge 
+          icon={maid.mood >= 80 ? '😊' : maid.mood >= 50 ? '😐' : '😢'} 
+          label="心情" 
+          value={Math.round(maid.mood)} 
+          suffix="%" 
+        />
       </div>
 
-      {/* Right: Role Selection + Rest Button */}
-      <div className="flex-shrink-0">
-        <div className="text-sm font-medium text-gray-700 mb-2">设置职位</div>
-        <div className="grid grid-cols-2 gap-2">
+      {/* Role Selection */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-600">职位分配</span>
+          {isWorking && (
+            <span className="text-xs text-amber-500">⚠️ 工作中</span>
+          )}
+        </div>
+        <div className="flex gap-2">
           {availableRoles.map(role => (
             <button
               key={role}
               onClick={() => onRoleChange(maid.id, role)}
               disabled={isWorking || isResting}
               className={`
-                px-4 py-3 rounded-xl transition-all text-sm flex flex-col items-center gap-1 min-w-[80px]
+                flex-1 py-2 rounded-lg transition-all text-center
                 ${maid.role === role && !isResting
-                  ? 'bg-pink-500 text-white shadow-md' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-pink-500 text-white shadow-sm' 
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100'
                 }
-                ${(isWorking || isResting) ? 'opacity-50 cursor-not-allowed' : ''}
+                ${(isWorking || isResting) ? 'opacity-40 cursor-not-allowed' : ''}
               `}
             >
-              <span className="text-xl">{roleIcons[role]}</span>
-              <span className="font-medium">{roleLabels[role]}</span>
+              <div className="text-base">{roleIcons[role]}</div>
+              <div className="text-xs mt-0.5">{roleLabels[role]}</div>
             </button>
           ))}
         </div>
-        
-        {/* Rest Button */}
-        <button
-          onClick={() => onToggleRest(maid.id)}
-          disabled={isWorking}
-          className={`
-            w-full mt-2 px-4 py-2 rounded-xl transition-all text-sm flex items-center justify-center gap-2
-            ${isResting 
-              ? 'bg-green-500 text-white shadow-md' 
-              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-            }
-            ${isWorking ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-        >
-          <span>{isResting ? '🌟' : '💤'}</span>
-          <span className="font-medium">{isResting ? '结束休息' : '安排休息'}</span>
-        </button>
-        
-        {isWorking && (
-          <div className="text-xs text-yellow-600 mt-2">
-            ⚠️ 工作中，无法操作
-          </div>
-        )}
       </div>
+
+      {/* Rest Button */}
+      <button
+        onClick={() => onToggleRest(maid.id)}
+        disabled={isWorking}
+        className={`
+          w-full py-2.5 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2
+          ${isResting 
+            ? 'bg-green-500 text-white hover:bg-green-600' 
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+          }
+          ${isWorking ? 'opacity-40 cursor-not-allowed' : ''}
+        `}
+      >
+        <span>{isResting ? '🌟' : '💤'}</span>
+        <span>{isResting ? '结束休息' : '安排休息'}</span>
+      </button>
     </div>
   );
 }
 
-// Stat Box Component
-function StatBox({ label, value, icon, color, suffix = '' }: { 
+// Compact Progress Row
+function ProgressRow({ 
+  label, 
+  value, 
+  color, 
+  warning = false,
+  showValue 
+}: { 
   label: string; 
   value: number; 
-  icon: string;
-  color: 'pink' | 'blue' | 'green' | 'yellow' | 'purple' | 'red';
-  suffix?: string;
+  color: string;
+  warning?: boolean;
+  showValue?: string;
 }) {
-  const colorClasses = {
-    pink: 'bg-pink-50 text-pink-600',
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    purple: 'bg-purple-50 text-purple-600',
-    red: 'bg-red-50 text-red-600',
-  };
-
   return (
-    <div className={`rounded-xl p-3 text-center ${colorClasses[color]}`}>
-      <div className="text-lg mb-1">{icon}</div>
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="font-bold text-lg">{value}{suffix}</div>
+    <div className="flex items-center gap-2">
+      <span className={`text-xs w-8 ${warning ? 'text-red-500' : 'text-gray-400'}`}>{label}</span>
+      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div 
+          className={`h-full rounded-full ${color}`}
+          style={{ width: `${Math.min(100, value)}%` }}
+        />
+      </div>
+      <span className={`text-xs w-10 text-right ${warning ? 'text-red-500' : 'text-gray-400'}`}>
+        {showValue || `${Math.round(value)}%`}
+      </span>
+    </div>
+  );
+}
+
+// Compact Stat Badge
+function StatBadge({ 
+  icon, 
+  label, 
+  value, 
+  suffix = '',
+  warning = false
+}: { 
+  icon: string; 
+  label: string; 
+  value: number;
+  suffix?: string;
+  warning?: boolean;
+}) {
+  return (
+    <div className={`text-center py-1.5 px-1 rounded-lg ${warning ? 'bg-red-50' : 'bg-gray-50'}`}>
+      <div className="text-sm">{icon}</div>
+      <div className={`text-xs font-bold ${warning ? 'text-red-600' : 'text-gray-700'}`}>
+        {value}{suffix}
+      </div>
     </div>
   );
 }
