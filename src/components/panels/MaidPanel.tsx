@@ -16,7 +16,6 @@ const roleLabels: Record<MaidRole, string> = {
   server: '服务员',
   barista: '咖啡师',
   entertainer: '表演者',
-  resting: '休息中',
 };
 
 const roleIcons: Record<MaidRole, string> = {
@@ -24,7 +23,6 @@ const roleIcons: Record<MaidRole, string> = {
   server: '🍽️',
   barista: '☕',
   entertainer: '🎭',
-  resting: '💤',
 };
 
 const roleColors: Record<MaidRole, string> = {
@@ -32,7 +30,6 @@ const roleColors: Record<MaidRole, string> = {
   server: 'bg-blue-100 text-blue-700 border-blue-300',
   barista: 'bg-amber-100 text-amber-700 border-amber-300',
   entertainer: 'bg-purple-100 text-purple-700 border-purple-300',
-  resting: 'bg-gray-100 text-gray-700 border-gray-300',
 };
 
 const personalityEmojis: Record<MaidPersonality, string> = {
@@ -108,6 +105,10 @@ export function MaidPanel() {
     }
   };
 
+  const handleToggleRest = (maidId: string) => {
+    dispatch({ type: 'TOGGLE_MAID_REST', maidId });
+  };
+
   return (
     <div className="min-h-full flex flex-col gap-4 p-4">
       {/* Header */}
@@ -167,6 +168,7 @@ export function MaidPanel() {
               maid={state.maids.find((m) => m.id === selectedMaid.id) || selectedMaid}
               onAssignRole={handleAssignRole}
               onFire={handleFireMaid}
+              onToggleRest={handleToggleRest}
             />
           </div>
         )}
@@ -197,7 +199,7 @@ interface MaidListItemProps {
 
 function MaidListItem({ maid, selected, onClick }: MaidListItemProps) {
   const isLowStamina = maid.stamina < 20;
-  const isResting = maid.role === 'resting';
+  const isResting = maid.status.isResting;
 
   return (
     <div
@@ -229,9 +231,15 @@ function MaidListItem({ maid, selected, onClick }: MaidListItemProps) {
             </span>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className={`text-xs px-2 py-0.5 rounded-full ${roleColors[maid.role]}`}>
-              {roleIcons[maid.role]} {roleLabels[maid.role]}
-            </span>
+            {isResting ? (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border-gray-300">
+                💤 休息中
+              </span>
+            ) : (
+              <span className={`text-xs px-2 py-0.5 rounded-full ${roleColors[maid.role]}`}>
+                {roleIcons[maid.role]} {roleLabels[maid.role]}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -250,14 +258,16 @@ interface MaidDetailCardProps {
   maid: Maid;
   onAssignRole: (maidId: string, role: MaidRole) => void;
   onFire: (maidId: string) => void;
+  onToggleRest: (maidId: string) => void;
 }
 
-function MaidDetailCard({ maid, onAssignRole, onFire }: MaidDetailCardProps) {
+function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest }: MaidDetailCardProps) {
   const [showFireConfirm, setShowFireConfirm] = useState(false);
   const expForNextLevel = getExperienceForLevel(maid.level);
   const expProgress = (maid.experience / expForNextLevel) * 100;
 
-  const roles: MaidRole[] = ['greeter', 'server', 'barista', 'entertainer', 'resting'];
+  const roles: MaidRole[] = ['greeter', 'server', 'barista', 'entertainer'];
+  const isResting = maid.status.isResting;
 
   return (
     <Card className="h-full">
@@ -335,6 +345,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire }: MaidDetailCardProps) {
               <button
                 key={role}
                 onClick={() => onAssignRole(maid.id, role)}
+                disabled={isResting}
                 className={`
                   px-3 py-1.5 rounded-xl text-sm font-medium
                   transition-all duration-200 border
@@ -342,12 +353,25 @@ function MaidDetailCard({ maid, onAssignRole, onFire }: MaidDetailCardProps) {
                     ? roleColors[role] + ' border-current'
                     : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                   }
+                  ${isResting ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 {roleIcons[role]} {roleLabels[role]}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Rest Toggle Button */}
+        <div className="mb-4">
+          <Button
+            variant={isResting ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => onToggleRest(maid.id)}
+            className="w-full"
+          >
+            {isResting ? '🔔 结束休息' : '💤 安排休息'}
+          </Button>
         </div>
 
         {/* Fire Button */}
