@@ -234,3 +234,52 @@ export function addExperience(maid: Maid, experience: number): Maid {
   };
   return checkLevelUp(updatedMaid);
 }
+
+/**
+ * 开始服务
+ * 初始化服务进度
+ */
+export function startService(maid: Maid, customerId: string): Maid {
+  return {
+    ...maid,
+    status: {
+      ...maid.status,
+      isWorking: true,
+      currentTask: 'serving',
+      servingCustomerId: customerId,
+    },
+  };
+}
+
+/**
+ * 更新服务进度
+ * 基于女仆速度计算进度增量
+ * @param maid 女仆
+ * @param deltaMinutes 经过的时间(分钟)
+ * @returns 新的进度值(0-100)
+ */
+export function updateServiceProgress(maid: Maid, currentProgress: number, deltaMinutes: number): number {
+  const speed = maid.stats.speed;
+  
+  // 基础进度增量: 速度值 * 0.5 * 时间(分钟)
+  const progressIncrement = speed * 0.5 * deltaMinutes;
+  
+  // 体力低于50%时效率降低
+  const staminaMultiplier = maid.stamina < 50 ? 0.7 : 1.0;
+  
+  const newProgress = currentProgress + (progressIncrement * staminaMultiplier);
+  
+  return Math.min(newProgress, 100);
+}
+
+/**
+ * 计算服务所需时间(分钟)
+ * 基于女仆速度计算
+ */
+export function getServiceDuration(maid: Maid): number {
+  const speed = maid.stats.speed;
+  const staminaMultiplier = maid.stamina < 50 ? 0.7 : 1.0;
+  
+  // 基础时间: 100 / (速度 * 0.5 * 体力倍率)
+  return 100 / (speed * 0.5 * staminaMultiplier);
+}

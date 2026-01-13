@@ -11,6 +11,7 @@ export const initialGameState: GameState = {
   season: 'spring',
   isPaused: true,
   isBusinessHours: true,
+  gameSpeed: 1, // 默认速度1x
   
   // 核心数据 - 初始为空或默认值
   maids: [],
@@ -64,7 +65,7 @@ export const GAME_CONSTANTS = {
   // 时间相关
   BUSINESS_START_TIME: 540,  // 9:00 AM
   BUSINESS_END_TIME: 1260,   // 9:00 PM
-  TIME_INCREMENT: 10,        // 每次tick增加10分钟
+  TIME_INCREMENT: 5,          // 每次tick增加5分钟
   
   // 季节天数
   DAYS_PER_SEASON: 30,

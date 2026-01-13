@@ -69,6 +69,9 @@ export interface Customer {
   status: CustomerStatus;
   arrivalTime: number;
   seatId: string;
+  serviceProgress?: number; // 服务进度 0-100
+  serviceStartTime?: number; // 服务开始时间
+  servingMaidId?: string; // 正在服务的女仆ID
 }
 
 // ==================== 菜单相关类型 ====================
@@ -204,6 +207,8 @@ export interface Notification {
 
 export type PanelType = 'cafe' | 'maids' | 'menu' | 'facility' | 'finance' | 'achievements' | 'settings';
 
+export type GameSpeed = 0.5 | 1 | 2 | 4;
+
 export interface GameState {
   // 时间
   day: number;
@@ -211,6 +216,7 @@ export interface GameState {
   season: Season;
   isPaused: boolean;
   isBusinessHours: boolean;
+  gameSpeed: GameSpeed;   // 游戏速度倍率
   
   // 核心数据
   maids: Maid[];
@@ -246,6 +252,7 @@ export type GameAction =
   | { type: 'TOGGLE_PAUSE' }
   | { type: 'END_DAY' }
   | { type: 'START_NEW_DAY' }
+  | { type: 'SET_GAME_SPEED'; speed: GameSpeed }
   
   // 女仆管理
   | { type: 'HIRE_MAID'; maid: Maid }
@@ -259,6 +266,9 @@ export type GameAction =
   | { type: 'UPDATE_CUSTOMER'; customerId: string; updates: Partial<Customer> }
   | { type: 'REMOVE_CUSTOMER'; customerId: string }
   | { type: 'SERVE_CUSTOMER'; maidId: string; customerId: string }
+  | { type: 'START_SERVICE'; maidId: string; customerId: string }
+  | { type: 'UPDATE_SERVICE_PROGRESS'; maidId: string; customerId: string; progress: number }
+  | { type: 'COMPLETE_SERVICE'; maidId: string; customerId: string }
   
   // 菜单管理
   | { type: 'UNLOCK_MENU_ITEM'; itemId: string }

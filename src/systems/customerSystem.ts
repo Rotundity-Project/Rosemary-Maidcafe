@@ -56,10 +56,10 @@ const customerTypeWeights: Record<CustomerType, { baseWeight: number; reputation
 
 // 顾客类型对应的耐心值范围
 const customerPatienceRange: Record<CustomerType, { min: number; max: number }> = {
-  regular: { min: 60, max: 100 },
-  vip: { min: 40, max: 70 },      // VIP更挑剔，耐心较低
-  critic: { min: 30, max: 60 },   // 评论家最挑剔
-  group: { min: 70, max: 100 },   // 团体顾客耐心较好
+  regular: { min: 70, max: 120 },
+  vip: { min: 50, max: 90 },      // VIP更挑剔，耐心较低
+  critic: { min: 40, max: 80 },   // 评论家最挑剔
+  group: { min: 80, max: 120 },   // 团体顾客耐心较好
 };
 
 /**
@@ -320,8 +320,8 @@ export function updatePatience(customer: Customer, deltaMinutes: number): Custom
       patienceDecay = deltaMinutes * 2;
       break;
     case 'waiting_order':
-      // 等待订单时耐心消耗较快
-      patienceDecay = deltaMinutes * 1.5;
+      // 等待订单时耐心消耗较快(已优化,降低消耗速度)
+      patienceDecay = deltaMinutes * 0.8;
       break;
     case 'ordering':
     case 'seated':
@@ -496,5 +496,40 @@ export function assignSeat(customer: Customer, seatId: string): Customer {
     ...customer,
     seatId,
     status: 'seated',
+  };
+}
+
+/**
+ * 开始服务
+ */
+export function startCustomerService(customer: Customer, maidId: string): Customer {
+  return {
+    ...customer,
+    status: 'waiting_order',
+    serviceProgress: 0,
+    serviceStartTime: Date.now(),
+    servingMaidId: maidId,
+  };
+}
+
+/**
+ * 更新服务进度
+ */
+export function updateCustomerServiceProgress(customer: Customer, progress: number): Customer {
+  return {
+    ...customer,
+    serviceProgress: progress,
+  };
+}
+
+/**
+ * 完成服务
+ * 顾客进入用餐状态
+ */
+export function completeService(customer: Customer): Customer {
+  return {
+    ...customer,
+    status: 'eating',
+    serviceProgress: 100,
   };
 }

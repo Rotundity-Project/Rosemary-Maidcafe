@@ -31,3 +31,5 @@ export { Navigation, NavigationVertical, NavigationBottom, NavigationSide } from
 
 export { MaidAvatar } from './MaidAvatar';
 export type { MaidAvatarSize } from './MaidAvatar';
+
+export { SpeedControl } from './SpeedControl';

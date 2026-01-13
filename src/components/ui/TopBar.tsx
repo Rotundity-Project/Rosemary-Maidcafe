@@ -4,13 +4,18 @@ import React from 'react';
 import { useGame } from '@/components/game/GameProvider';
 import { formatGameTime, formatGold, formatDay, getSeasonIcon, formatSeason } from '@/utils/formatters';
 import { Button } from './Button';
+import { SpeedControl } from './SpeedControl';
 
 export function TopBar() {
   const { state, dispatch } = useGame();
-  const { day, time, season, isPaused, finance, reputation } = state;
+  const { day, time, season, isPaused, finance, reputation, gameSpeed } = state;
 
   const handleTogglePause = () => {
     dispatch({ type: 'TOGGLE_PAUSE' });
+  };
+
+  const handleSpeedChange = (speed: typeof gameSpeed) => {
+    dispatch({ type: 'SET_GAME_SPEED', speed });
   };
 
   return (
@@ -40,6 +45,7 @@ export function TopBar() {
               {formatGameTime(time)}
             </span>
           </div>
+          <SpeedControl currentSpeed={gameSpeed} onSpeedChange={handleSpeedChange} />
           <Button
             variant={isPaused ? 'primary' : 'secondary'}
             size="sm"
@@ -73,15 +79,15 @@ export function TopBar() {
 
       {/* Mobile layout (< 640px): Compact two-row layout */}
       <div className="flex sm:hidden flex-col gap-2 max-w-7xl mx-auto">
-        {/* Row 1: Icon, Time, Pause button */}
-        <div className="flex items-center justify-between">
+        {/* Row 1: Icon, Time, Pause button, Speed Control */}
+        <div className="flex items-center justify-between gap-2">
           {/* Left: Game icon only (no title text on mobile) */}
           <div className="flex items-center">
             <span className="text-xl" aria-label="迷迭香咖啡厅">🌿</span>
           </div>
 
           {/* Center: Time display */}
-          <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-2 py-1 border border-pink-100">
+          <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-2 py-1 border border-pink-100 flex-1 justify-center">
             <span className="text-base">🕐</span>
             <span className="font-mono text-base font-semibold text-gray-800">
               {formatGameTime(time)}
@@ -102,10 +108,10 @@ export function TopBar() {
           </button>
         </div>
 
-        {/* Row 2: Resources (Gold, Reputation, Day/Season) */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Row 2: Resources (Gold, Reputation, Day/Season) and Speed Control */}
+        <div className="flex items-center justify-between gap-1.5">
           {/* Gold */}
-          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100 flex-1 justify-center">
+          <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-1 rounded-lg border border-yellow-100 flex-1 justify-center">
             <span className="text-sm">💰</span>
             <span className="font-semibold text-yellow-700 text-sm">
               {formatGold(finance.gold)}
@@ -113,7 +119,7 @@ export function TopBar() {
           </div>
 
           {/* Reputation */}
-          <div className="flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-lg border border-purple-100 flex-1 justify-center">
+          <div className="flex items-center gap-1 bg-purple-50 px-1.5 py-1 rounded-lg border border-purple-100 flex-1 justify-center">
             <span className="text-sm">⭐</span>
             <span className="font-semibold text-purple-700 text-sm">
               {reputation}
@@ -121,9 +127,35 @@ export function TopBar() {
           </div>
 
           {/* Day/Season */}
-          <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 flex-1 justify-center">
+          <div className="flex items-center gap-1 bg-gray-50 px-1.5 py-1 rounded-lg border border-gray-100 flex-1 justify-center">
             <span className="text-sm">{getSeasonIcon(season)}</span>
             <span className="text-gray-600 text-sm font-medium">D{day}</span>
+          </div>
+
+          {/* Speed Control - Compact version for mobile */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            {[
+              { value: 0.5, label: '0.5x', icon: '🐢' },
+              { value: 1, label: '1x', icon: '🚶' },
+              { value: 2, label: '2x', icon: '🚀' },
+              { value: 4, label: '4x', icon: '⚡' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleSpeedChange(option.value as typeof gameSpeed)}
+                className={`
+                  flex items-center justify-center px-1.5 py-1 rounded text-xs font-medium
+                  transition-all duration-200
+                  ${gameSpeed === option.value
+                    ? 'bg-white text-pink-600 shadow-sm'
+                    : 'text-gray-600 hover:bg-white/50'
+                  }
+                `}
+                aria-label={`游戏速度 ${option.label}`}
+              >
+                <span>{option.icon}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

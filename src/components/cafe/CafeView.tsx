@@ -421,66 +421,9 @@ export function CafeView() {
       {/* Selected Details Panel - Shows at bottom on all screen sizes, hidden in landscape to save space */}
       {(selectedCustomer || selectedMaid) && !isLandscape && (
         <div className="border-t border-gray-100 pt-4">
-          {/* Selected Customer Details - Full width */}
-          {selectedCustomer && !selectedMaid && (
-            <Card variant="outlined">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>👤</span>
-                    <span>顾客详情</span>
-                  </div>
-                  {/* Close button for mobile */}
-                  <button
-                    onClick={() => dispatch({ type: 'SELECT_CUSTOMER', customerId: null })}
-                    className="lg:hidden touch-target flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                    aria-label="关闭详情"
-                  >
-                    <span className="text-gray-400">✕</span>
-                  </button>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <CustomerCard
-                  customer={selectedCustomer}
-                  selected
-                />
-              </CardBody>
-            </Card>
-          )}
-
-          {/* Selected Maid Details - Full width */}
-          {selectedMaid && !selectedCustomer && (
-            <Card variant="outlined">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>👧</span>
-                    <span>女仆详情</span>
-                  </div>
-                  {/* Close button for mobile */}
-                  <button
-                    onClick={() => dispatch({ type: 'SELECT_MAID', maidId: null })}
-                    className="lg:hidden touch-target flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                    aria-label="关闭详情"
-                  >
-                    <span className="text-gray-400">✕</span>
-                  </button>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <MaidDetailPanel
-                  maid={selectedMaid}
-                  onRoleChange={handleRoleChange}
-                  onToggleRest={handleToggleRest}
-                />
-              </CardBody>
-            </Card>
-          )}
-
-          {/* Both selected - Two columns on desktop, stacked on mobile */}
-          {selectedCustomer && selectedMaid && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Selected Customer Details */}
+            {selectedCustomer && (
               <Card variant="outlined">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -492,7 +435,7 @@ export function CafeView() {
                     <button
                       onClick={() => dispatch({ type: 'SELECT_CUSTOMER', customerId: null })}
                       className="lg:hidden touch-target flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                      aria-label="关闭顾客详情"
+                      aria-label="关闭详情"
                     >
                       <span className="text-gray-400">✕</span>
                     </button>
@@ -505,6 +448,10 @@ export function CafeView() {
                   />
                 </CardBody>
               </Card>
+            )}
+
+            {/* Selected Maid Details */}
+            {selectedMaid && (
               <Card variant="outlined">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -516,7 +463,7 @@ export function CafeView() {
                     <button
                       onClick={() => dispatch({ type: 'SELECT_MAID', maidId: null })}
                       className="lg:hidden touch-target flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                      aria-label="关闭女仆详情"
+                      aria-label="关闭详情"
                     >
                       <span className="text-gray-400">✕</span>
                     </button>
@@ -530,8 +477,8 @@ export function CafeView() {
                   />
                 </CardBody>
               </Card>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -116,6 +116,23 @@ export function CustomerCard({
         <PatienceBar value={customer.patience} size="sm" />
       </div>
 
+      {/* Service Progress Bar - only for waiting_order status */}
+      {customer.status === 'waiting_order' && customer.serviceProgress !== undefined && (
+        <div className="mb-2">
+          <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+            <span>🍽️</span>
+            <span>服务进度</span>
+            <span className="text-pink-600 font-medium">{Math.round(customer.serviceProgress)}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-pink-400 to-pink-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${customer.serviceProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Order Status */}
       {customer.order.items.length > 0 && (
         <div className="text-xs text-gray-600">

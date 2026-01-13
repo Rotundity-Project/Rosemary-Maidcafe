@@ -6,6 +6,9 @@ import {
   Season,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
+import { startService, updateServiceProgress as updateMaidServiceProgress } from '@/systems/maidSystem';
+import { startCustomerService, updateCustomerServiceProgress, completeService, calculateRewards, calculateSatisfaction } from '@/systems/customerSystem';
+import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 
 /**
  * 计算下一个季节
@@ -73,24 +76,35 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'SET_GAME_SPEED': {
+      return {
+        ...state,
+        gameSpeed: action.speed,
+      };
+    }
+
     case 'END_DAY': {
+      // 计算日常运营成本
+      const dailyOperatingCost = calculateDailyOperatingCost(state.maids, state.facility);
+      
       // 记录当日财务到历史
       const dailyFinance: DailyFinance = {
         day: state.day,
         revenue: state.finance.dailyRevenue,
-        expenses: state.finance.dailyExpenses,
-        profit: state.finance.dailyRevenue - state.finance.dailyExpenses,
+        expenses: state.finance.dailyExpenses + dailyOperatingCost,
+        profit: state.finance.dailyRevenue - (state.finance.dailyExpenses + dailyOperatingCost),
       };
-
+      
       // 保留最近7天的历史
       const newHistory = [...state.finance.history, dailyFinance].slice(-7);
-
+      
       return {
         ...state,
         isPaused: true,
         isBusinessHours: false,
         finance: {
           ...state.finance,
+          gold: Math.max(0, state.finance.gold - dailyOperatingCost),
           history: newHistory,
         },
       };
@@ -257,6 +271,96 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         maids: updatedMaids,
         customers: updatedCustomers,
+      };
+    }
+
+    case 'START_SERVICE': {
+      const maid = state.maids.find(m => m.id === action.maidId);
+      const customer = state.customers.find(c => c.id === action.customerId);
+      
+      if (!maid || !customer) {
+        return state;
+      }
+
+      const updatedMaid = startService(maid, action.customerId);
+      const updatedCustomer = startCustomerService(customer, action.maidId);
+
+      return {
+        ...state,
+        maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
+        customers: state.customers.map(c => c.id === action.customerId ? updatedCustomer : c),
+      };
+    }
+
+    case 'UPDATE_SERVICE_PROGRESS': {
+      const maid = state.maids.find(m => m.id === action.maidId);
+      const customer = state.customers.find(c => c.id === action.customerId);
+      
+      if (!maid || !customer || customer.serviceProgress === undefined) {
+        return state;
+      }
+
+      const newProgress = updateMaidServiceProgress(maid, customer.serviceProgress, GAME_CONSTANTS.TIME_INCREMENT);
+      const updatedCustomer = updateCustomerServiceProgress(customer, newProgress);
+
+      return {
+        ...state,
+        customers: state.customers.map(c => c.id === action.customerId ? updatedCustomer : c),
+      };
+    }
+
+    case 'COMPLETE_SERVICE': {
+      const maid = state.maids.find(m => m.id === action.maidId);
+      const customer = state.customers.find(c => c.id === action.customerId);
+      
+      if (!maid || !customer) {
+        return state;
+      }
+
+      // 计算等待时间
+      const waitTime = customer.serviceStartTime 
+        ? (Date.now() - customer.serviceStartTime) / 60000 
+        : 0;
+
+      // 计算满意度
+      const satisfaction = calculateSatisfaction(maid, customer, waitTime);
+      
+      // 计算奖励
+      const rewards = calculateRewards(customer, maid);
+      
+      // 更新女仆状态(释放)
+      const updatedMaid = {
+        ...maid,
+        status: {
+          ...maid.status,
+          isWorking: false,
+          currentTask: null,
+          servingCustomerId: null,
+        },
+      };
+
+      // 更新顾客状态
+      const updatedCustomer = completeService({
+        ...customer,
+        satisfaction,
+      });
+
+      return {
+        ...state,
+        maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
+        customers: state.customers.map(c => c.id === action.customerId ? updatedCustomer : c),
+        finance: {
+          ...state.finance,
+          gold: state.finance.gold + rewards.gold + rewards.tip,
+          dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
+        },
+        reputation: Math.max(0, Math.min(100, state.reputation + rewards.reputation)),
+        statistics: {
+          ...state.statistics,
+          totalCustomersServed: state.statistics.totalCustomersServed + 1,
+          totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
+          totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+        },
       };
     }
 

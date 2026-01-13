@@ -28,7 +28,7 @@ export function useGameLoop(
   dispatch: React.Dispatch<GameAction>,
   config: GameLoopConfig = {}
 ) {
-  const { speedMultiplier = 1, tickInterval = 1000 } = config;
+  const { speedMultiplier = 1, tickInterval = 2000 } = config;
   
   // 使用 ref 存储最新的 state 和 config 以避免闭包问题
   const stateRef = useRef(state);
@@ -249,11 +249,51 @@ export function useGameLoop(
       const customer = sortedCustomers[i];
       
       dispatchRef.current({
-        type: 'SERVE_CUSTOMER',
+        type: 'START_SERVICE',
         maidId: maid.id,
         customerId: customer.id,
       });
     }
+  }, []);
+
+  /**
+   * 更新服务进度
+   * 为所有正在服务的顾客更新进度
+   */
+  const handleServiceProgress = useCallback((currentState: GameState, deltaMinutes: number) => {
+    const servingCustomers = currentState.customers.filter(
+      (c: Customer) => c.status === 'waiting_order' && c.serviceProgress !== undefined
+    );
+    
+    servingCustomers.forEach((customer: Customer) => {
+      if (!customer.servingMaidId) return;
+      
+      const maid = currentState.maids.find(m => m.id === customer.servingMaidId);
+      if (!maid) return;
+      
+      // 更新进度
+      const newProgress = Math.min(
+        (customer.serviceProgress || 0) + (maid.stats.speed * 0.5 * deltaMinutes),
+        100
+      );
+      
+      if (newProgress >= 100) {
+        // 服务完成
+        dispatchRef.current({
+          type: 'COMPLETE_SERVICE',
+          maidId: maid.id,
+          customerId: customer.id,
+        });
+      } else {
+        // 更新进度
+        dispatchRef.current({
+          type: 'UPDATE_SERVICE_PROGRESS',
+          maidId: maid.id,
+          customerId: customer.id,
+          progress: newProgress,
+        });
+      }
+    });
   }, []);
 
   /**
@@ -317,8 +357,8 @@ export function useGameLoop(
 
       // 只有在未暂停且在营业时间时才执行游戏逻辑
       if (!currentState.isPaused && currentState.isBusinessHours) {
-        // 累计时间（考虑速度倍率）
-        accumulated += deltaTime * speed;
+        // 累计时间（考虑速度倍率和游戏速度设置）
+        accumulated += deltaTime * speed * currentState.gameSpeed;
         
         // 当累计时间达到 tick 间隔时，执行游戏逻辑
         if (accumulated >= interval) {
@@ -335,6 +375,9 @@ export function useGameLoop(
             
             // 更新顾客耐心
             handleCustomerPatience(currentState, GAME_CONSTANTS.TIME_INCREMENT);
+            
+            // 更新服务进度
+            handleServiceProgress(currentState, GAME_CONSTANTS.TIME_INCREMENT);
             
             // 自动分配女仆服务客人
             handleAutoAssignMaids(stateRef.current);
@@ -368,7 +411,7 @@ export function useGameLoop(
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [handleTimeTick, handleMaidUpdates, handleCustomerPatience, handleAutoAssignMaids, handleAchievementCheck, handleCustomerSpawn]);
+  }, [handleTimeTick, handleMaidUpdates, handleCustomerPatience, handleServiceProgress, handleAutoAssignMaids, handleAchievementCheck, handleCustomerSpawn]);
 
   /**
    * 启动游戏循环（兼容旧接口）
