@@ -6,6 +6,7 @@ import { SeatGrid } from './Seat';
 import { MaidCard } from './MaidCard';
 import { MaidDetailPanel } from './MaidDetailPanel';
 import { CustomerCard } from './CustomerCard';
+import { CustomerDetailPanel } from './CustomerDetailPanel';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard';
 import { MaidRole } from '@/types';
@@ -442,10 +443,10 @@ export function CafeView() {
                   </div>
                 </CardHeader>
                 <CardBody>
-                  <CustomerCard
-                    customer={selectedCustomer}
-                    selected
-                  />
+                  <div className="space-y-3">
+                    <CustomerCard customer={selectedCustomer} selected />
+                    <CustomerDetailPanel customer={selectedCustomer} />
+                  </div>
                 </CardBody>
               </Card>
             )}

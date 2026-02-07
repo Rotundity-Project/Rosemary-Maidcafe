@@ -3,6 +3,7 @@ import { defaultMenuItems } from './menuItems';
 import { defaultAchievements } from './achievements';
 import { defaultDecorations } from './decorations';
 import { defaultEquipment } from './equipment';
+import { defaultTasks } from './tasks';
 
 export const initialGameState: GameState = {
   // 时间设置
@@ -12,6 +13,11 @@ export const initialGameState: GameState = {
   isPaused: true,
   isBusinessHours: true,
   gameSpeed: 1, // 默认速度1x
+
+  runtime: {
+    customerSpawnMs: 0,
+    customerStatusTicks: {},
+  },
   
   // 核心数据 - 初始为空或默认值
   maids: [],
@@ -41,6 +47,7 @@ export const initialGameState: GameState = {
   
   // 成就
   achievements: defaultAchievements,
+  tasks: defaultTasks,
   statistics: {
     totalCustomersServed: 0,
     totalRevenue: 0,
@@ -58,6 +65,7 @@ export const initialGameState: GameState = {
   selectedCustomerId: null,
   activePanel: 'cafe',
   notifications: [],
+  dailySummaryOpen: false,
 };
 
 // 游戏常量

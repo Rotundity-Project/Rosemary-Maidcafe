@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GameProvider } from '@/components/game/GameProvider';
+import { AudioProvider } from '@/components/game/AudioProvider';
 import { GameLoop } from '@/components/game/GameLoop';
 import { GameUI } from '@/components/game/GameUI';
 
@@ -38,7 +39,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">🌿</div>
+          <div className="text-6xl mb-4 motion-safe:animate-bounce">🌿</div>
           <h1 className="text-2xl font-bold text-pink-500 mb-2">
             迷迭香咖啡厅
           </h1>
@@ -46,7 +47,7 @@ export default function Home() {
             正在加载游戏...
           </p>
           <div className="mt-4 flex justify-center">
-            <div className="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full motion-safe:animate-spin" />
           </div>
         </div>
       </div>
@@ -79,8 +80,10 @@ export default function Home() {
   // Main game
   return (
     <GameProvider>
-      <GameLoop />
-      <GameUI />
+      <AudioProvider>
+        <GameLoop />
+        <GameUI />
+      </AudioProvider>
     </GameProvider>
   );
 }

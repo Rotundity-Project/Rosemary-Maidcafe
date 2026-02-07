@@ -17,6 +17,32 @@ export interface StorageResult<T> {
   error?: string;
 }
 
+function prepareStateForSave(state: GameState): GameState {
+  return {
+    ...state,
+    runtime: {
+      customerSpawnMs: 0,
+      customerStatusTicks: {},
+    },
+    notifications: [],
+    selectedMaidId: null,
+    selectedCustomerId: null,
+    dailySummaryOpen: false,
+  };
+}
+
+function normalizeLoadedState(state: GameState): GameState {
+  return {
+    ...state,
+    runtime: state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+    tasks: Array.isArray(state.tasks) ? state.tasks : initialGameState.tasks,
+    notifications: Array.isArray(state.notifications) ? state.notifications : [],
+    selectedMaidId: state.selectedMaidId ?? null,
+    selectedCustomerId: state.selectedCustomerId ?? null,
+    dailySummaryOpen: false,
+  };
+}
+
 /**
  * 生成校验和 - 使用简单的字符串哈希算法
  * @param state 游戏状态
@@ -134,11 +160,12 @@ export function saveGame(state: GameState): StorageResult<void> {
       return { success: false, error: 'localStorage 不可用' };
     }
 
+    const preparedState = prepareStateForSave(state);
     const saveData: SaveData = {
       version: GAME_CONSTANTS.SAVE_VERSION,
       timestamp: Date.now(),
-      gameState: state,
-      checksum: generateChecksum(state),
+      gameState: preparedState,
+      checksum: generateChecksum(preparedState),
     };
 
     const jsonString = JSON.stringify(saveData);
@@ -182,10 +209,11 @@ export function loadGame(): StorageResult<GameState> {
 
     // 迁移旧存档中的女仆头像
     const migratedState = migrateMaidAvatars(validationResult.data!.gameState);
+    const normalizedState = normalizeLoadedState(migratedState);
 
     return { 
       success: true, 
-      data: migratedState 
+      data: normalizedState
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -201,11 +229,12 @@ export function loadGame(): StorageResult<GameState> {
  */
 export function exportSave(state: GameState): StorageResult<Blob> {
   try {
+    const preparedState = prepareStateForSave(state);
     const saveData: SaveData = {
       version: GAME_CONSTANTS.SAVE_VERSION,
       timestamp: Date.now(),
-      gameState: state,
-      checksum: generateChecksum(state),
+      gameState: preparedState,
+      checksum: generateChecksum(preparedState),
     };
 
     const jsonString = JSON.stringify(saveData, null, 2);
@@ -274,10 +303,11 @@ export async function importSave(file: File): Promise<StorageResult<GameState>> 
 
         // 迁移旧存档中的女仆头像
         const migratedState = migrateMaidAvatars(validationResult.data!.gameState);
+        const normalizedState = normalizeLoadedState(migratedState);
 
         resolve({ 
           success: true, 
-          data: migratedState 
+          data: normalizedState
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : '未知错误';

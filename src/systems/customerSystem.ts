@@ -56,10 +56,10 @@ const customerTypeWeights: Record<CustomerType, { baseWeight: number; reputation
 
 // 顾客类型对应的耐心值范围
 const customerPatienceRange: Record<CustomerType, { min: number; max: number }> = {
-  regular: { min: 70, max: 120 },
+  regular: { min: 70, max: 100 },
   vip: { min: 50, max: 90 },      // VIP更挑剔，耐心较低
   critic: { min: 40, max: 80 },   // 评论家最挑剔
-  group: { min: 80, max: 120 },   // 团体顾客耐心较好
+  group: { min: 80, max: 100 },   // 团体顾客耐心较好
 };
 
 /**

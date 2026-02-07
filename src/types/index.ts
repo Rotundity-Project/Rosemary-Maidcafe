@@ -181,6 +181,40 @@ export interface Achievement {
   condition: AchievementCondition;
 }
 
+// ==================== 任务相关类型 ====================
+
+export type TaskType = 'daily' | 'growth';
+
+export type TaskConditionType =
+  | 'serve_customers'
+  | 'earn_gold'
+  | 'hire_maids'
+  | 'unlock_menu_items'
+  | 'upgrade_cafe';
+
+export interface TaskCondition {
+  type: TaskConditionType;
+  target: number;
+}
+
+export interface TaskReward {
+  gold: number;
+  reputation: number;
+}
+
+export interface Task {
+  id: string;
+  name: string;
+  description: string;
+  type: TaskType;
+  condition: TaskCondition;
+  reward: TaskReward;
+  progress: number;
+  completed: boolean;
+  claimed: boolean;
+  dayAssigned: number;
+}
+
 // ==================== 统计相关类型 ====================
 
 export interface GameStatistics {
@@ -205,9 +239,14 @@ export interface Notification {
 
 // ==================== 游戏状态类型 ====================
 
-export type PanelType = 'cafe' | 'maids' | 'menu' | 'facility' | 'finance' | 'achievements' | 'settings';
+export type PanelType = 'cafe' | 'maids' | 'menu' | 'facility' | 'finance' | 'tasks' | 'achievements' | 'settings';
 
 export type GameSpeed = 0.5 | 1 | 2 | 4;
+
+export interface GameRuntime {
+  customerSpawnMs: number;
+  customerStatusTicks: Record<string, number>;
+}
 
 export interface GameState {
   // 时间
@@ -217,6 +256,8 @@ export interface GameState {
   isPaused: boolean;
   isBusinessHours: boolean;
   gameSpeed: GameSpeed;   // 游戏速度倍率
+
+  runtime: GameRuntime;
   
   // 核心数据
   maids: Maid[];
@@ -232,6 +273,9 @@ export interface GameState {
   // 成就
   achievements: Achievement[];
   statistics: GameStatistics;
+
+  // 任务
+  tasks: Task[];
   
   // 声望
   reputation: number;
@@ -241,6 +285,7 @@ export interface GameState {
   selectedCustomerId: string | null;
   activePanel: PanelType;
   notifications: Notification[];
+  dailySummaryOpen: boolean;
 }
 
 
@@ -292,6 +337,9 @@ export type GameAction =
   // 成就
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
   | { type: 'UPDATE_STATISTICS'; updates: Partial<GameStatistics> }
+
+  // 任务
+  | { type: 'CLAIM_TASK_REWARD'; taskId: string }
   
   // UI
   | { type: 'SET_ACTIVE_PANEL'; panel: PanelType }
@@ -299,6 +347,7 @@ export type GameAction =
   | { type: 'SELECT_CUSTOMER'; customerId: string | null }
   | { type: 'ADD_NOTIFICATION'; notification: Notification }
   | { type: 'REMOVE_NOTIFICATION'; notificationId: string }
+  | { type: 'CLOSE_DAILY_SUMMARY' }
   
   // 存储
   | { type: 'LOAD_GAME'; state: GameState }

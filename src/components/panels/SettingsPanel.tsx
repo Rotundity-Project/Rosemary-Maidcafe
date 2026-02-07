@@ -2,14 +2,15 @@
 
 import React, { useState } from 'react';
 import { useGame } from '@/components/game/GameProvider';
+import { useAudio } from '@/components/game/AudioProvider';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { deleteSave, exportSave, downloadSave } from '@/utils/storage';
-import { initialGameState } from '@/data/initialState';
 
 export function SettingsPanel() {
   const { state, dispatch } = useGame();
+  const { settings, setMuted, setBgmEnabled, setSfxEnabled, setBgmVolume, setSfxVolume, playSfx } = useAudio();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteStep, setDeleteStep] = useState(0);
 
@@ -110,6 +111,88 @@ export function SettingsPanel() {
             <div className="flex justify-between py-2">
               <span className="text-gray-600">雇佣女仆总数</span>
               <span className="font-medium">{state.statistics.maidsHired}</span>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>🔊 音频</CardHeader>
+        <CardBody>
+          <div className="space-y-4 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">静音</span>
+              <input
+                type="checkbox"
+                checked={settings.muted}
+                onChange={(e) => {
+                  setMuted(e.target.checked);
+                  playSfx('click');
+                }}
+                className="h-4 w-4 accent-pink-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">背景音乐</span>
+              <input
+                type="checkbox"
+                checked={settings.bgmEnabled}
+                onChange={(e) => {
+                  setBgmEnabled(e.target.checked);
+                  playSfx('click');
+                }}
+                disabled={settings.muted}
+                className="h-4 w-4 accent-pink-500 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">音乐音量</span>
+                <span className="text-gray-500">{Math.round(settings.bgmVolume * 100)}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={Math.round(settings.bgmVolume * 100)}
+                onChange={(e) => setBgmVolume(Number(e.target.value) / 100)}
+                onPointerUp={() => playSfx('click')}
+                disabled={settings.muted || !settings.bgmEnabled}
+                className="w-full accent-pink-500 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">音效</span>
+              <input
+                type="checkbox"
+                checked={settings.sfxEnabled}
+                onChange={(e) => {
+                  setSfxEnabled(e.target.checked);
+                  playSfx('click');
+                }}
+                disabled={settings.muted}
+                className="h-4 w-4 accent-pink-500 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">音效音量</span>
+                <span className="text-gray-500">{Math.round(settings.sfxVolume * 100)}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={Math.round(settings.sfxVolume * 100)}
+                onChange={(e) => setSfxVolume(Number(e.target.value) / 100)}
+                onPointerUp={() => playSfx('click')}
+                disabled={settings.muted || !settings.sfxEnabled}
+                className="w-full accent-pink-500 disabled:opacity-50"
+              />
             </div>
           </div>
         </CardBody>

@@ -6,9 +6,11 @@ import {
   Season,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { startService, updateServiceProgress as updateMaidServiceProgress } from '@/systems/maidSystem';
-import { startCustomerService, updateCustomerServiceProgress, completeService, calculateRewards, calculateSatisfaction } from '@/systems/customerSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateServiceProgress as updateMaidServiceProgress } from '@/systems/maidSystem';
+import { checkAchievements } from '@/systems/achievementSystem';
+import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
+import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 
 /**
  * 计算下一个季节
@@ -56,16 +58,310 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
-      // 推进时间
-      const newTime = state.time + GAME_CONSTANTS.TIME_INCREMENT;
-      
-      // 检查是否到达营业结束时间
-      const newIsBusinessHours = newTime < GAME_CONSTANTS.BUSINESS_END_TIME;
+      const deltaMinutes = GAME_CONSTANTS.TIME_INCREMENT;
+      const deltaMs = action.deltaTime;
+
+      const nextRuntime = {
+        ...state.runtime,
+        customerSpawnMs: (state.runtime.customerSpawnMs ?? 0) + deltaMs,
+        customerStatusTicks: { ...(state.runtime.customerStatusTicks ?? {}) },
+      };
+
+      const baseCustomers = state.customers;
+
+      const notifications = [...state.notifications];
+      let reputation = state.reputation;
+      let tasks = state.tasks;
+
+      const maidsById = new Map(state.maids.map(m => [m.id, m] as const));
+      const customersById = new Map(baseCustomers.map(c => [c.id, c] as const));
+
+      for (const customer of [...customersById.values()]) {
+        if (customer.status === 'eating' || customer.status === 'paying' || customer.status === 'leaving') {
+          const defaultTicks = customer.status === 'eating' ? 2 : 1;
+          const current = nextRuntime.customerStatusTicks[customer.id] ?? defaultTicks;
+          const remaining = current - 1;
+
+          if (remaining > 0) {
+            nextRuntime.customerStatusTicks[customer.id] = remaining;
+            continue;
+          }
+
+          if (customer.status === 'eating') {
+            customersById.set(customer.id, { ...customer, status: 'paying' });
+            nextRuntime.customerStatusTicks[customer.id] = 1;
+            continue;
+          }
+
+          if (customer.status === 'paying') {
+            customersById.set(customer.id, { ...customer, status: 'leaving' });
+            nextRuntime.customerStatusTicks[customer.id] = 1;
+            continue;
+          }
+
+          customersById.delete(customer.id);
+          delete nextRuntime.customerStatusTicks[customer.id];
+          continue;
+        }
+
+        delete nextRuntime.customerStatusTicks[customer.id];
+      }
+
+      for (const maid of maidsById.values()) {
+        const updated = updateMaidStamina(maid, deltaMinutes);
+        const wasResting = maid.status.isResting;
+        const wasWorking = maid.status.isWorking;
+
+        if (updated.stamina <= 0 && !wasResting) {
+          maidsById.set(maid.id, {
+            ...updated,
+            stamina: 0,
+            status: {
+              isWorking: false,
+              isResting: true,
+              currentTask: null,
+              servingCustomerId: null,
+            },
+          });
+          notifications.push({
+            id: `maid_exhausted_${maid.id}_${Date.now()}`,
+            type: 'warning',
+            message: `${maid.name} 体力耗尽，已自动安排休息`,
+            timestamp: Date.now(),
+          });
+          continue;
+        }
+
+        if (updated.stamina >= 50 && wasResting) {
+          maidsById.set(maid.id, {
+            ...updated,
+            status: {
+              ...updated.status,
+              isResting: false,
+            },
+          });
+          notifications.push({
+            id: `maid_recovered_${maid.id}_${Date.now()}`,
+            type: 'success',
+            message: `${maid.name} 体力恢复，已返回工作岗位`,
+            timestamp: Date.now(),
+          });
+          continue;
+        }
+
+        if (updated.stamina !== maid.stamina || updated.status.isWorking !== wasWorking) {
+          maidsById.set(maid.id, updated);
+        }
+      }
+
+      for (const customer of customersById.values()) {
+        if (customer.status === 'leaving' || customer.status === 'paying' || customer.status === 'eating') {
+          continue;
+        }
+
+        const updatedCustomer = updatePatience(customer, deltaMinutes);
+        if (shouldCustomerLeave(updatedCustomer)) {
+          const { customer: leavingCustomer, reputationPenalty } = handlePatienceTimeout(updatedCustomer);
+          reputation = Math.max(0, reputation - reputationPenalty);
+          customersById.set(customer.id, leavingCustomer);
+          nextRuntime.customerStatusTicks[customer.id] = 1;
+          notifications.push({
+            id: `patience_timeout_${customer.id}_${Date.now()}`,
+            type: 'warning',
+            message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
+            timestamp: Date.now(),
+          });
+          continue;
+        }
+
+        if (updatedCustomer.patience !== customer.patience) {
+          customersById.set(customer.id, updatedCustomer);
+        }
+      }
+
+      const customersListForProgress = [...customersById.values()];
+      for (const customer of customersListForProgress) {
+        if (customer.status !== 'waiting_order' || customer.serviceProgress === undefined || !customer.servingMaidId) {
+          continue;
+        }
+
+        const maid = maidsById.get(customer.servingMaidId);
+        if (!maid) {
+          continue;
+        }
+
+        const newProgress = updateMaidServiceProgress(maid, customer.serviceProgress, deltaMinutes);
+        if (newProgress >= 100) {
+          const waitTime = customer.serviceStartTime ? (Date.now() - customer.serviceStartTime) / 60000 : 0;
+          const satisfaction = calculateSatisfaction(maid, customer, waitTime);
+          const rewards = calculateRewards(customer, maid);
+
+          maidsById.set(maid.id, {
+            ...maid,
+            status: {
+              ...maid.status,
+              isWorking: false,
+              currentTask: null,
+              servingCustomerId: null,
+            },
+          });
+
+          customersById.set(customer.id, completeService({ ...customer, satisfaction }));
+          nextRuntime.customerStatusTicks[customer.id] = 2;
+
+          state = {
+            ...state,
+            finance: {
+              ...state.finance,
+              gold: state.finance.gold + rewards.gold + rewards.tip,
+              dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
+            },
+            statistics: {
+              ...state.statistics,
+              totalCustomersServed: state.statistics.totalCustomersServed + 1,
+              totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
+              totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+            },
+          };
+          tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
+          tasks = applyTaskEvent(tasks, { type: 'earn_gold', amount: rewards.gold + rewards.tip });
+          reputation = Math.max(0, Math.min(100, reputation + rewards.reputation));
+        } else {
+          customersById.set(customer.id, updateCustomerServiceProgress(customer, newProgress));
+        }
+      }
+
+      const waitingCustomers = [...customersById.values()].filter(c => c.status === 'seated');
+      if (waitingCustomers.length > 0) {
+        const availableMaids = [...maidsById.values()].filter(
+          m =>
+            !m.status.isResting &&
+            !m.status.isWorking &&
+            m.status.servingCustomerId === null &&
+            m.stamina >= 10
+        );
+
+        if (availableMaids.length > 0) {
+          const sortedMaids = [...availableMaids].sort((a, b) => calculateEfficiency(b) - calculateEfficiency(a));
+          const sortedCustomers = [...waitingCustomers].sort((a, b) => a.patience - b.patience);
+          const assignCount = Math.min(sortedMaids.length, sortedCustomers.length);
+
+          for (let i = 0; i < assignCount; i++) {
+            const maid = sortedMaids[i];
+            const customer = sortedCustomers[i];
+            maidsById.set(maid.id, startService(maid, customer.id));
+            customersById.set(customer.id, startCustomerService(customer, maid.id));
+          }
+        }
+      }
+
+      const activeCustomers = [...customersById.values()].filter(c => c.status !== 'waiting_seat' && c.seatId);
+      const occupiedSeats = new Set(activeCustomers.map(c => c.seatId));
+
+      const spawnIntervalMs = getSpawnInterval(reputation, state.facility.cafeLevel);
+      let spawnMs = nextRuntime.customerSpawnMs;
+      let spawnCount = 0;
+
+      while (spawnMs >= spawnIntervalMs && spawnCount < 3) {
+        if (occupiedSeats.size >= state.facility.maxSeats) {
+          break;
+        }
+
+        let seatId: string | null = null;
+        for (let i = 1; i <= state.facility.maxSeats; i++) {
+          const candidate = `seat-${i}`;
+          if (!occupiedSeats.has(candidate)) {
+            seatId = candidate;
+            break;
+          }
+        }
+
+        if (!seatId) {
+          break;
+        }
+
+        const newCustomer = generateCustomer(reputation, state.season);
+        const order = generateOrder(newCustomer, state.menuItems, state.season);
+
+        customersById.set(newCustomer.id, {
+          ...newCustomer,
+          order,
+          seatId,
+          status: 'seated',
+        });
+        occupiedSeats.add(seatId);
+        spawnMs -= spawnIntervalMs;
+        spawnCount += 1;
+      }
+
+      const finalCustomers = [...customersById.values()];
+
+      const unlockedIds = checkAchievements(state.statistics, state.achievements);
+      let achievements = state.achievements;
+      let achievementRewardGold = 0;
+      for (const id of unlockedIds) {
+        const achievement = achievements.find(a => a.id === id);
+        if (!achievement || achievement.unlocked) {
+          continue;
+        }
+        achievements = achievements.map(a => a.id === id ? { ...a, unlocked: true, unlockedDate: Date.now() } : a);
+        achievementRewardGold += achievement.reward;
+        notifications.push({
+          id: `achievement_${id}_${Date.now()}`,
+          type: 'achievement',
+          message: `🏆 成就解锁：${achievement.name}！奖励 ${achievement.reward} 金币`,
+          timestamp: Date.now(),
+        });
+      }
+
+      const newTime = state.time + deltaMinutes;
+      const time = Math.min(newTime, GAME_CONSTANTS.BUSINESS_END_TIME);
+      const isClosingTick = time >= GAME_CONSTANTS.BUSINESS_END_TIME;
+
+      const intermediateState: GameState = {
+        ...state,
+        time,
+        isBusinessHours: !isClosingTick,
+        runtime: {
+          ...nextRuntime,
+          customerSpawnMs: spawnMs,
+        },
+        maids: [...maidsById.values()],
+        customers: finalCustomers,
+        achievements,
+        tasks,
+        finance: {
+          ...state.finance,
+          gold: state.finance.gold + achievementRewardGold,
+        },
+        reputation,
+        notifications,
+      };
+
+      if (!isClosingTick) {
+        return intermediateState;
+      }
+
+      const dailyOperatingCost = calculateDailyOperatingCost(intermediateState.maids, intermediateState.facility);
+      const dailyFinance: DailyFinance = {
+        day: intermediateState.day,
+        revenue: intermediateState.finance.dailyRevenue,
+        expenses: intermediateState.finance.dailyExpenses + dailyOperatingCost,
+        profit: intermediateState.finance.dailyRevenue - (intermediateState.finance.dailyExpenses + dailyOperatingCost),
+      };
+      const newHistory = [...intermediateState.finance.history, dailyFinance].slice(-7);
 
       return {
-        ...state,
-        time: Math.min(newTime, GAME_CONSTANTS.BUSINESS_END_TIME),
-        isBusinessHours: newIsBusinessHours,
+        ...intermediateState,
+        isPaused: true,
+        isBusinessHours: false,
+        dailySummaryOpen: true,
+        time: GAME_CONSTANTS.BUSINESS_END_TIME,
+        finance: {
+          ...intermediateState.finance,
+          gold: Math.max(0, intermediateState.finance.gold - dailyOperatingCost),
+          history: newHistory,
+        },
       };
     }
 
@@ -102,6 +398,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         isPaused: true,
         isBusinessHours: false,
+        dailySummaryOpen: true,
         finance: {
           ...state.finance,
           gold: Math.max(0, state.finance.gold - dailyOperatingCost),
@@ -125,7 +422,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         season: newSeason,
         isPaused: true,
         isBusinessHours: true,
+        dailySummaryOpen: false,
+        runtime: {
+          ...state.runtime,
+          customerSpawnMs: 0,
+          customerStatusTicks: {},
+        },
         customers: [], // 清空顾客
+        tasks: refreshDailyTasks(state.tasks, newDay),
         finance: {
           ...state.finance,
           dailyRevenue: 0,
@@ -160,6 +464,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         maids: [...state.maids, action.maid],
+        tasks: applyTaskEvent(state.tasks, { type: 'hire_maids', amount: 1 }),
         statistics: {
           ...state.statistics,
           maidsHired: state.statistics.maidsHired + 1,
@@ -383,6 +688,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             ? { ...item, unlocked: true }
             : item
         ),
+        tasks: applyTaskEvent(state.tasks, { type: 'unlock_menu_items', amount: 1 }),
         finance: {
           ...state.finance,
           gold: state.finance.gold - menuItem.unlockCost,
@@ -433,6 +739,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           cafeLevel: newLevel,
           maxSeats: newMaxSeats,
         },
+        tasks: applyTaskEvent(state.tasks, { type: 'upgrade_cafe', level: newLevel }),
         finance: {
           ...state.finance,
           gold: state.finance.gold - upgradeCost,
@@ -614,6 +921,34 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    // ==================== 任务 ====================
+    case 'CLAIM_TASK_REWARD': {
+      const { tasks, reward } = claimTaskReward(state.tasks, action.taskId);
+      if (!reward) {
+        return state;
+      }
+
+      return {
+        ...state,
+        tasks,
+        finance: {
+          ...state.finance,
+          gold: state.finance.gold + reward.gold,
+          dailyRevenue: state.finance.dailyRevenue + reward.gold,
+        },
+        reputation: Math.max(0, Math.min(100, state.reputation + reward.reputation)),
+        notifications: [
+          ...state.notifications,
+          {
+            id: `task_reward_${action.taskId}_${Date.now()}`,
+            type: 'success',
+            message: `任务奖励已领取：+${reward.gold} 金币，声望 +${reward.reputation}`,
+            timestamp: Date.now(),
+          },
+        ],
+      };
+    }
+
     // ==================== UI ====================
     case 'SET_ACTIVE_PANEL': {
       return {
@@ -636,6 +971,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'CLOSE_DAILY_SUMMARY': {
+      return {
+        ...state,
+        dailySummaryOpen: false,
+      };
+    }
+
     case 'ADD_NOTIFICATION': {
       return {
         ...state,
@@ -652,7 +994,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     // ==================== 存储 ====================
     case 'LOAD_GAME': {
-      return action.state;
+      return {
+        ...action.state,
+        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+        dailySummaryOpen: false,
+      };
     }
 
     case 'RESET_GAME': {

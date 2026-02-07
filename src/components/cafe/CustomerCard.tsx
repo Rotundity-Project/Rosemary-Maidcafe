@@ -67,7 +67,7 @@ export function CustomerCard({
           <div className={`
             absolute -bottom-1 left-1/2 -translate-x-1/2
             w-2 h-2 rounded-full
-            ${isPatienceCritical ? 'bg-red-500 animate-pulse' : 'bg-yellow-500'}
+            ${isPatienceCritical ? 'bg-red-500 motion-safe:animate-pulse' : 'bg-yellow-500'}
           `} />
         )}
       </div>
@@ -85,7 +85,7 @@ export function CustomerCard({
           : 'border-gray-100'
         }
         ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300' : ''}
-        ${isPatienceCritical ? 'animate-pulse' : ''}
+        ${isPatienceCritical ? 'motion-safe:animate-pulse' : ''}
       `}
     >
       {/* Customer Type Badge */}

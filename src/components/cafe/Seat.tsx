@@ -66,7 +66,7 @@ export function Seat({
               : 'border-gray-100'
             }
             ${onCustomerClick ? 'cursor-pointer hover:border-pink-300' : ''}
-            ${isPatienceCritical ? 'animate-pulse border-red-400' : ''}
+            ${isPatienceCritical ? 'motion-safe:animate-pulse border-red-400' : ''}
           `
         }
         ${isHighlighted ? 'ring-2 ring-pink-400 ring-offset-1' : ''}
@@ -166,7 +166,7 @@ export function SeatGrid({
   // Map customers to seats
   const customerBySeat = new Map<string, Customer>();
   customers.forEach(customer => {
-    if (customer.seatId && customer.status !== 'waiting_seat' && customer.status !== 'leaving') {
+    if (customer.seatId && customer.status !== 'waiting_seat') {
       customerBySeat.set(customer.seatId, customer);
     }
   });

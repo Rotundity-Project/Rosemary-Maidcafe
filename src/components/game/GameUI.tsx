@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useGame } from './GameProvider';
 import { useGameLoopControls } from './GameLoop';
 import { TopBar } from '@/components/ui/TopBar';
@@ -11,6 +11,7 @@ import { MaidPanel } from '@/components/panels/MaidPanel';
 import { MenuPanel } from '@/components/panels/MenuPanel';
 import { FacilityPanel } from '@/components/panels/FacilityPanel';
 import { FinancePanel } from '@/components/panels/FinancePanel';
+import { TaskPanel } from '@/components/panels/TaskPanel';
 import { AchievementPanel } from '@/components/panels/AchievementPanel';
 import { SettingsPanel } from '@/components/panels/SettingsPanel';
 import { HireMaidModal } from '@/components/modals/HireMaidModal';
@@ -28,27 +29,14 @@ import { hireCostByLevel } from '@/data/maidNames';
  */
 export function GameUI() {
   const { state, dispatch } = useGame();
-  const { startNewDay, isBusinessHours } = useGameLoopControls();
+  const { startNewDay } = useGameLoopControls();
   
   // Modal states
   const [showHireMaidModal, setShowHireMaidModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
-  const [showDailySummaryModal, setShowDailySummaryModal] = useState(false);
   const [showSaveLoadModal, setShowSaveLoadModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
   const [customersServedToday, setCustomersServedToday] = useState(0);
-  
-  // Track previous business hours state to detect end of day
-  const prevIsBusinessHoursRef = useRef(isBusinessHours);
-  
-  // Show daily summary modal when business hours end
-  useEffect(() => {
-    // Detect transition from business hours to non-business hours
-    if (prevIsBusinessHoursRef.current && !isBusinessHours) {
-      setShowDailySummaryModal(true);
-    }
-    prevIsBusinessHoursRef.current = isBusinessHours;
-  }, [isBusinessHours]);
 
   // Handle notification dismiss
   const handleDismissNotification = useCallback((notificationId: string) => {
@@ -61,13 +49,9 @@ export function GameUI() {
     if (state.finance.gold >= hireCost) {
       dispatch({ type: 'HIRE_MAID', maid });
       dispatch({ type: 'DEDUCT_GOLD', amount: hireCost });
-      dispatch({
-        type: 'UPDATE_STATISTICS',
-        updates: { maidsHired: state.statistics.maidsHired + 1 },
-      });
     }
     setShowHireMaidModal(false);
-  }, [dispatch, state.finance.gold, state.statistics.maidsHired]);
+  }, [dispatch, state.finance.gold]);
 
   // Handle load game
   const handleLoadGame = useCallback((loadedState: GameState) => {
@@ -83,7 +67,6 @@ export function GameUI() {
   const handleStartNewDay = useCallback(() => {
     startNewDay();
     setCustomersServedToday(0);
-    setShowDailySummaryModal(false);
   }, [startNewDay]);
 
   // Handle event modal close
@@ -105,6 +88,8 @@ export function GameUI() {
         return <FacilityPanel />;
       case 'finance':
         return <FinancePanel />;
+      case 'tasks':
+        return <TaskPanel />;
       case 'achievements':
         return <AchievementPanel />;
       case 'settings':
@@ -160,8 +145,8 @@ export function GameUI() {
       />
       
       <DailySummaryModal
-        isOpen={showDailySummaryModal}
-        onClose={() => setShowDailySummaryModal(false)}
+        isOpen={state.dailySummaryOpen}
+        onClose={() => dispatch({ type: 'CLOSE_DAILY_SUMMARY' })}
         onStartNewDay={handleStartNewDay}
         day={state.day}
         finance={state.finance}

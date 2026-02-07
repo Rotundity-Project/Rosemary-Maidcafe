@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { id: 'menu', label: '菜单', icon: '📋', shortLabel: '单' },
   { id: 'facility', label: '设施', icon: '🏠', shortLabel: '施' },
   { id: 'finance', label: '财务', icon: '💹', shortLabel: '财' },
+  { id: 'tasks', label: '任务', icon: '🎯', shortLabel: '任' },
   { id: 'achievements', label: '成就', icon: '🏆', shortLabel: '就' },
   { id: 'settings', label: '设置', icon: '⚙️', shortLabel: '设' },
 ];
