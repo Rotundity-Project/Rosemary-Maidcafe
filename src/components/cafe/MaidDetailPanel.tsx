@@ -206,7 +206,7 @@ function ProgressRow({
 // Compact Stat Badge
 function StatBadge({ 
   icon, 
-  label, 
+  label: _label, 
   value, 
   suffix = '',
   warning = false

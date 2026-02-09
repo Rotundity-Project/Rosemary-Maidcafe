@@ -22,7 +22,7 @@ export function DailySummaryModal({
   onStartNewDay,
   day,
   finance,
-  maids,
+  maids: _maids,
   statistics,
 }: DailySummaryModalProps) {
   const profit = finance.dailyRevenue - finance.dailyExpenses;

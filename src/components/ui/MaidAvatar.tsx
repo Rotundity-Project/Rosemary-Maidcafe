@@ -35,7 +35,7 @@ export function MaidAvatar({
   name,
   size = 'md',
   className = '',
-  showFallback = true,
+  showFallback: _showFallback = true,
 }: MaidAvatarProps) {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

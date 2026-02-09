@@ -231,7 +231,7 @@ interface StatItemProps {
   compact?: boolean;
 }
 
-function StatItem({ label, value, color, compact }: StatItemProps) {
+function StatItem({ label, value, color, compact: _compact }: StatItemProps) {
   const colorClasses = {
     pink: 'bg-pink-50',
     blue: 'bg-blue-50',
