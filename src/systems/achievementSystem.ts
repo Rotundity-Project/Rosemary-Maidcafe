@@ -1,4 +1,4 @@
-import { Achievement, GameStatistics, GameAction } from '@/types';
+import { Achievement, GameStatistics, GameAction, GameState } from '@/types';
 
 /**
  * 成就系统 - 负责成就检查、解锁和统计更新
@@ -9,11 +9,13 @@ import { Achievement, GameStatistics, GameAction } from '@/types';
  * 检查成就是否满足解锁条件
  * @param statistics 当前游戏统计数据
  * @param achievements 成就列表
+ * @param gameState 可选的完整游戏状态（用于检查更多条件）
  * @returns 新解锁的成就ID列表
  */
 export function checkAchievements(
   statistics: GameStatistics,
-  achievements: Achievement[]
+  achievements: Achievement[],
+  gameState?: GameState
 ): string[] {
   const newlyUnlocked: string[] = [];
 
@@ -45,6 +47,33 @@ export function checkAchievements(
         break;
       case 'maidsHired':
         currentValue = statistics.maidsHired;
+        break;
+      // 扩展的条件类型检查
+      case 'customerStreak':
+        // 需要从runtime获取连续服务数
+        currentValue = gameState?.runtime?.customerStreak ?? 0;
+        break;
+      case 'dailyRevenue':
+        // 单日收入
+        currentValue = gameState?.finance?.dailyRevenue ?? 0;
+        break;
+      case 'reputation':
+        // 声望
+        currentValue = gameState?.reputation ?? 0;
+        break;
+      case 'menuItemsUnlocked':
+        // 解锁的菜单项数量
+        currentValue = gameState?.menuItems?.filter(item => item.unlocked).length ?? 0;
+        break;
+      case 'cafeLevel':
+        // 咖啡厅等级
+        currentValue = gameState?.facility?.cafeLevel ?? 0;
+        break;
+      case 'maidMaxLevel':
+        // 女仆最高等级
+        if (gameState?.maids && gameState.maids.length > 0) {
+          currentValue = Math.max(...gameState.maids.map(m => m.level));
+        }
         break;
       default:
         continue;
@@ -165,11 +194,13 @@ export function recordTip(
  * 获取成就进度
  * @param achievement 成就
  * @param statistics 统计数据
+ * @param gameState 可选的完整游戏状态（用于检查更多条件）
  * @returns 进度百分比 (0-100)
  */
 export function getAchievementProgress(
   achievement: Achievement,
-  statistics: GameStatistics
+  statistics: GameStatistics,
+  gameState?: GameState
 ): number {
   if (achievement.unlocked) {
     return 100;
@@ -196,6 +227,27 @@ export function getAchievementProgress(
       break;
     case 'maidsHired':
       currentValue = statistics.maidsHired;
+      break;
+    // 扩展的条件类型检查
+    case 'customerStreak':
+      currentValue = gameState?.runtime?.customerStreak ?? 0;
+      break;
+    case 'dailyRevenue':
+      currentValue = gameState?.finance?.dailyRevenue ?? 0;
+      break;
+    case 'reputation':
+      currentValue = gameState?.reputation ?? 0;
+      break;
+    case 'menuItemsUnlocked':
+      currentValue = gameState?.menuItems?.filter(item => item.unlocked).length ?? 0;
+      break;
+    case 'cafeLevel':
+      currentValue = gameState?.facility?.cafeLevel ?? 0;
+      break;
+    case 'maidMaxLevel':
+      if (gameState?.maids && gameState.maids.length > 0) {
+        currentValue = Math.max(...gameState.maids.map(m => m.level));
+      }
       break;
     default:
       return 0;

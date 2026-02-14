@@ -6,7 +6,7 @@ import {
   Season,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { calculateEfficiency, startService, updateMaidStamina, updateServiceProgress as updateMaidServiceProgress, addExperience } from '@/systems/maidSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
@@ -116,7 +116,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       for (const maid of maidsById.values()) {
-        const updated = updateMaidStamina(maid, deltaMinutes);
+        const updatedStamina = updateMaidStamina(maid, deltaMinutes);
+        const updated = updateMaidMood(updatedStamina, deltaMinutes);
         const wasResting = maid.status.isResting;
         const wasWorking = maid.status.isWorking;
 
@@ -173,6 +174,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           reputation = Math.max(0, reputation - reputationPenalty);
           customersById.set(customer.id, leavingCustomer);
           nextRuntime.customerStatusTicks[customer.id] = 1;
+          // 顾客离开时重置连续服务计数
+          nextRuntime.customerStreak = 0;
           notifications.push({
             id: generateNotificationId('patience_timeout'),
             type: 'warning',
@@ -235,6 +238,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             runtime: {
               ...state.runtime,
               customersServedToday: (state.runtime.customersServedToday ?? 0) + 1,
+              customerStreak: (state.runtime.customerStreak ?? 0) + 1,
             },
           };
           tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
@@ -310,7 +314,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       const finalCustomers = [...customersById.values()];
 
-      const unlockedIds = checkAchievements(state.statistics, state.achievements);
+      const unlockedIds = checkAchievements(state.statistics, state.achievements, state);
       let achievements = state.achievements;
       let achievementRewardGold = 0;
       for (const id of unlockedIds) {
@@ -442,6 +446,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           customerSpawnMs: 0,
           customerStatusTicks: {},
           customersServedToday: 0,
+          customerStreak: 0,
         },
         customers: [], // 清空顾客
         tasks: refreshDailyTasks(state.tasks, newDay),
@@ -1026,7 +1031,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'LOAD_GAME': {
       return {
         ...action.state,
-        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0 },
+        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0, customerStreak: 0 },
         dailySummaryOpen: false,
       };
     }

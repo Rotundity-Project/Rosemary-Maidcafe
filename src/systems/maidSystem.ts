@@ -185,6 +185,33 @@ export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
 }
 
 /**
+ * 更新女仆心情
+ * 工作时心情可能下降，休息时心情恢复
+ * @param maid 女仆
+ * @param deltaMinutes 经过的时间（分钟）
+ * @returns 更新后的女仆
+ */
+export function updateMaidMood(maid: Maid, deltaMinutes: number): Maid {
+  let newMood = maid.mood;
+  
+  if (maid.status.isResting) {
+    // 休息时心情恢复较快，每分钟恢复1点
+    newMood = maid.mood + (deltaMinutes * 1);
+  } else if (maid.status.isWorking) {
+    // 工作时心情缓慢下降，每分钟下降0.2点
+    newMood = maid.mood - (deltaMinutes * 0.2);
+  } else {
+    // 空闲时心情略微恢复，每分钟恢复0.5点
+    newMood = maid.mood + (deltaMinutes * 0.5);
+  }
+  
+  return {
+    ...maid,
+    mood: clamp(newMood, 0, 100),
+  };
+}
+
+/**
  * 获取咖啡厅等级对应的最大女仆数
  * Requirements: 2.9
  */
@@ -217,16 +244,6 @@ export function assignRole(maid: Maid, role: MaidRole): Maid {
       currentTask: maid.status.currentTask,
       servingCustomerId: maid.status.servingCustomerId,
     },
-  };
-}
-
-/**
- * 更新女仆心情
- */
-export function updateMaidMood(maid: Maid, delta: number): Maid {
-  return {
-    ...maid,
-    mood: clamp(maid.mood + delta, 0, 100),
   };
 }
 

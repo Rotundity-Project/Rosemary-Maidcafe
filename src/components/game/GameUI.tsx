@@ -6,6 +6,7 @@ import { useGameLoopControls } from './GameLoop';
 import { TopBar } from '@/components/ui/TopBar';
 import { Navigation, NavigationBottom, NavigationSide } from '@/components/ui/Navigation';
 import { NotificationContainer } from '@/components/ui/Notification';
+import { KeyboardHints } from '@/components/ui/KeyboardHints';
 import { CafeView } from '@/components/cafe/CafeView';
 import { MaidPanel } from '@/components/panels/MaidPanel';
 import { MenuPanel } from '@/components/panels/MenuPanel';
@@ -160,6 +161,9 @@ export function GameUI() {
         onLoadGame={handleLoadGame}
         onNewGame={handleNewGame}
       />
+      
+      {/* Keyboard Hints */}
+      <KeyboardHints />
     </div>
   );
 }
