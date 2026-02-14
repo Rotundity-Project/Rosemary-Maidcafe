@@ -10,6 +10,7 @@ export const initialGameState: GameState = {
   day: 1,
   time: 540, // 9:00 AM (9 * 60 = 540分钟)
   season: 'spring',
+  weather: 'sunny',
   isPaused: true,
   isBusinessHours: true,
   gameSpeed: 1, // 默认速度1x

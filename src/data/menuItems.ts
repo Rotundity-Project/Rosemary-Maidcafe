@@ -518,4 +518,24 @@ export const defaultMenuItems: MenuItem[] = [
     season: 'winter',
     icon: '🎄',
   },
+  // New Drinks
+  { id: 'espresso', name: '意式浓缩', nameEn: 'Espresso', category: 'drinks', basePrice: 22, currentPrice: 22, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 20, season: null, icon: '☕' },
+  { id: 'americano', name: '美式咖啡', nameEn: 'Americano', category: 'drinks', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 35, season: null, icon: '☕' },
+  { id: 'flat-white', name: '馥芮白', nameEn: 'Flat White', category: 'drinks', basePrice: 42, currentPrice: 42, unlocked: false, unlockCost: 380, popularity: 0, prepTime: 50, season: null, icon: '☕' },
+  { id: 'fruit-tea', name: '水果茶', nameEn: 'Fruit Tea', category: 'drinks', basePrice: 35, currentPrice: 35, unlocked: false, unlockCost: 280, popularity: 0, prepTime: 40, season: 'summer', icon: '🍹' },
+  { id: 'lemonade', name: '柠檬水', nameEn: 'Lemonade', category: 'drinks', basePrice: 25, currentPrice: 25, unlocked: false, unlockCost: 160, popularity: 0, prepTime: 25, season: 'summer', icon: '🍋' },
+  // New Desserts
+  { id: 'waffle', name: '华夫饼', nameEn: 'Waffle', category: 'desserts', basePrice: 38, currentPrice: 38, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 35, season: null, icon: '🧇' },
+  { id: 'donut', name: '甜甜圈', nameEn: 'Donut', category: 'desserts', basePrice: 22, currentPrice: 22, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 15, season: null, icon: '🍩' },
+  { id: 'roll-cake', name: '瑞士卷', nameEn: 'Swiss Roll', category: 'desserts', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 260, popularity: 0, prepTime: 20, season: null, icon: '🍰' },
+  { id: 'mont-blanc', name: '蒙布朗', nameEn: 'Mont Blanc', category: 'desserts', basePrice: 55, currentPrice: 55, unlocked: false, unlockCost: 450, popularity: 0, prepTime: 30, season: 'autumn', icon: '🌰' },
+  // New Main
+  { id: 'ramen', name: '拉面', nameEn: 'Ramen', category: 'main', basePrice: 52, currentPrice: 52, unlocked: false, unlockCost: 380, popularity: 0, prepTime: 85, season: null, icon: '🍜' },
+  { id: 'udon', name: '乌冬面', nameEn: 'Udon', category: 'main', basePrice: 45, currentPrice: 45, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 70, season: null, icon: '🍜' },
+  { id: 'gyudon', name: '牛井饭', nameEn: 'Gyudon', category: 'main', basePrice: 48, currentPrice: 48, unlocked: false, unlockCost: 350, popularity: 0, prepTime: 75, season: null, icon: '🍚' },
+  { id: 'bento', name: '便当', nameEn: 'Bento', category: 'main', basePrice: 58, currentPrice: 58, unlocked: false, unlockCost: 420, popularity: 0, prepTime: 60, season: null, icon: '🍱' },
+  // New Special
+  { id: 'anniversary-set', name: '周年庆套餐', nameEn: 'Anniversary Set', category: 'special', basePrice: 198, currentPrice: 198, unlocked: false, unlockCost: 2000, popularity: 0, prepTime: 200, season: null, icon: '🎉' },
+  { id: 'white-day-set', name: '白色情人节套餐', nameEn: 'White Day Set', category: 'special', basePrice: 178, currentPrice: 178, unlocked: false, unlockCost: 1600, popularity: 0, prepTime: 190, season: 'spring', icon: '🤍' },
+  { id: 'hanami-set', name: '赏花套餐', nameEn: 'Hanami Set', category: 'special', basePrice: 138, currentPrice: 138, unlocked: false, unlockCost: 1200, popularity: 0, prepTime: 150, season: 'spring', icon: '🌸' },
 ];

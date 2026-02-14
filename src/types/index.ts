@@ -80,6 +80,8 @@ export type MenuCategory = 'drinks' | 'desserts' | 'main' | 'special';
 
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
+export type Weather = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -253,6 +255,7 @@ export interface GameState {
   day: number;
   time: number;           // 分钟，从0开始，540=9:00AM
   season: Season;
+  weather: Weather;
   isPaused: boolean;
   isBusinessHours: boolean;
   gameSpeed: GameSpeed;   // 游戏速度倍率

@@ -188,3 +188,15 @@ export function formatNumber(value: number): string {
 export function formatLevel(level: number): string {
   return `Lv.${level}`;
 }
+
+import { Weather } from '@/types';
+
+export function formatWeather(weather: Weather): string {
+  const names: Record<Weather, string> = { sunny: '晴天', cloudy: '多云', rainy: '雨天', snowy: '雪天' };
+  return names[weather];
+}
+
+export function getWeatherIcon(weather: Weather): string {
+  const icons: Record<Weather, string> = { sunny: '☀️', cloudy: '☁️', rainy: '🌧️', snowy: '❄️' };
+  return icons[weather];
+}
