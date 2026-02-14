@@ -93,18 +93,14 @@ function selectCustomerType(reputation: number): CustomerType {
  * 生成顾客
  * Requirements: 3.1, 3.2
  * @param reputation 咖啡厅声望 (0-100)
- * @param season 当前季节 (用于未来季节性顾客行为扩展)
+ * @param _season 当前季节 (用于未来季节性顾客行为扩展)
  */
-export function generateCustomer(reputation: number, season: Season): Customer {
+export function generateCustomer(reputation: number, _season: Season): Customer {
   const type = selectCustomerType(reputation);
   const patienceRange = customerPatienceRange[type];
   
   const firstName = randomChoice(customerFirstNames);
   const lastName = randomChoice(customerLastNames);
-  
-  // 季节可能影响顾客类型概率（未来扩展）
-  // 目前仅用于记录，确保参数被使用
-  const seasonalModifier = season ? 1 : 1;
   
   const customer: Customer = {
     id: generateId(),
@@ -116,7 +112,7 @@ export function generateCustomer(reputation: number, season: Season): Customer {
       totalPrice: 0,
       preparedItems: [],
     },
-    patience: randomInt(patienceRange.min, patienceRange.max) * seasonalModifier,
+    patience: randomInt(patienceRange.min, patienceRange.max),
     satisfaction: 50, // 初始满意度为中等
     status: 'waiting_seat',
     arrivalTime: Date.now(),

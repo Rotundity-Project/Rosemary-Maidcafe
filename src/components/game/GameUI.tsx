@@ -36,7 +36,6 @@ export function GameUI() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showSaveLoadModal, setShowSaveLoadModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
-  const [customersServedToday, setCustomersServedToday] = useState(0);
 
   // Handle notification dismiss
   const handleDismissNotification = useCallback((notificationId: string) => {
@@ -66,7 +65,6 @@ export function GameUI() {
   // Handle start new day from daily summary
   const handleStartNewDay = useCallback(() => {
     startNewDay();
-    setCustomersServedToday(0);
   }, [startNewDay]);
 
   // Handle event modal close
@@ -151,7 +149,7 @@ export function GameUI() {
         day={state.day}
         finance={state.finance}
         maids={state.maids}
-        customersServedToday={customersServedToday}
+        customersServedToday={state.runtime.customersServedToday}
         statistics={state.statistics}
       />
       

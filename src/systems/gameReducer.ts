@@ -6,7 +6,7 @@ import {
   Season,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { calculateEfficiency, startService, updateMaidStamina, updateServiceProgress as updateMaidServiceProgress } from '@/systems/maidSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateServiceProgress as updateMaidServiceProgress, addExperience } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
@@ -196,10 +196,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           const satisfaction = calculateSatisfaction(maid, customer, waitTime);
           const rewards = calculateRewards(customer, maid);
 
+          // 为女仆添加经验
+          const experiencedMaid = addExperience(maid, rewards.maidExperience);
           maidsById.set(maid.id, {
-            ...maid,
+            ...experiencedMaid,
             status: {
-              ...maid.status,
+              ...experiencedMaid.status,
               isWorking: false,
               currentTask: null,
               servingCustomerId: null,
@@ -221,6 +223,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
               totalCustomersServed: state.statistics.totalCustomersServed + 1,
               totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
               totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+            },
+            runtime: {
+              ...state.runtime,
+              customersServedToday: (state.runtime.customersServedToday ?? 0) + 1,
             },
           };
           tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
@@ -427,6 +433,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.runtime,
           customerSpawnMs: 0,
           customerStatusTicks: {},
+          customersServedToday: 0,
         },
         customers: [], // 清空顾客
         tasks: refreshDailyTasks(state.tasks, newDay),
@@ -978,10 +985,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'ADD_NOTIFICATION': {
+    case 'ADD_MAID_EXPERIENCE': {
+      const maid = state.maids.find(m => m.id === action.maidId);
+      if (!maid) {
+        return state;
+      }
+      const updatedMaid = addExperience(maid, action.experience);
       return {
         ...state,
-        notifications: [...state.notifications, action.notification],
+        maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
+      };
+    }
+
+    case 'ADD_NOTIFICATION': {
+      // 限制通知数量，最多保留50条
+      const maxNotifications = 50;
+      const newNotifications = [...state.notifications, action.notification].slice(-maxNotifications);
+      return {
+        ...state,
+        notifications: newNotifications,
       };
     }
 
@@ -996,7 +1018,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'LOAD_GAME': {
       return {
         ...action.state,
-        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0 },
         dailySummaryOpen: false,
       };
     }

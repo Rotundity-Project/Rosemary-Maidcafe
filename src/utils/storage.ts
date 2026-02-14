@@ -23,6 +23,7 @@ function prepareStateForSave(state: GameState): GameState {
     runtime: {
       customerSpawnMs: 0,
       customerStatusTicks: {},
+      customersServedToday: 0,
     },
     notifications: [],
     selectedMaidId: null,
@@ -34,7 +35,7 @@ function prepareStateForSave(state: GameState): GameState {
 function normalizeLoadedState(state: GameState): GameState {
   return {
     ...state,
-    runtime: state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+    runtime: state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0 },
     tasks: Array.isArray(state.tasks) ? state.tasks : initialGameState.tasks,
     notifications: Array.isArray(state.notifications) ? state.notifications : [],
     selectedMaidId: state.selectedMaidId ?? null,

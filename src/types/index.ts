@@ -248,6 +248,7 @@ export type GameSpeed = 0.5 | 1 | 2 | 4;
 export interface GameRuntime {
   customerSpawnMs: number;
   customerStatusTicks: Record<string, number>;
+  customersServedToday: number;  // 当日服务顾客数
 }
 
 export interface GameState {
@@ -308,6 +309,7 @@ export type GameAction =
   | { type: 'ASSIGN_ROLE'; maidId: string; role: MaidRole }
   | { type: 'UPDATE_MAID'; maidId: string; updates: Partial<Maid> }
   | { type: 'TOGGLE_MAID_REST'; maidId: string }  // 切换休息状态
+  | { type: 'ADD_MAID_EXPERIENCE'; maidId: string; experience: number }  // 增加女仆经验
   
   // 顾客管理
   | { type: 'SPAWN_CUSTOMER'; customer: Customer }
