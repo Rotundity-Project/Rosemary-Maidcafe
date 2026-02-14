@@ -72,8 +72,8 @@ function selectCustomerType(reputation: number): CustomerType {
   // 计算每种类型的实际权重
   const weights = types.map(type => {
     const config = customerTypeWeights[type];
-    // 声望越高，特殊顾客出现概率越高
-    return config.baseWeight + (reputation / 100) * config.reputationBonus * 100;
+    // 声望越高，特殊顾客出现概率越高 (reputationBonus 0-0.2 之间)
+    return config.baseWeight + (reputation / 100) * config.reputationBonus * config.baseWeight;
   });
   
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -222,15 +222,20 @@ export function generateOrder(customer: Customer, menuItems: MenuItem[], season:
  * @param waitTime 等待时间（分钟）
  */
 export function calculateSatisfaction(maid: Maid, customer: Customer, waitTime: number): number {
+  // 参数验证
+  if (!maid || !customer) {
+    return 50; // 默认中等满意度
+  }
+  
   // 基础满意度 50
   let satisfaction = 50;
   
   // 女仆魅力加成 (0-25分)
-  const charmBonus = (maid.stats.charm / 100) * 25;
+  const charmBonus = (clamp(maid.stats?.charm ?? 50, 0, 100) / 100) * 25;
   satisfaction += charmBonus;
   
   // 女仆技能加成 (0-25分)
-  const skillBonus = (maid.stats.skill / 100) * 25;
+  const skillBonus = (clamp(maid.stats?.skill ?? 50, 0, 100) / 100) * 25;
   satisfaction += skillBonus;
   
   // 等待时间惩罚
@@ -260,15 +265,17 @@ export function calculateSatisfaction(maid: Maid, customer: Customer, waitTime: 
   
   // 女仆体力影响
   // 体力低于50%时，满意度略微降低
-  if (maid.stamina < 50) {
-    const staminaPenalty = ((50 - maid.stamina) / 50) * 10;
+  const maidStamina = maid.stamina ?? 100;
+  if (maidStamina < 50) {
+    const staminaPenalty = ((50 - maidStamina) / 50) * 10;
     satisfaction -= staminaPenalty;
   }
   
   // 女仆心情影响
   // 心情低于50%时，满意度略微降低
-  if (maid.mood < 50) {
-    const moodPenalty = ((50 - maid.mood) / 50) * 10;
+  const maidMood = maid.mood ?? 100;
+  if (maidMood < 50) {
+    const moodPenalty = ((50 - maidMood) / 50) * 10;
     satisfaction -= moodPenalty;
   }
   
@@ -458,9 +465,9 @@ export function calculateRewards(customer: Customer, maid: Maid): {
     reputation = type === 'critic' ? -5 : type === 'vip' ? -3 : -1;
   }
   
-  // VIP顾客额外奖励
+  // VIP顾客额外奖励 (20%额外消费，最低1金币)
   if (type === 'vip' && satisfaction >= 70) {
-    gold = Math.round(gold * 1.2); // 20%额外消费
+    gold = Math.max(1, Math.round(gold * 1.2));
   }
   
   // 计算女仆经验

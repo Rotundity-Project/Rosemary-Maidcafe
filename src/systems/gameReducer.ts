@@ -42,6 +42,14 @@ function getAreaUnlockCost(area: Area): number {
 }
 
 /**
+ * 生成唯一ID (使用计数器避免高频时ID重复)
+ */
+let notificationIdCounter = 0;
+function generateNotificationId(prefix: string): string {
+  return `${prefix}_${Date.now()}_${++notificationIdCounter}`;
+}
+
+/**
  * 游戏状态 Reducer
  */
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -124,7 +132,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             },
           });
           notifications.push({
-            id: `maid_exhausted_${maid.id}_${Date.now()}`,
+            id: generateNotificationId('maid_exhausted'),
             type: 'warning',
             message: `${maid.name} 体力耗尽，已自动安排休息`,
             timestamp: Date.now(),
@@ -141,7 +149,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             },
           });
           notifications.push({
-            id: `maid_recovered_${maid.id}_${Date.now()}`,
+            id: generateNotificationId('maid_recovered'),
             type: 'success',
             message: `${maid.name} 体力恢复，已返回工作岗位`,
             timestamp: Date.now(),
@@ -166,7 +174,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           customersById.set(customer.id, leavingCustomer);
           nextRuntime.customerStatusTicks[customer.id] = 1;
           notifications.push({
-            id: `patience_timeout_${customer.id}_${Date.now()}`,
+            id: generateNotificationId('patience_timeout'),
             type: 'warning',
             message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
             timestamp: Date.now(),
@@ -313,7 +321,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         achievements = achievements.map(a => a.id === id ? { ...a, unlocked: true, unlockedDate: Date.now() } : a);
         achievementRewardGold += achievement.reward;
         notifications.push({
-          id: `achievement_${id}_${Date.now()}`,
+          id: generateNotificationId('achievement'),
           type: 'achievement',
           message: `🏆 成就解锁：${achievement.name}！奖励 ${achievement.reward} 金币`,
           timestamp: Date.now(),
@@ -947,7 +955,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         notifications: [
           ...state.notifications,
           {
-            id: `task_reward_${action.taskId}_${Date.now()}`,
+            id: generateNotificationId('task_reward'),
             type: 'success',
             message: `任务奖励已领取：+${reward.gold} 金币，声望 +${reward.reputation}`,
             timestamp: Date.now(),

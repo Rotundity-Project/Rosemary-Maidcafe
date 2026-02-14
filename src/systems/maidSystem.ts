@@ -86,11 +86,17 @@ export function generateRandomMaid(usedImages: string[] = []): Maid {
  * Requirements: 2.4
  */
 export function calculateEfficiency(maid: Maid): number {
+  // 参数验证
+  if (!maid || typeof maid.stats?.charm !== 'number' || typeof maid.stats?.skill !== 'number' || 
+      typeof maid.stats?.speed !== 'number' || typeof maid.mood !== 'number' || typeof maid.stamina !== 'number') {
+    return 0;
+  }
+  
   // 基础效率 = (魅力 + 技能 + 速度) / 3
-  const baseEfficiency = (maid.stats.charm + maid.stats.skill + maid.stats.speed) / 3;
+  const baseEfficiency = (clamp(maid.stats.charm, 0, 100) + clamp(maid.stats.skill, 0, 100) + clamp(maid.stats.speed, 0, 100)) / 3;
   
   // 心情影响效率 (心情100时为1.0，心情0时为0.5)
-  const moodModifier = 0.5 + (maid.mood / 200);
+  const moodModifier = 0.5 + (clamp(maid.mood, 0, 100) / 200);
   
   // 计算效率
   let efficiency = baseEfficiency * moodModifier;
