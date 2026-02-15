@@ -5,34 +5,7 @@ import {
   personalityStatBonuses,
 } from '@/data/maidNames';
 import { getRandomMaidImage } from '@/data/maidImages';
-
-/**
- * 生成唯一ID
- */
-function generateId(): string {
-  return `maid_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-}
-
-/**
- * 从数组中随机选择一个元素
- */
-function randomChoice<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-/**
- * 生成指定范围内的随机整数
- */
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * 将值限制在指定范围内
- */
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
+import { generateId, randomChoice, randomInt, clamp } from '@/utils';
 
 /**
  * 生成随机女仆

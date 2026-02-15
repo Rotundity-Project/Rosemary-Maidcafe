@@ -9,8 +9,9 @@ import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
 import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
-import { calculateDailyOperatingCost } from '@/systems/financeSystem';
+import { calculateDailyOperatingCost, processEndOfDay } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
+import { generateId } from '@/utils';
 
 /**
  * 计算下一个季节
@@ -42,11 +43,10 @@ function getAreaUnlockCost(area: Area): number {
 }
 
 /**
- * 生成唯一ID (使用计数器避免高频时ID重复)
+ * 生成通知ID (使用共享工具函数)
  */
-let notificationIdCounter = 0;
 function generateNotificationId(prefix: string): string {
-  return `${prefix}_${Date.now()}_${++notificationIdCounter}`;
+  return generateId(`notif_${prefix}`);
 }
 
 /**
