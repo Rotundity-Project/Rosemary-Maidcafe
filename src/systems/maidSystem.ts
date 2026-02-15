@@ -141,23 +141,41 @@ export function checkLevelUp(maid: Maid): Maid {
   return updatedMaid;
 }
 
+// 体力/心情恢复/消耗速率常量
+const STAMINA_RATES = {
+  REST_RECOVERY: 2,      // 休息时每分钟恢复2点
+  WORK_CONSUMPTION: 0.5, // 工作时每分钟消耗0.5点
+  IDLE_RECOVERY: 0.5,    // 空闲时每分钟恢复0.5点
+} as const;
+
+const MOOD_RATES = {
+  REST_RECOVERY: 1,      // 休息时每分钟恢复1点
+  WORK_CONSUMPTION: 0.2, // 工作时每分钟下降0.2点
+  IDLE_RECOVERY: 0.5,    // 空闲时每分钟恢复0.5点
+} as const;
+
 /**
  * 更新女仆体力
  * 工作时消耗体力，休息或空闲时恢复体力
  * Requirements: 2.8
  */
 export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
+  // 参数验证
+  if (!maid || typeof maid.stamina !== 'number' || !maid.status) {
+    return maid;
+  }
+
   let newStamina = maid.stamina;
   
   if (maid.status.isResting) {
     // 休息时每分钟恢复2点体力
-    newStamina = maid.stamina + (deltaMinutes * 2);
+    newStamina = maid.stamina + (deltaMinutes * STAMINA_RATES.REST_RECOVERY);
   } else if (maid.status.isWorking) {
     // 工作时每分钟消耗0.5点体力
-    newStamina = maid.stamina - (deltaMinutes * 0.5);
+    newStamina = maid.stamina - (deltaMinutes * STAMINA_RATES.WORK_CONSUMPTION);
   } else {
     // 空闲时每分钟恢复0.5点体力
-    newStamina = maid.stamina + (deltaMinutes * 0.5);
+    newStamina = maid.stamina + (deltaMinutes * STAMINA_RATES.IDLE_RECOVERY);
   }
   
   return {
@@ -174,17 +192,22 @@ export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
  * @returns 更新后的女仆
  */
 export function updateMaidMood(maid: Maid, deltaMinutes: number): Maid {
+  // 参数验证
+  if (!maid || typeof maid.mood !== 'number' || !maid.status) {
+    return maid;
+  }
+
   let newMood = maid.mood;
   
   if (maid.status.isResting) {
     // 休息时心情恢复较快，每分钟恢复1点
-    newMood = maid.mood + (deltaMinutes * 1);
+    newMood = maid.mood + (deltaMinutes * MOOD_RATES.REST_RECOVERY);
   } else if (maid.status.isWorking) {
     // 工作时心情缓慢下降，每分钟下降0.2点
-    newMood = maid.mood - (deltaMinutes * 0.2);
+    newMood = maid.mood - (deltaMinutes * MOOD_RATES.WORK_CONSUMPTION);
   } else {
     // 空闲时心情略微恢复，每分钟恢复0.5点
-    newMood = maid.mood + (deltaMinutes * 0.5);
+    newMood = maid.mood + (deltaMinutes * MOOD_RATES.IDLE_RECOVERY);
   }
   
   return {
@@ -205,18 +228,27 @@ export function getMaxMaids(cafeLevel: number): number {
 }
 
 /**
+ * 角色效率加成配置
+ * 不同角色在不同服务类型时有额外加成
+ */
+const ROLE_EFFICIENCY_BONUSES: Record<MaidRole, Record<string, number>> = {
+  greeter: { regular: 1.1, vip: 1.15 },
+  server: { regular: 1.1, group: 1.15 },
+  barista: { regular: 1.1, critic: 1.1 },
+  entertainer: { vip: 1.15, critic: 1.2 },
+};
+
+/**
  * 根据角色获取效率加成
  * 不同角色在不同服务类型时有额外加成
  */
 export function getRoleEfficiencyBonus(maid: Maid, customerType: string): number {
-  const roleBonuses: Record<string, Record<string, number>> = {
-    greeter: { regular: 1.1, vip: 1.15 },
-    server: { regular: 1.1, group: 1.15 },
-    barista: { regular: 1.1, critic: 1.1 },
-    entertainer: { vip: 1.15, critic: 1.2 },
-  };
+  // 参数验证
+  if (!maid || !maid.role) {
+    return 1.0;
+  }
   
-  const roleBonus = roleBonuses[maid.role]?.[customerType] ?? 1.0;
+  const roleBonus = ROLE_EFFICIENCY_BONUSES[maid.role]?.[customerType] ?? 1.0;
   return roleBonus;
 }
 
@@ -303,4 +335,22 @@ export function getServiceDuration(maid: Maid): number {
   
   // 基础时间: 100 / (速度 * 0.5 * 体力倍率)
   return 100 / (speed * 0.5 * staminaMultiplier);
+}
+
+/**
+ * 检查女仆是否处于疲劳状态（需要预警）
+ * 体力低于30%时返回true
+ */
+export function isMaidTired(maid: Maid): boolean {
+  return maid.stamina < 30 && !maid.status.isResting;
+}
+
+/**
+ * 获取女仆疲劳程度描述
+ * 返回: 'fine' | 'tired' | 'exhausted'
+ */
+export function getMaidFatigueLevel(maid: Maid): 'fine' | 'tired' | 'exhausted' {
+  if (maid.stamina <= 0) return 'exhausted';
+  if (maid.stamina < 30) return 'tired';
+  return 'fine';
 }

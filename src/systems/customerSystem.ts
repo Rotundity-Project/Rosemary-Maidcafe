@@ -428,6 +428,11 @@ export function calculateRewards(customer: Customer, maid: Maid): {
   reputation: number;
   maidExperience: number;
 } {
+  // 参数验证
+  if (!customer || !maid) {
+    return { gold: 0, tip: 0, reputation: 0, maidExperience: 0 };
+  }
+
   const { satisfaction, order, type } = customer;
   
   // 基础金币 = 订单总价

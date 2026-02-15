@@ -4,9 +4,10 @@ import {
   Area,
   DailyFinance,
   Season,
+  Customer,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus } from '@/systems/maidSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus, isMaidTired } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
@@ -14,6 +15,33 @@ import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/ta
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId, generateNotificationId } from '@/utils';
 
+
+// 状态更新辅助函数 - 减少代码重复
+/**
+ * 更新财务和统计数据的辅助函数
+ * 统一处理金币、收入、声望、统计数据更新
+ */
+function updateFinanceAndStatistics(
+  state: GameState,
+  rewards: { gold: number; tip: number; reputation: number },
+  additionalStats?: Partial<GameState['statistics']>
+): Pick<GameState, 'finance' | 'reputation' | 'statistics'> {
+  return {
+    finance: {
+      ...state.finance,
+      gold: state.finance.gold + rewards.gold + rewards.tip,
+      dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
+    },
+    reputation: Math.max(0, Math.min(100, state.reputation + rewards.reputation)),
+    statistics: {
+      ...state.statistics,
+      totalCustomersServed: state.statistics.totalCustomersServed + 1,
+      totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
+      totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+      ...additionalStats,
+    },
+  };
+}
 
 /**
  * 计算下一个季节
@@ -234,19 +262,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           customersById.set(customer.id, completeService({ ...customer, satisfaction }));
           nextRuntime.customerStatusTicks[customer.id] = 2;
 
+          // 使用辅助函数更新财务和统计数据
+          const financeAndStats = updateFinanceAndStatistics(state, rewards);
+
           state = {
             ...state,
-            finance: {
-              ...state.finance,
-              gold: state.finance.gold + rewards.gold + rewards.tip,
-              dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
-            },
-            statistics: {
-              ...state.statistics,
-              totalCustomersServed: state.statistics.totalCustomersServed + 1,
-              totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
-              totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
-            },
+            ...financeAndStats,
             runtime: {
               ...state.runtime,
               customersServedToday: (state.runtime.customersServedToday ?? 0) + 1,
@@ -255,7 +276,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           };
           tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
           tasks = applyTaskEvent(tasks, { type: 'earn_gold', amount: rewards.gold + rewards.tip });
-          reputation = Math.max(0, Math.min(100, reputation + rewards.reputation));
         } else {
           customersById.set(customer.id, updateCustomerServiceProgress(customer, newProgress));
         }
@@ -686,24 +706,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         satisfaction,
       });
 
+      // 使用辅助函数更新财务和统计数据
+      const financeAndStats = updateFinanceAndStatistics(
+        state,
+        rewards,
+        { perfectServicesCount: state.statistics.perfectServicesCount + (isPerfectService ? 1 : 0) }
+      );
+
       return {
         ...state,
         maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
         customers: state.customers.map(c => c.id === action.customerId ? updatedCustomer : c),
-        finance: {
-          ...state.finance,
-          gold: state.finance.gold + rewards.gold + rewards.tip,
-          dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
-        },
-        reputation: Math.max(0, Math.min(100, state.reputation + rewards.reputation)),
-        statistics: {
-          ...state.statistics,
-          totalCustomersServed: state.statistics.totalCustomersServed + 1,
-          totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
-          totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
-          // 追踪完美服务次数
-          perfectServicesCount: state.statistics.perfectServicesCount + (isPerfectService ? 1 : 0),
-        },
+        ...financeAndStats,
       };
     }
 
