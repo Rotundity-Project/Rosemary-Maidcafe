@@ -6,6 +6,7 @@ import { useGameLoopControls } from './GameLoop';
 import { TopBar } from '@/components/ui/TopBar';
 import { Navigation, NavigationBottom, NavigationSide } from '@/components/ui/Navigation';
 import { NotificationContainer } from '@/components/ui/Notification';
+import { KeyboardHints } from '@/components/ui/KeyboardHints';
 import { CafeView } from '@/components/cafe/CafeView';
 import { MaidPanel } from '@/components/panels/MaidPanel';
 import { MenuPanel } from '@/components/panels/MenuPanel';
@@ -36,7 +37,6 @@ export function GameUI() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showSaveLoadModal, setShowSaveLoadModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
-  const [customersServedToday, setCustomersServedToday] = useState(0);
 
   // Handle notification dismiss
   const handleDismissNotification = useCallback((notificationId: string) => {
@@ -46,12 +46,19 @@ export function GameUI() {
   // Handle hire maid
   const handleHireMaid = useCallback((maid: Maid) => {
     const hireCost = hireCostByLevel[0];
+    const maxMaids = state.facility.cafeLevel + 2;
+    
+    // 检查女仆数量是否已达上限
+    if (state.maids.length >= maxMaids) {
+      return;
+    }
+    
     if (state.finance.gold >= hireCost) {
       dispatch({ type: 'HIRE_MAID', maid });
       dispatch({ type: 'DEDUCT_GOLD', amount: hireCost });
     }
     setShowHireMaidModal(false);
-  }, [dispatch, state.finance.gold]);
+  }, [dispatch, state.finance.gold, state.maids.length, state.facility.cafeLevel]);
 
   // Handle load game
   const handleLoadGame = useCallback((loadedState: GameState) => {
@@ -66,7 +73,6 @@ export function GameUI() {
   // Handle start new day from daily summary
   const handleStartNewDay = useCallback(() => {
     startNewDay();
-    setCustomersServedToday(0);
   }, [startNewDay]);
 
   // Handle event modal close
@@ -151,7 +157,7 @@ export function GameUI() {
         day={state.day}
         finance={state.finance}
         maids={state.maids}
-        customersServedToday={customersServedToday}
+        customersServedToday={state.runtime.customersServedToday}
         statistics={state.statistics}
       />
       
@@ -162,6 +168,9 @@ export function GameUI() {
         onLoadGame={handleLoadGame}
         onNewGame={handleNewGame}
       />
+      
+      {/* Keyboard Hints */}
+      <KeyboardHints />
     </div>
   );
 }

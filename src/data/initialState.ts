@@ -10,6 +10,7 @@ export const initialGameState: GameState = {
   day: 1,
   time: 540, // 9:00 AM (9 * 60 = 540分钟)
   season: 'spring',
+  weather: 'sunny',
   isPaused: true,
   isBusinessHours: true,
   gameSpeed: 1, // 默认速度1x
@@ -17,6 +18,8 @@ export const initialGameState: GameState = {
   runtime: {
     customerSpawnMs: 0,
     customerStatusTicks: {},
+    customersServedToday: 0,
+    customerStreak: 0,  // 必需字段，提供默认值
   },
   
   // 核心数据 - 初始为空或默认值
@@ -86,9 +89,10 @@ export const GAME_CONSTANTS = {
   // 女仆相关
   MAX_MAID_LEVEL: 50,
   EXPERIENCE_PER_LEVEL: 100,
-  LOW_STAMINA_THRESHOLD: 20,
+  LOW_STAMINA_THRESHOLD: 30,  // 预警阈值从20提升到30
   LOW_STAMINA_EFFICIENCY: 0.5,
   STAMINA_RECOVERY_RATE: 5,  // 休息时每tick恢复的体力
+  STAMINA_WARNING_THRESHOLD: 30, // 新增：体力预警阈值
   
   // 顾客相关
   BASE_PATIENCE: 100,

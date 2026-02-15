@@ -210,4 +210,14 @@ export const defaultAchievements: Achievement[] = [
     reward: 1000,
     condition: { type: 'perfectServicesCount', target: 100 },
   },
+  // New Achievements
+  { id: 'streak-5', name: '服务小能手', description: '连续服务5位顾客', unlocked: false, unlockedDate: null, reward: 150, condition: { type: 'customerStreak', target: 5 } },
+  { id: 'streak-10', name: '服务达人', description: '连续服务10位顾客', unlocked: false, unlockedDate: null, reward: 300, condition: { type: 'customerStreak', target: 10 } },
+  { id: 'daily-revenue-500', name: '日收500', description: '单日收入达到500金币', unlocked: false, unlockedDate: null, reward: 200, condition: { type: 'dailyRevenue', target: 500 } },
+  { id: 'daily-revenue-1000', name: '日收千金', description: '单日收入达到1000金币', unlocked: false, unlockedDate: null, reward: 400, condition: { type: 'dailyRevenue', target: 1000 } },
+  { id: 'reputation-50', name: '小有名声', description: '声望达到50', unlocked: false, unlockedDate: null, reward: 200, condition: { type: 'reputation', target: 50 } },
+  { id: 'reputation-100', name: '名声大振', description: '声望达到100', unlocked: false, unlockedDate: null, reward: 400, condition: { type: 'reputation', target: 100 } },
+  { id: 'menu-unlock-20', name: '菜单达人', description: '解锁20种菜单', unlocked: false, unlockedDate: null, reward: 300, condition: { type: 'menuItemsUnlocked', target: 20 } },
+  { id: 'cafe-level-5', name: '咖啡厅升级', description: '咖啡厅等级达到5级', unlocked: false, unlockedDate: null, reward: 500, condition: { type: 'cafeLevel', target: 5 } },
+  { id: 'maid-level-5', name: '资深女仆', description: '培养女仆达到5级', unlocked: false, unlockedDate: null, reward: 300, condition: { type: 'maidMaxLevel', target: 5 } },
 ];

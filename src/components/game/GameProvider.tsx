@@ -46,14 +46,21 @@ export function GameProvider({ children }: GameProviderProps) {
     stateRef.current = state;
   }, [state]);
 
-  // 自动保存逻辑 - 定时节流保存
+  // 自动保存逻辑 - 定时节流保存，带错误处理
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
     }
 
     const intervalId = window.setInterval(() => {
-      saveGame(stateRef.current);
+      try {
+        const result = saveGame(stateRef.current);
+        if (!result.success) {
+          console.warn('[GameProvider] Auto-save failed:', result.error);
+        }
+      } catch (error) {
+        console.error('[GameProvider] Auto-save error:', error);
+      }
     }, 10000);
 
     return () => window.clearInterval(intervalId);
@@ -61,8 +68,15 @@ export function GameProvider({ children }: GameProviderProps) {
 
   // 页面关闭前保存
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      saveGame(stateRef.current);
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      try {
+        const result = saveGame(stateRef.current);
+        if (!result.success) {
+          console.warn('[GameProvider] Save on exit failed:', result.error);
+        }
+      } catch (error) {
+        console.error('[GameProvider] Save on exit error:', error);
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

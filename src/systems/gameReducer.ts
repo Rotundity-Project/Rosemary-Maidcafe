@@ -4,13 +4,44 @@ import {
   Area,
   DailyFinance,
   Season,
+  Customer,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { calculateEfficiency, startService, updateMaidStamina, updateServiceProgress as updateMaidServiceProgress } from '@/systems/maidSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus, isMaidTired } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
+import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
+import { generateId, generateNotificationId } from '@/utils';
+
+
+// 状态更新辅助函数 - 减少代码重复
+/**
+ * 更新财务和统计数据的辅助函数
+ * 统一处理金币、收入、声望、统计数据更新
+ */
+function updateFinanceAndStatistics(
+  state: GameState,
+  rewards: { gold: number; tip: number; reputation: number },
+  additionalStats?: Partial<GameState['statistics']>
+): Pick<GameState, 'finance' | 'reputation' | 'statistics'> {
+  return {
+    finance: {
+      ...state.finance,
+      gold: state.finance.gold + rewards.gold + rewards.tip,
+      dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
+    },
+    reputation: Math.max(0, Math.min(100, state.reputation + rewards.reputation)),
+    statistics: {
+      ...state.statistics,
+      totalCustomersServed: state.statistics.totalCustomersServed + 1,
+      totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
+      totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+      ...additionalStats,
+    },
+  };
+}
 
 /**
  * 计算下一个季节
@@ -22,23 +53,69 @@ function getNextSeason(currentSeason: Season): Season {
 }
 
 /**
- * 计算咖啡厅升级成本
+ * 处理顾客离开事件 - 抽取为独立函数
+ * 消除代码重复，统一的顾客离开处理逻辑
  */
-function getCafeUpgradeCost(currentLevel: number): number {
-  return 500 * Math.pow(2, currentLevel - 1);
+function handleCustomerLeave(
+  customer: ReturnType<typeof updatePatience>,
+  customersById: Map<string, any>,
+  nextRuntime: any,
+  notifications: any[],
+  currentReputation: number
+): { customersById: Map<string, any>; reputation: number; notifications: any[] } {
+  const { customer: leavingCustomer, reputationPenalty } = handlePatienceTimeout(customer);
+  const newReputation = Math.max(0, currentReputation - reputationPenalty);
+  
+  customersById.set(customer.id, leavingCustomer);
+  nextRuntime.customerStatusTicks[customer.id] = 1;
+  nextRuntime.customerStreak = 0;
+  
+  notifications.push({
+    id: generateNotificationId('patience_timeout'),
+    type: 'warning',
+    message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
+    timestamp: Date.now(),
+  });
+  
+  return { customersById, reputation: newReputation, notifications };
 }
 
 /**
- * 计算区域解锁成本
+ * 处理顾客状态转换的辅助函数
+ * 统一处理顾客从 eating -> paying -> leaving -> 删除 的流程
  */
-function getAreaUnlockCost(area: Area): number {
-  const costs: Record<Area, number> = {
-    main: 0,
-    outdoor: 2000,
-    vip_room: 5000,
-    stage: 10000,
-  };
-  return costs[area];
+function processCustomerStatusTicks(
+  customer: any,
+  customersById: Map<string, any>,
+  nextRuntime: any
+): boolean {
+  if (customer.status === 'eating' || customer.status === 'paying' || customer.status === 'leaving') {
+    const defaultTicks = customer.status === 'eating' ? 2 : 1;
+    const current = nextRuntime.customerStatusTicks[customer.id] ?? defaultTicks;
+    const remaining = current - 1;
+
+    if (remaining > 0) {
+      nextRuntime.customerStatusTicks[customer.id] = remaining;
+      return false;
+    }
+
+    if (customer.status === 'eating') {
+      customersById.set(customer.id, { ...customer, status: 'paying' });
+      nextRuntime.customerStatusTicks[customer.id] = 1;
+      return false;
+    }
+
+    if (customer.status === 'paying') {
+      customersById.set(customer.id, { ...customer, status: 'leaving' });
+      nextRuntime.customerStatusTicks[customer.id] = 1;
+      return false;
+    }
+
+    customersById.delete(customer.id);
+    delete nextRuntime.customerStatusTicks[customer.id];
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -69,46 +146,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       const baseCustomers = state.customers;
 
-      const notifications = [...state.notifications];
+      let notifications = [...state.notifications];
       let reputation = state.reputation;
       let tasks = state.tasks;
 
       const maidsById = new Map(state.maids.map(m => [m.id, m] as const));
-      const customersById = new Map(baseCustomers.map(c => [c.id, c] as const));
+      let customersById = new Map(baseCustomers.map(c => [c.id, c] as const));
 
       for (const customer of [...customersById.values()]) {
-        if (customer.status === 'eating' || customer.status === 'paying' || customer.status === 'leaving') {
-          const defaultTicks = customer.status === 'eating' ? 2 : 1;
-          const current = nextRuntime.customerStatusTicks[customer.id] ?? defaultTicks;
-          const remaining = current - 1;
-
-          if (remaining > 0) {
-            nextRuntime.customerStatusTicks[customer.id] = remaining;
-            continue;
-          }
-
-          if (customer.status === 'eating') {
-            customersById.set(customer.id, { ...customer, status: 'paying' });
-            nextRuntime.customerStatusTicks[customer.id] = 1;
-            continue;
-          }
-
-          if (customer.status === 'paying') {
-            customersById.set(customer.id, { ...customer, status: 'leaving' });
-            nextRuntime.customerStatusTicks[customer.id] = 1;
-            continue;
-          }
-
-          customersById.delete(customer.id);
-          delete nextRuntime.customerStatusTicks[customer.id];
+        // 使用辅助函数处理顾客状态转换
+        const processed = processCustomerStatusTicks(customer, customersById, nextRuntime);
+        if (processed) {
           continue;
         }
-
         delete nextRuntime.customerStatusTicks[customer.id];
       }
 
       for (const maid of maidsById.values()) {
-        const updated = updateMaidStamina(maid, deltaMinutes);
+        const updatedStamina = updateMaidStamina(maid, deltaMinutes);
+        const updated = updateMaidMood(updatedStamina, deltaMinutes);
         const wasResting = maid.status.isResting;
         const wasWorking = maid.status.isWorking;
 
@@ -124,7 +180,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             },
           });
           notifications.push({
-            id: `maid_exhausted_${maid.id}_${Date.now()}`,
+            id: generateNotificationId('maid_exhausted'),
             type: 'warning',
             message: `${maid.name} 体力耗尽，已自动安排休息`,
             timestamp: Date.now(),
@@ -141,7 +197,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             },
           });
           notifications.push({
-            id: `maid_recovered_${maid.id}_${Date.now()}`,
+            id: generateNotificationId('maid_recovered'),
             type: 'success',
             message: `${maid.name} 体力恢复，已返回工作岗位`,
             timestamp: Date.now(),
@@ -161,16 +217,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         const updatedCustomer = updatePatience(customer, deltaMinutes);
         if (shouldCustomerLeave(updatedCustomer)) {
-          const { customer: leavingCustomer, reputationPenalty } = handlePatienceTimeout(updatedCustomer);
-          reputation = Math.max(0, reputation - reputationPenalty);
-          customersById.set(customer.id, leavingCustomer);
-          nextRuntime.customerStatusTicks[customer.id] = 1;
-          notifications.push({
-            id: `patience_timeout_${customer.id}_${Date.now()}`,
-            type: 'warning',
-            message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
-            timestamp: Date.now(),
-          });
+          // 使用辅助函数处理顾客离开事件
+          const result = handleCustomerLeave(updatedCustomer, customersById, nextRuntime, notifications, reputation);
+          customersById = result.customersById;
+          reputation = result.reputation;
+          notifications = result.notifications;
           continue;
         }
 
@@ -179,12 +230,29 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      const customersListForProgress = [...customersById.values()];
-      for (const customer of customersListForProgress) {
-        if (customer.status !== 'waiting_order' || customer.serviceProgress === undefined || !customer.servingMaidId) {
-          continue;
+      // 优化：单次遍历处理多个状态，减少数组复制
+      // 分离不同状态的顾客以避免重复遍历
+      const waitingCustomers: any[] = [];
+      const activeCustomers: any[] = [];
+      const customersWithService: any[] = [];
+      
+      for (const customer of customersById.values()) {
+        // 处理服务进度更新
+        if (customer.status === 'waiting_order' && customer.serviceProgress !== undefined && customer.servingMaidId) {
+          customersWithService.push(customer);
         }
+        // 收集等待服务的顾客
+        if (customer.status === 'seated') {
+          waitingCustomers.push(customer);
+        }
+        // 收集有座位的顾客
+        if (customer.status !== 'waiting_seat' && customer.seatId) {
+          activeCustomers.push(customer);
+        }
+      }
 
+      // 处理服务进度
+      for (const customer of customersWithService) {
         const maid = maidsById.get(customer.servingMaidId);
         if (!maid) {
           continue;
@@ -196,10 +264,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           const satisfaction = calculateSatisfaction(maid, customer, waitTime);
           const rewards = calculateRewards(customer, maid);
 
+          // 为女仆添加经验
+          const experiencedMaid = addExperience(maid, rewards.maidExperience);
           maidsById.set(maid.id, {
-            ...maid,
+            ...experiencedMaid,
             status: {
-              ...maid.status,
+              ...experiencedMaid.status,
               isWorking: false,
               currentTask: null,
               servingCustomerId: null,
@@ -209,29 +279,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           customersById.set(customer.id, completeService({ ...customer, satisfaction }));
           nextRuntime.customerStatusTicks[customer.id] = 2;
 
+          // 使用辅助函数更新财务和统计数据
+          const financeAndStats = updateFinanceAndStatistics(state, rewards);
+
           state = {
             ...state,
-            finance: {
-              ...state.finance,
-              gold: state.finance.gold + rewards.gold + rewards.tip,
-              dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
-            },
-            statistics: {
-              ...state.statistics,
-              totalCustomersServed: state.statistics.totalCustomersServed + 1,
-              totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
-              totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+            ...financeAndStats,
+            runtime: {
+              ...state.runtime,
+              customersServedToday: (state.runtime.customersServedToday ?? 0) + 1,
+              customerStreak: (state.runtime.customerStreak ?? 0) + 1,
             },
           };
           tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
           tasks = applyTaskEvent(tasks, { type: 'earn_gold', amount: rewards.gold + rewards.tip });
-          reputation = Math.max(0, Math.min(100, reputation + rewards.reputation));
         } else {
           customersById.set(customer.id, updateCustomerServiceProgress(customer, newProgress));
         }
       }
-
-      const waitingCustomers = [...customersById.values()].filter(c => c.status === 'seated');
       if (waitingCustomers.length > 0) {
         const availableMaids = [...maidsById.values()].filter(
           m =>
@@ -255,7 +320,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      const activeCustomers = [...customersById.values()].filter(c => c.status !== 'waiting_seat' && c.seatId);
+      // 使用之前遍历时收集的 activeCustomers 数据
       const occupiedSeats = new Set(activeCustomers.map(c => c.seatId));
 
       const spawnIntervalMs = getSpawnInterval(reputation, state.facility.cafeLevel);
@@ -296,7 +361,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       const finalCustomers = [...customersById.values()];
 
-      const unlockedIds = checkAchievements(state.statistics, state.achievements);
+      const unlockedIds = checkAchievements(state.statistics, state.achievements, state);
       let achievements = state.achievements;
       let achievementRewardGold = 0;
       for (const id of unlockedIds) {
@@ -307,7 +372,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         achievements = achievements.map(a => a.id === id ? { ...a, unlocked: true, unlockedDate: Date.now() } : a);
         achievementRewardGold += achievement.reward;
         notifications.push({
-          id: `achievement_${id}_${Date.now()}`,
+          id: generateNotificationId('achievement'),
           type: 'achievement',
           message: `🏆 成就解锁：${achievement.name}！奖励 ${achievement.reward} 金币`,
           timestamp: Date.now(),
@@ -427,6 +492,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.runtime,
           customerSpawnMs: 0,
           customerStatusTicks: {},
+          customersServedToday: 0,
+          customerStreak: 0,
         },
         customers: [], // 清空顾客
         tasks: refreshDailyTasks(state.tasks, newDay),
@@ -443,6 +510,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         maids: state.maids.map(maid => ({
           ...maid,
           stamina: 100, // 新的一天体力恢复满
+          mood: 100, // 新的一天心情恢复满
           status: {
             isWorking: false,
             isResting: false,
@@ -633,6 +701,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // 计算奖励
       const rewards = calculateRewards(customer, maid);
       
+      // 判断是否为完美服务 (满意度 >= 90)
+      const isPerfectService = satisfaction >= 90;
+      
       // 更新女仆状态(释放)
       const updatedMaid = {
         ...maid,
@@ -650,22 +721,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         satisfaction,
       });
 
+      // 使用辅助函数更新财务和统计数据
+      const financeAndStats = updateFinanceAndStatistics(
+        state,
+        rewards,
+        { perfectServicesCount: state.statistics.perfectServicesCount + (isPerfectService ? 1 : 0) }
+      );
+
       return {
         ...state,
         maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
         customers: state.customers.map(c => c.id === action.customerId ? updatedCustomer : c),
-        finance: {
-          ...state.finance,
-          gold: state.finance.gold + rewards.gold + rewards.tip,
-          dailyRevenue: state.finance.dailyRevenue + rewards.gold + rewards.tip,
-        },
-        reputation: Math.max(0, Math.min(100, state.reputation + rewards.reputation)),
-        statistics: {
-          ...state.statistics,
-          totalCustomersServed: state.statistics.totalCustomersServed + 1,
-          totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
-          totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
-        },
+        ...financeAndStats,
       };
     }
 
@@ -940,7 +1007,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         notifications: [
           ...state.notifications,
           {
-            id: `task_reward_${action.taskId}_${Date.now()}`,
+            id: generateNotificationId('task_reward'),
             type: 'success',
             message: `任务奖励已领取：+${reward.gold} 金币，声望 +${reward.reputation}`,
             timestamp: Date.now(),
@@ -978,10 +1045,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'ADD_NOTIFICATION': {
+    case 'ADD_MAID_EXPERIENCE': {
+      const maid = state.maids.find(m => m.id === action.maidId);
+      if (!maid) {
+        return state;
+      }
+      const updatedMaid = addExperience(maid, action.experience);
       return {
         ...state,
-        notifications: [...state.notifications, action.notification],
+        maids: state.maids.map(m => m.id === action.maidId ? updatedMaid : m),
+      };
+    }
+
+    case 'ADD_NOTIFICATION': {
+      // 限制通知数量，最多保留50条
+      const maxNotifications = 50;
+      const newNotifications = [...state.notifications, action.notification].slice(-maxNotifications);
+      return {
+        ...state,
+        notifications: newNotifications,
       };
     }
 
@@ -996,7 +1078,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'LOAD_GAME': {
       return {
         ...action.state,
-        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0, customerStreak: 0 },
         dailySummaryOpen: false,
       };
     }

@@ -227,3 +227,22 @@ export const seasonalEvents: Record<Season, GameEvent[]> = {
 };
 
 export const allEvents = [...positiveEvents, ...negativeEvents];
+
+// New Events
+export const newPositiveEvents = [
+  { id: 'food-blogger', type: 'positive' as const, name: '美食博主推荐', description: '一位美食博主推荐了咖啡厅的菜品！', effects: [{ target: 'customers', modifier: 1.4, isMultiplier: true }, { target: 'reputation', modifier: 6, isMultiplier: false }], duration: 420, icon: '📸' },
+  { id: 'social-media-viral', type: 'positive' as const, name: '网红打卡', description: '咖啡厅成为网红打卡地点！', effects: [{ target: 'customers', modifier: 1.8, isMultiplier: true }, { target: 'reputation', modifier: 12, isMultiplier: false }], duration: 540, icon: '🔥' },
+  { id: 'award-winning', type: 'positive' as const, name: '获奖认证', description: '咖啡厅获得了年度最佳咖啡厅奖！', effects: [{ target: 'reputation', modifier: 20, isMultiplier: false }, { target: 'customers', modifier: 1.6, isMultiplier: true }], duration: 720, icon: '🏆' },
+];
+
+export const newNegativeEvents = [
+  { id: 'competitor-opening', type: 'negative' as const, name: '竞争对手开业', description: '附近开了一家新的咖啡厅，分流了部分顾客。', effects: [{ target: 'customers', modifier: 0.7, isMultiplier: true }, { target: 'revenue', modifier: 0.8, isMultiplier: true }], duration: 540, icon: '🏪' },
+  { id: 'staff-absence', type: 'negative' as const, name: '员工请假', description: '一名女仆突然请假，人手不足！', effects: [{ target: 'satisfaction', modifier: 0.75, isMultiplier: true }, { target: 'customers', modifier: 0.8, isMultiplier: true }], duration: 420, icon: '😴' },
+];
+
+export const newSeasonalEvents = {
+  spring: [{ id: 'white-day', type: 'seasonal' as const, name: '白色情人节', description: '白色情人节，单身顾客也会来消费！', effects: [{ target: 'customers', modifier: 1.5, isMultiplier: true }, { target: 'revenue', modifier: 1.25, isMultiplier: true }], duration: 480, icon: '🤍' }],
+  summer: [{ id: 'firework-display', type: 'seasonal' as const, name: '烟花大会', description: '烟花大会期间，顾客络绎不绝！', effects: [{ target: 'customers', modifier: 1.7, isMultiplier: true }, { target: 'revenue', modifier: 1.4, isMultiplier: true }], duration: 480, icon: '🎇' }],
+  autumn: [{ id: 'halloween', type: 'seasonal' as const, name: '万圣节', description: '万圣节到了，变装派对！', effects: [{ target: 'customers', modifier: 1.5, isMultiplier: true }, { target: 'revenue', modifier: 1.3, isMultiplier: true }], duration: 480, icon: '🎃' }],
+  winter: [{ id: 'snow-festival', type: 'seasonal' as const, name: '冰雪节', description: '冰雪节到了，咖啡厅推出热饮特惠！', effects: [{ target: 'customers', modifier: 1.3, isMultiplier: true }, { target: 'satisfaction', modifier: 1.15, isMultiplier: true }], duration: 540, icon: '❄️' }],
+};

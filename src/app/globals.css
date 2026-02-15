@@ -2090,3 +2090,33 @@ body {
     gap: 0.5rem;
   }
 }
+
+/* ============================================
+   Dark Mode - 暗色主题
+   ============================================ */
+.dark-mode {
+  --background: #1A1A2E;
+  --foreground: #E2E8F0;
+  --background-secondary: #16213E;
+  --primary-50: #2D1F24;
+  --primary-100: #3D2830;
+  --primary-500: #B87080;
+  --primary-600: #D08094;
+  --gold-light: #3D3520;
+  --gold: #D4940A;
+  --reputation-light: #2D1F3D;
+  --reputation: #8B5CF6;
+  --surface: #16213E;
+  --surface-hover: #1F2B47;
+  --surface-active: #283552;
+  --border: #2D3A52;
+  --border-light: #243048;
+  --text-primary: #E2E8F0;
+  --text-secondary: #A0AEC0;
+  --text-muted: #718096;
+}
+
+.dark-mode body {
+  background-color: var(--background);
+  color: var(--foreground);
+}

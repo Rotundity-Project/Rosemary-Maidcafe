@@ -80,6 +80,8 @@ export type MenuCategory = 'drinks' | 'desserts' | 'main' | 'special';
 
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
+export type Weather = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -246,6 +248,8 @@ export type GameSpeed = 0.5 | 1 | 2 | 4;
 export interface GameRuntime {
   customerSpawnMs: number;
   customerStatusTicks: Record<string, number>;
+  customersServedToday: number;  // 当日服务顾客数
+  customerStreak: number;        // 连续服务顾客数（用于成就）
 }
 
 export interface GameState {
@@ -253,6 +257,7 @@ export interface GameState {
   day: number;
   time: number;           // 分钟，从0开始，540=9:00AM
   season: Season;
+  weather: Weather;
   isPaused: boolean;
   isBusinessHours: boolean;
   gameSpeed: GameSpeed;   // 游戏速度倍率
@@ -305,6 +310,7 @@ export type GameAction =
   | { type: 'ASSIGN_ROLE'; maidId: string; role: MaidRole }
   | { type: 'UPDATE_MAID'; maidId: string; updates: Partial<Maid> }
   | { type: 'TOGGLE_MAID_REST'; maidId: string }  // 切换休息状态
+  | { type: 'ADD_MAID_EXPERIENCE'; maidId: string; experience: number }  // 增加女仆经验
   
   // 顾客管理
   | { type: 'SPAWN_CUSTOMER'; customer: Customer }

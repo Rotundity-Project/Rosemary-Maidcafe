@@ -6,7 +6,7 @@ import { useAudio } from '@/components/game/AudioProvider';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { deleteSave, exportSave, downloadSave } from '@/utils/storage';
+import { deleteSave, exportSave, downloadSave, saveGame } from '@/utils/storage';
 
 export function SettingsPanel() {
   const { state, dispatch } = useGame();
@@ -25,6 +25,53 @@ export function SettingsPanel() {
           id: `notif_${Date.now()}`,
           type: 'success',
           message: '存档已导出',
+          timestamp: Date.now(),
+        },
+      });
+    }
+  };
+
+  // 手动保存
+  const handleManualSave = () => {
+    const result = saveGame(state);
+    dispatch({
+      type: 'ADD_NOTIFICATION',
+      notification: {
+        id: `notif_${Date.now()}`,
+        type: result.success ? 'success' : 'error',
+        message: result.success ? '游戏已保存' : `保存失败: ${result.error}`,
+        timestamp: Date.now(),
+      },
+    });
+  };
+
+  // 复制游戏信息到剪贴板
+  const handleCopyGameInfo = async () => {
+    const info = `🌿 迷迭香咖啡厅 - 第 ${state.day} 天
+💰 金币: ${state.finance.gold.toLocaleString()}
+⭐ 声望: ${state.reputation}
+👩‍⚕️ 女仆: ${state.maids.length}人
+📊 服务顾客: ${state.statistics.totalCustomersServed}
+💕 总收入: ${state.statistics.totalRevenue.toLocaleString()}`;
+
+    try {
+      await navigator.clipboard.writeText(info);
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        notification: {
+          id: `notif_${Date.now()}`,
+          type: 'success',
+          message: '游戏信息已复制到剪贴板',
+          timestamp: Date.now(),
+        },
+      });
+    } catch {
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        notification: {
+          id: `notif_${Date.now()}`,
+          type: 'error',
+          message: '复制失败',
           timestamp: Date.now(),
         },
       });
@@ -205,10 +252,26 @@ export function SettingsPanel() {
           <div className="space-y-3">
             <Button
               variant="secondary"
+              onClick={handleManualSave}
+              className="w-full"
+            >
+              💾 手动保存
+            </Button>
+            
+            <Button
+              variant="secondary"
               onClick={handleExportSave}
               className="w-full"
             >
               📤 导出存档
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={handleCopyGameInfo}
+              className="w-full"
+            >
+              📋 复制游戏信息
             </Button>
             
             <Button

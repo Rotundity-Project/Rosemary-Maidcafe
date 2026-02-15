@@ -1,38 +1,11 @@
-import { Maid, MaidStats, MaidPersonality, MaidRole } from '@/types';
+import { Maid, MaidStats, MaidPersonality, MaidRole, CustomerType } from '@/types';
 import {
   maidFirstNames,
   maidLastNames,
   personalityStatBonuses,
 } from '@/data/maidNames';
 import { getRandomMaidImage } from '@/data/maidImages';
-
-/**
- * 生成唯一ID
- */
-function generateId(): string {
-  return `maid_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-}
-
-/**
- * 从数组中随机选择一个元素
- */
-function randomChoice<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-/**
- * 生成指定范围内的随机整数
- */
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * 将值限制在指定范围内
- */
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
+import { generateId, randomChoice, randomInt, clamp } from '@/utils';
 
 /**
  * 生成随机女仆
@@ -83,24 +56,39 @@ export function generateRandomMaid(usedImages: string[] = []): Maid {
 /**
  * 计算女仆服务效率
  * 基于女仆的属性计算，体力低于20%时效率减半
+ * 优化：减少中间计算步骤，提升性能
+ * 优化：加入角色效率加成 (getRoleEfficiencyBonus)
  * Requirements: 2.4
  */
-export function calculateEfficiency(maid: Maid): number {
-  // 基础效率 = (魅力 + 技能 + 速度) / 3
-  const baseEfficiency = (maid.stats.charm + maid.stats.skill + maid.stats.speed) / 3;
-  
-  // 心情影响效率 (心情100时为1.0，心情0时为0.5)
-  const moodModifier = 0.5 + (maid.mood / 200);
-  
-  // 计算效率
-  let efficiency = baseEfficiency * moodModifier;
-  
-  // 体力低于20%时效率减半 (Requirements: 2.4)
-  if (maid.stamina < 20) {
-    efficiency *= 0.5;
+export function calculateEfficiency(maid: Maid, customerType: string = 'regular'): number {
+  // 参数验证
+  if (!maid || typeof maid.stats?.charm !== 'number' || typeof maid.stats?.skill !== 'number' || 
+      typeof maid.stats?.speed !== 'number' || typeof maid.mood !== 'number' || typeof maid.stamina !== 'number') {
+    return 0;
   }
   
-  return clamp(efficiency, 0, 100);
+  // 提取属性值并归一化 (0-100范围)
+  const charm = Math.max(0, Math.min(100, maid.stats.charm));
+  const skill = Math.max(0, Math.min(100, maid.stats.skill));
+  const speed = Math.max(0, Math.min(100, maid.stats.speed));
+  const mood = Math.max(0, Math.min(100, maid.mood));
+  
+  // 基础效率 = (魅力 + 技能 + 速度) / 3
+  const baseEfficiency = (charm + skill + speed) / 3;
+  
+  // 心情影响效率 (心情100时为1.0，心情0时为0.5)
+  const moodModifier = 0.5 + (mood / 200);
+  
+  // 计算效率并应用体力惩罚
+  // 体力低于20%时效率减半 (Requirements: 2.4)
+  const staminaMultiplier = maid.stamina < 20 ? 0.5 : 1.0;
+  
+  // 角色效率加成 (不同角色对不同顾客类型有额外加成)
+  const roleBonus = getRoleEfficiencyBonus(maid, customerType);
+  
+  const efficiency = baseEfficiency * moodModifier * staminaMultiplier * roleBonus;
+  
+  return Math.max(0, Math.min(100, efficiency));
 }
 
 /**
@@ -153,28 +141,78 @@ export function checkLevelUp(maid: Maid): Maid {
   return updatedMaid;
 }
 
+// 体力/心情恢复/消耗速率常量
+const STAMINA_RATES = {
+  REST_RECOVERY: 2,      // 休息时每分钟恢复2点
+  WORK_CONSUMPTION: 0.5, // 工作时每分钟消耗0.5点
+  IDLE_RECOVERY: 0.5,    // 空闲时每分钟恢复0.5点
+} as const;
+
+const MOOD_RATES = {
+  REST_RECOVERY: 1,      // 休息时每分钟恢复1点
+  WORK_CONSUMPTION: 0.2, // 工作时每分钟下降0.2点
+  IDLE_RECOVERY: 0.5,    // 空闲时每分钟恢复0.5点
+} as const;
+
 /**
  * 更新女仆体力
  * 工作时消耗体力，休息或空闲时恢复体力
  * Requirements: 2.8
  */
 export function updateMaidStamina(maid: Maid, deltaMinutes: number): Maid {
+  // 参数验证
+  if (!maid || typeof maid.stamina !== 'number' || !maid.status) {
+    return maid;
+  }
+
   let newStamina = maid.stamina;
   
   if (maid.status.isResting) {
     // 休息时每分钟恢复2点体力
-    newStamina = maid.stamina + (deltaMinutes * 2);
+    newStamina = maid.stamina + (deltaMinutes * STAMINA_RATES.REST_RECOVERY);
   } else if (maid.status.isWorking) {
     // 工作时每分钟消耗0.5点体力
-    newStamina = maid.stamina - (deltaMinutes * 0.5);
+    newStamina = maid.stamina - (deltaMinutes * STAMINA_RATES.WORK_CONSUMPTION);
   } else {
     // 空闲时每分钟恢复0.5点体力
-    newStamina = maid.stamina + (deltaMinutes * 0.5);
+    newStamina = maid.stamina + (deltaMinutes * STAMINA_RATES.IDLE_RECOVERY);
   }
   
   return {
     ...maid,
     stamina: clamp(newStamina, 0, 100),
+  };
+}
+
+/**
+ * 更新女仆心情
+ * 工作时心情可能下降，休息时心情恢复
+ * @param maid 女仆
+ * @param deltaMinutes 经过的时间（分钟）
+ * @returns 更新后的女仆
+ */
+export function updateMaidMood(maid: Maid, deltaMinutes: number): Maid {
+  // 参数验证
+  if (!maid || typeof maid.mood !== 'number' || !maid.status) {
+    return maid;
+  }
+
+  let newMood = maid.mood;
+  
+  if (maid.status.isResting) {
+    // 休息时心情恢复较快，每分钟恢复1点
+    newMood = maid.mood + (deltaMinutes * MOOD_RATES.REST_RECOVERY);
+  } else if (maid.status.isWorking) {
+    // 工作时心情缓慢下降，每分钟下降0.2点
+    newMood = maid.mood - (deltaMinutes * MOOD_RATES.WORK_CONSUMPTION);
+  } else {
+    // 空闲时心情略微恢复，每分钟恢复0.5点
+    newMood = maid.mood + (deltaMinutes * MOOD_RATES.IDLE_RECOVERY);
+  }
+  
+  return {
+    ...maid,
+    mood: clamp(newMood, 0, 100),
   };
 }
 
@@ -187,6 +225,40 @@ export function getMaxMaids(cafeLevel: number): number {
   // 每升一级增加1名
   // 等级10: 11名女仆
   return Math.min(2 + (cafeLevel - 1), 11);
+}
+
+/**
+ * 角色效率加成配置
+ * 不同角色在不同服务类型时有额外加成
+ * 使用预设的客户类型确保类型安全
+ */
+const ROLE_EFFICIENCY_BONUSES: Record<MaidRole, Record<CustomerType, number>> = {
+  greeter: { regular: 1.1, vip: 1.15, critic: 1.0, group: 1.0 },
+  server: { regular: 1.1, vip: 1.0, critic: 1.0, group: 1.15 },
+  barista: { regular: 1.1, vip: 1.0, critic: 1.1, group: 1.0 },
+  entertainer: { regular: 1.0, vip: 1.15, critic: 1.2, group: 1.0 },
+};
+
+// 预设客户类型列表
+const CUSTOMER_TYPES: CustomerType[] = ['regular', 'vip', 'critic', 'group'];
+
+/**
+ * 根据角色获取效率加成
+ * 不同角色在不同服务类型时有额外加成
+ */
+export function getRoleEfficiencyBonus(maid: Maid, customerType: string): number {
+  // 参数验证
+  if (!maid || !maid.role) {
+    return 1.0;
+  }
+  
+  // 类型安全转换：将字符串转换为 CustomerType
+  const validCustomerType = CUSTOMER_TYPES.includes(customerType as CustomerType) 
+    ? customerType as CustomerType 
+    : 'regular';
+  
+  const roleBonuses = ROLE_EFFICIENCY_BONUSES[maid.role];
+  return roleBonuses?.[validCustomerType] ?? 1.0;
 }
 
 /**
@@ -211,16 +283,6 @@ export function assignRole(maid: Maid, role: MaidRole): Maid {
       currentTask: maid.status.currentTask,
       servingCustomerId: maid.status.servingCustomerId,
     },
-  };
-}
-
-/**
- * 更新女仆心情
- */
-export function updateMaidMood(maid: Maid, delta: number): Maid {
-  return {
-    ...maid,
-    mood: clamp(maid.mood + delta, 0, 100),
   };
 }
 
@@ -282,4 +344,22 @@ export function getServiceDuration(maid: Maid): number {
   
   // 基础时间: 100 / (速度 * 0.5 * 体力倍率)
   return 100 / (speed * 0.5 * staminaMultiplier);
+}
+
+/**
+ * 检查女仆是否处于疲劳状态（需要预警）
+ * 体力低于30%时返回true
+ */
+export function isMaidTired(maid: Maid): boolean {
+  return maid.stamina < 30 && !maid.status.isResting;
+}
+
+/**
+ * 获取女仆疲劳程度描述
+ * 返回: 'fine' | 'tired' | 'exhausted'
+ */
+export function getMaidFatigueLevel(maid: Maid): 'fine' | 'tired' | 'exhausted' {
+  if (maid.stamina <= 0) return 'exhausted';
+  if (maid.stamina < 30) return 'tired';
+  return 'fine';
 }

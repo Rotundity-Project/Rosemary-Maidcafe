@@ -18,11 +18,15 @@ export interface StorageResult<T> {
 }
 
 function prepareStateForSave(state: GameState): GameState {
+  // 保留 runtime 中的 customerStreak（用于连续服务成就）
+  const currentStreak = state.runtime?.customerStreak ?? 0;
   return {
     ...state,
     runtime: {
       customerSpawnMs: 0,
       customerStatusTicks: {},
+      customersServedToday: 0,
+      customerStreak: currentStreak,
     },
     notifications: [],
     selectedMaidId: null,
@@ -34,7 +38,14 @@ function prepareStateForSave(state: GameState): GameState {
 function normalizeLoadedState(state: GameState): GameState {
   return {
     ...state,
-    runtime: state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {} },
+    runtime: state.runtime 
+      ? { 
+          customerSpawnMs: state.runtime.customerSpawnMs ?? 0, 
+          customerStatusTicks: state.runtime.customerStatusTicks ?? {}, 
+          customersServedToday: state.runtime.customersServedToday ?? 0,
+          customerStreak: state.runtime.customerStreak ?? 0,
+        }
+      : { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0, customerStreak: 0 },
     tasks: Array.isArray(state.tasks) ? state.tasks : initialGameState.tasks,
     notifications: Array.isArray(state.notifications) ? state.notifications : [],
     selectedMaidId: state.selectedMaidId ?? null,
@@ -119,7 +130,7 @@ function validateGameState(state: GameState): boolean {
     'day', 'time', 'season', 'isPaused', 'isBusinessHours',
     'maids', 'customers', 'menuItems', 'facility', 'finance',
     'activeEvents', 'eventHistory', 'achievements', 'statistics',
-    'reputation', 'activePanel', 'notifications'
+    'reputation', 'activePanel', 'notifications', 'gameSpeed', 'tasks'
   ];
 
   for (const field of requiredFields) {
@@ -132,6 +143,7 @@ function validateGameState(state: GameState): boolean {
   if (typeof state.day !== 'number' || state.day < 1) return false;
   if (typeof state.time !== 'number' || state.time < 0) return false;
   if (typeof state.reputation !== 'number') return false;
+  if (typeof state.gameSpeed !== 'number') return false;
 
   // 检查数组字段
   if (!Array.isArray(state.maids)) return false;
@@ -139,11 +151,13 @@ function validateGameState(state: GameState): boolean {
   if (!Array.isArray(state.menuItems)) return false;
   if (!Array.isArray(state.achievements)) return false;
   if (!Array.isArray(state.notifications)) return false;
+  if (!Array.isArray(state.tasks)) return false;
 
   // 检查对象字段
   if (!state.facility || typeof state.facility !== 'object') return false;
   if (!state.finance || typeof state.finance !== 'object') return false;
   if (!state.statistics || typeof state.statistics !== 'object') return false;
+  if (!state.runtime || typeof state.runtime !== 'object') return false;
 
   return true;
 }

@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { useGame } from '@/components/game/GameProvider';
-import { formatGameTime, formatGold, formatDay, getSeasonIcon, formatSeason } from '@/utils/formatters';
+import { formatGameTime, formatGold, formatDay, getSeasonIcon, formatSeason, getWeatherIcon, formatWeather } from '@/utils/formatters';
 import { Button } from './Button';
 import { SpeedControl } from './SpeedControl';
 
 export function TopBar() {
   const { state, dispatch } = useGame();
-  const { day, time, season, isPaused, finance, reputation, gameSpeed } = state;
+  const { day, time, season, weather, isPaused, finance, reputation, gameSpeed } = state;
 
   const handleTogglePause = () => {
     dispatch({ type: 'TOGGLE_PAUSE' });
@@ -33,6 +33,11 @@ export function TopBar() {
             <span className="flex items-center gap-1">
               {getSeasonIcon(season)}
               <span className="hidden md:inline">{formatSeason(season)}</span>
+            </span>
+            <span className="text-pink-200">|</span>
+            <span className="flex items-center gap-1">
+              {getWeatherIcon(weather)}
+              <span className="hidden md:inline">{formatWeather(weather)}</span>
             </span>
           </div>
         </div>
