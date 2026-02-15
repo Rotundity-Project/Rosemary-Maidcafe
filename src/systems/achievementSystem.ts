@@ -1,9 +1,57 @@
-import { Achievement, GameStatistics, GameAction, GameState } from '@/types';
+import { Achievement, GameStatistics, GameAction, GameState, AchievementCondition } from '@/types';
 
 /**
  * 成就系统 - 负责成就检查、解锁和统计更新
  * Requirements: 10.1, 10.2, 10.3, 10.4
  */
+
+/**
+ * 从游戏状态中获取成就条件的当前值
+ * @param condition 成就条件
+ * @param statistics 统计数据
+ * @param gameState 可选的完整游戏状态
+ * @returns 当前值
+ */
+function getConditionValue(
+  condition: AchievementCondition,
+  statistics: GameStatistics,
+  gameState?: GameState
+): number {
+  const { type, target } = condition;
+
+  switch (type) {
+    case 'totalCustomersServed':
+      return statistics.totalCustomersServed;
+    case 'totalRevenue':
+      return statistics.totalRevenue;
+    case 'totalDaysPlayed':
+      return statistics.totalDaysPlayed;
+    case 'totalTipsEarned':
+      return statistics.totalTipsEarned;
+    case 'perfectServicesCount':
+      return statistics.perfectServicesCount;
+    case 'maidsHired':
+      return statistics.maidsHired;
+    // 扩展的条件类型检查
+    case 'customerStreak':
+      return gameState?.runtime?.customerStreak ?? 0;
+    case 'dailyRevenue':
+      return gameState?.finance?.dailyRevenue ?? 0;
+    case 'reputation':
+      return gameState?.reputation ?? 0;
+    case 'menuItemsUnlocked':
+      return gameState?.menuItems?.filter(item => item.unlocked).length ?? 0;
+    case 'cafeLevel':
+      return gameState?.facility?.cafeLevel ?? 0;
+    case 'maidMaxLevel':
+      if (gameState?.maids && gameState.maids.length > 0) {
+        return Math.max(...gameState.maids.map(m => m.level));
+      }
+      return 0;
+    default:
+      return 0;
+  }
+}
 
 /**
  * 检查成就是否满足解锁条件
@@ -25,62 +73,10 @@ export function checkAchievements(
       continue;
     }
 
-    const { type, target } = achievement.condition;
-    let currentValue = 0;
-
-    // 根据条件类型获取当前值
-    switch (type) {
-      case 'totalCustomersServed':
-        currentValue = statistics.totalCustomersServed;
-        break;
-      case 'totalRevenue':
-        currentValue = statistics.totalRevenue;
-        break;
-      case 'totalDaysPlayed':
-        currentValue = statistics.totalDaysPlayed;
-        break;
-      case 'totalTipsEarned':
-        currentValue = statistics.totalTipsEarned;
-        break;
-      case 'perfectServicesCount':
-        currentValue = statistics.perfectServicesCount;
-        break;
-      case 'maidsHired':
-        currentValue = statistics.maidsHired;
-        break;
-      // 扩展的条件类型检查
-      case 'customerStreak':
-        // 需要从runtime获取连续服务数
-        currentValue = gameState?.runtime?.customerStreak ?? 0;
-        break;
-      case 'dailyRevenue':
-        // 单日收入
-        currentValue = gameState?.finance?.dailyRevenue ?? 0;
-        break;
-      case 'reputation':
-        // 声望
-        currentValue = gameState?.reputation ?? 0;
-        break;
-      case 'menuItemsUnlocked':
-        // 解锁的菜单项数量
-        currentValue = gameState?.menuItems?.filter(item => item.unlocked).length ?? 0;
-        break;
-      case 'cafeLevel':
-        // 咖啡厅等级
-        currentValue = gameState?.facility?.cafeLevel ?? 0;
-        break;
-      case 'maidMaxLevel':
-        // 女仆最高等级
-        if (gameState?.maids && gameState.maids.length > 0) {
-          currentValue = Math.max(...gameState.maids.map(m => m.level));
-        }
-        break;
-      default:
-        continue;
-    }
+    const currentValue = getConditionValue(achievement.condition, statistics, gameState);
 
     // 检查是否达到目标
-    if (currentValue >= target) {
+    if (currentValue >= achievement.condition.target) {
       newlyUnlocked.push(achievement.id);
     }
   }
@@ -206,54 +202,8 @@ export function getAchievementProgress(
     return 100;
   }
 
-  const { type, target } = achievement.condition;
-  let currentValue = 0;
-
-  switch (type) {
-    case 'totalCustomersServed':
-      currentValue = statistics.totalCustomersServed;
-      break;
-    case 'totalRevenue':
-      currentValue = statistics.totalRevenue;
-      break;
-    case 'totalDaysPlayed':
-      currentValue = statistics.totalDaysPlayed;
-      break;
-    case 'totalTipsEarned':
-      currentValue = statistics.totalTipsEarned;
-      break;
-    case 'perfectServicesCount':
-      currentValue = statistics.perfectServicesCount;
-      break;
-    case 'maidsHired':
-      currentValue = statistics.maidsHired;
-      break;
-    // 扩展的条件类型检查
-    case 'customerStreak':
-      currentValue = gameState?.runtime?.customerStreak ?? 0;
-      break;
-    case 'dailyRevenue':
-      currentValue = gameState?.finance?.dailyRevenue ?? 0;
-      break;
-    case 'reputation':
-      currentValue = gameState?.reputation ?? 0;
-      break;
-    case 'menuItemsUnlocked':
-      currentValue = gameState?.menuItems?.filter(item => item.unlocked).length ?? 0;
-      break;
-    case 'cafeLevel':
-      currentValue = gameState?.facility?.cafeLevel ?? 0;
-      break;
-    case 'maidMaxLevel':
-      if (gameState?.maids && gameState.maids.length > 0) {
-        currentValue = Math.max(...gameState.maids.map(m => m.level));
-      }
-      break;
-    default:
-      return 0;
-  }
-
-  return Math.min(100, Math.floor((currentValue / target) * 100));
+  const currentValue = getConditionValue(achievement.condition, statistics, gameState);
+  return Math.min(100, Math.floor((currentValue / achievement.condition.target) * 100));
 }
 
 /**
