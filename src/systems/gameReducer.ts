@@ -6,13 +6,27 @@ import {
   Season,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
-import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience } from '@/systems/maidSystem';
+import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost, processEndOfDay } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId } from '@/utils';
+
+/**
+ * 开发环境日志开关
+ */
+const DEBUG_MODE = process.env.NODE_ENV === 'development';
+
+/**
+ * 开发环境日志函数
+ */
+function debugLog(...args: unknown[]): void {
+  if (DEBUG_MODE) {
+    console.log('[GameReducer]', ...args);
+  }
+}
 
 /**
  * 计算下一个季节
@@ -28,6 +42,33 @@ function getNextSeason(currentSeason: Season): Season {
  */
 function generateNotificationId(prefix: string): string {
   return generateId(`notif_${prefix}`);
+}
+
+/**
+ * 处理顾客离开事件 - 抽取为独立函数
+ */
+function handleCustomerLeave(
+  customer: ReturnType<typeof updatePatience>,
+  customersById: Map<string, any>,
+  nextRuntime: any,
+  notifications: any[],
+  currentReputation: number
+): { customersById: Map<string, any>; reputation: number; notifications: any[] } {
+  const { customer: leavingCustomer, reputationPenalty } = handlePatienceTimeout(customer);
+  const newReputation = Math.max(0, currentReputation - reputationPenalty);
+  
+  customersById.set(customer.id, leavingCustomer);
+  nextRuntime.customerStatusTicks[customer.id] = 1;
+  nextRuntime.customerStreak = 0;
+  
+  notifications.push({
+    id: generateNotificationId('patience_timeout'),
+    type: 'warning',
+    message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
+    timestamp: Date.now(),
+  });
+  
+  return { customersById, reputation: newReputation, notifications };
 }
 
 /**

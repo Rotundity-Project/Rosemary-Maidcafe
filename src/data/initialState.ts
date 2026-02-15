@@ -19,7 +19,7 @@ export const initialGameState: GameState = {
     customerSpawnMs: 0,
     customerStatusTicks: {},
     customersServedToday: 0,
-    customerStreak: 0,
+    customerStreak: 0,  // 必需字段，提供默认值
   },
   
   // 核心数据 - 初始为空或默认值

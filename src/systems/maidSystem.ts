@@ -65,11 +65,17 @@ export function calculateEfficiency(maid: Maid): number {
     return 0;
   }
   
+  // 提取并缓存 clamp 后的值，避免重复计算
+  const charm = clamp(maid.stats.charm, 0, 100);
+  const skill = clamp(maid.stats.skill, 0, 100);
+  const speed = clamp(maid.stats.speed, 0, 100);
+  const mood = clamp(maid.mood, 0, 100);
+  
   // 基础效率 = (魅力 + 技能 + 速度) / 3
-  const baseEfficiency = (clamp(maid.stats.charm, 0, 100) + clamp(maid.stats.skill, 0, 100) + clamp(maid.stats.speed, 0, 100)) / 3;
+  const baseEfficiency = (charm + skill + speed) / 3;
   
   // 心情影响效率 (心情100时为1.0，心情0时为0.5)
-  const moodModifier = 0.5 + (clamp(maid.mood, 0, 100) / 200);
+  const moodModifier = 0.5 + (mood / 200);
   
   // 计算效率
   let efficiency = baseEfficiency * moodModifier;
@@ -193,6 +199,22 @@ export function getMaxMaids(cafeLevel: number): number {
   // 每升一级增加1名
   // 等级10: 11名女仆
   return Math.min(2 + (cafeLevel - 1), 11);
+}
+
+/**
+ * 根据角色获取效率加成
+ * 不同角色在不同服务类型时有额外加成
+ */
+export function getRoleEfficiencyBonus(maid: Maid, customerType: string): number {
+  const roleBonuses: Record<string, Record<string, number>> = {
+    greeter: { regular: 1.1, vip: 1.15 },
+    server: { regular: 1.1, group: 1.15 },
+    barista: { regular: 1.1, critic: 1.1 },
+    entertainer: { vip: 1.15, critic: 1.2 },
+  };
+  
+  const roleBonus = roleBonuses[maid.role]?.[customerType] ?? 1.0;
+  return roleBonus;
 }
 
 /**

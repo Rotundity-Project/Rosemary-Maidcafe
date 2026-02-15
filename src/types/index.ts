@@ -249,7 +249,7 @@ export interface GameRuntime {
   customerSpawnMs: number;
   customerStatusTicks: Record<string, number>;
   customersServedToday: number;  // 当日服务顾客数
-  customerStreak?: number;       // 连续服务顾客数（用于成就）
+  customerStreak: number;        // 连续服务顾客数（用于成就）
 }
 
 export interface GameState {
