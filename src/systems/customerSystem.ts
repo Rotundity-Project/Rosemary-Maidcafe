@@ -50,11 +50,14 @@ const SPAWN_INTERVAL_CONFIG = {
 function selectCustomerType(reputation: number): CustomerType {
   const types: CustomerType[] = ['regular', 'vip', 'critic', 'group'];
   
+  // 边界处理：确保 reputation 在有效范围内
+  const clampedReputation = Math.max(0, Math.min(100, reputation));
+  
   // 计算每种类型的实际权重
   const weights = types.map(type => {
     const config = customerTypeWeights[type];
     // 声望越高，特殊顾客出现概率越高 (reputationBonus 0-0.2 之间)
-    return config.baseWeight + (reputation / 100) * config.reputationBonus * config.baseWeight;
+    return config.baseWeight + (clampedReputation / 100) * config.reputationBonus * config.baseWeight;
   });
   
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -164,7 +167,12 @@ export function generateOrder(customer: Customer, menuItems: MenuItem[], season:
   const selectedItems: OrderItem[] = [];
   const selectedIds = new Set<string>();
   
-  for (let i = 0; i < orderCount; i++) {
+  // 安全限制：最多尝试选择订单数量 * 2 次，避免无限循环
+  const maxAttempts = orderCount * 2;
+  let attempts = 0;
+  
+  while (selectedItems.length < orderCount && attempts < maxAttempts) {
+    attempts++;
     let random = Math.random() * totalWeight;
     
     for (const wi of weightedItems) {

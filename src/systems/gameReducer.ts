@@ -230,12 +230,29 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      const customersListForProgress = [...customersById.values()];
-      for (const customer of customersListForProgress) {
-        if (customer.status !== 'waiting_order' || customer.serviceProgress === undefined || !customer.servingMaidId) {
-          continue;
+      // 优化：单次遍历处理多个状态，减少数组复制
+      // 分离不同状态的顾客以避免重复遍历
+      const waitingCustomers: any[] = [];
+      const activeCustomers: any[] = [];
+      const customersWithService: any[] = [];
+      
+      for (const customer of customersById.values()) {
+        // 处理服务进度更新
+        if (customer.status === 'waiting_order' && customer.serviceProgress !== undefined && customer.servingMaidId) {
+          customersWithService.push(customer);
         }
+        // 收集等待服务的顾客
+        if (customer.status === 'seated') {
+          waitingCustomers.push(customer);
+        }
+        // 收集有座位的顾客
+        if (customer.status !== 'waiting_seat' && customer.seatId) {
+          activeCustomers.push(customer);
+        }
+      }
 
+      // 处理服务进度
+      for (const customer of customersWithService) {
         const maid = maidsById.get(customer.servingMaidId);
         if (!maid) {
           continue;
@@ -280,8 +297,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           customersById.set(customer.id, updateCustomerServiceProgress(customer, newProgress));
         }
       }
-
-      const waitingCustomers = [...customersById.values()].filter(c => c.status === 'seated');
       if (waitingCustomers.length > 0) {
         const availableMaids = [...maidsById.values()].filter(
           m =>
@@ -305,7 +320,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      const activeCustomers = [...customersById.values()].filter(c => c.status !== 'waiting_seat' && c.seatId);
+      // 使用之前遍历时收集的 activeCustomers 数据
       const occupiedSeats = new Set(activeCustomers.map(c => c.seatId));
 
       const spawnIntervalMs = getSpawnInterval(reputation, state.facility.cafeLevel);

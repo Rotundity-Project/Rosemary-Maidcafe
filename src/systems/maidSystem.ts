@@ -1,4 +1,4 @@
-import { Maid, MaidStats, MaidPersonality, MaidRole } from '@/types';
+import { Maid, MaidStats, MaidPersonality, MaidRole, CustomerType } from '@/types';
 import {
   maidFirstNames,
   maidLastNames,
@@ -230,13 +230,17 @@ export function getMaxMaids(cafeLevel: number): number {
 /**
  * 角色效率加成配置
  * 不同角色在不同服务类型时有额外加成
+ * 使用预设的客户类型确保类型安全
  */
-const ROLE_EFFICIENCY_BONUSES: Record<MaidRole, Record<string, number>> = {
-  greeter: { regular: 1.1, vip: 1.15 },
-  server: { regular: 1.1, group: 1.15 },
-  barista: { regular: 1.1, critic: 1.1 },
-  entertainer: { vip: 1.15, critic: 1.2 },
+const ROLE_EFFICIENCY_BONUSES: Record<MaidRole, Record<CustomerType, number>> = {
+  greeter: { regular: 1.1, vip: 1.15, critic: 1.0, group: 1.0 },
+  server: { regular: 1.1, vip: 1.0, critic: 1.0, group: 1.15 },
+  barista: { regular: 1.1, vip: 1.0, critic: 1.1, group: 1.0 },
+  entertainer: { regular: 1.0, vip: 1.15, critic: 1.2, group: 1.0 },
 };
+
+// 预设客户类型列表
+const CUSTOMER_TYPES: CustomerType[] = ['regular', 'vip', 'critic', 'group'];
 
 /**
  * 根据角色获取效率加成
@@ -248,8 +252,13 @@ export function getRoleEfficiencyBonus(maid: Maid, customerType: string): number
     return 1.0;
   }
   
-  const roleBonus = ROLE_EFFICIENCY_BONUSES[maid.role]?.[customerType] ?? 1.0;
-  return roleBonus;
+  // 类型安全转换：将字符串转换为 CustomerType
+  const validCustomerType = CUSTOMER_TYPES.includes(customerType as CustomerType) 
+    ? customerType as CustomerType 
+    : 'regular';
+  
+  const roleBonuses = ROLE_EFFICIENCY_BONUSES[maid.role];
+  return roleBonuses?.[validCustomerType] ?? 1.0;
 }
 
 /**
