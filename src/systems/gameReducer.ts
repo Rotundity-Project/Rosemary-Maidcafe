@@ -46,6 +46,7 @@ function generateNotificationId(prefix: string): string {
 
 /**
  * 处理顾客离开事件 - 抽取为独立函数
+ * 消除代码重复，统一的顾客离开处理逻辑
  */
 function handleCustomerLeave(
   customer: ReturnType<typeof updatePatience>,
@@ -69,6 +70,44 @@ function handleCustomerLeave(
   });
   
   return { customersById, reputation: newReputation, notifications };
+}
+
+/**
+ * 处理顾客状态转换的辅助函数
+ * 统一处理顾客从 eating -> paying -> leaving -> 删除 的流程
+ */
+function processCustomerStatusTicks(
+  customer: any,
+  customersById: Map<string, any>,
+  nextRuntime: any
+): boolean {
+  if (customer.status === 'eating' || customer.status === 'paying' || customer.status === 'leaving') {
+    const defaultTicks = customer.status === 'eating' ? 2 : 1;
+    const current = nextRuntime.customerStatusTicks[customer.id] ?? defaultTicks;
+    const remaining = current - 1;
+
+    if (remaining > 0) {
+      nextRuntime.customerStatusTicks[customer.id] = remaining;
+      return false;
+    }
+
+    if (customer.status === 'eating') {
+      customersById.set(customer.id, { ...customer, status: 'paying' });
+      nextRuntime.customerStatusTicks[customer.id] = 1;
+      return false;
+    }
+
+    if (customer.status === 'paying') {
+      customersById.set(customer.id, { ...customer, status: 'leaving' });
+      nextRuntime.customerStatusTicks[customer.id] = 1;
+      return false;
+    }
+
+    customersById.delete(customer.id);
+    delete nextRuntime.customerStatusTicks[customer.id];
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -99,41 +138,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       const baseCustomers = state.customers;
 
-      const notifications = [...state.notifications];
+      let notifications = [...state.notifications];
       let reputation = state.reputation;
       let tasks = state.tasks;
 
       const maidsById = new Map(state.maids.map(m => [m.id, m] as const));
-      const customersById = new Map(baseCustomers.map(c => [c.id, c] as const));
+      let customersById = new Map(baseCustomers.map(c => [c.id, c] as const));
 
       for (const customer of [...customersById.values()]) {
-        if (customer.status === 'eating' || customer.status === 'paying' || customer.status === 'leaving') {
-          const defaultTicks = customer.status === 'eating' ? 2 : 1;
-          const current = nextRuntime.customerStatusTicks[customer.id] ?? defaultTicks;
-          const remaining = current - 1;
-
-          if (remaining > 0) {
-            nextRuntime.customerStatusTicks[customer.id] = remaining;
-            continue;
-          }
-
-          if (customer.status === 'eating') {
-            customersById.set(customer.id, { ...customer, status: 'paying' });
-            nextRuntime.customerStatusTicks[customer.id] = 1;
-            continue;
-          }
-
-          if (customer.status === 'paying') {
-            customersById.set(customer.id, { ...customer, status: 'leaving' });
-            nextRuntime.customerStatusTicks[customer.id] = 1;
-            continue;
-          }
-
-          customersById.delete(customer.id);
-          delete nextRuntime.customerStatusTicks[customer.id];
+        // 使用辅助函数处理顾客状态转换
+        const processed = processCustomerStatusTicks(customer, customersById, nextRuntime);
+        if (processed) {
           continue;
         }
-
         delete nextRuntime.customerStatusTicks[customer.id];
       }
 
@@ -192,18 +209,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         const updatedCustomer = updatePatience(customer, deltaMinutes);
         if (shouldCustomerLeave(updatedCustomer)) {
-          const { customer: leavingCustomer, reputationPenalty } = handlePatienceTimeout(updatedCustomer);
-          reputation = Math.max(0, reputation - reputationPenalty);
-          customersById.set(customer.id, leavingCustomer);
-          nextRuntime.customerStatusTicks[customer.id] = 1;
-          // 顾客离开时重置连续服务计数
-          nextRuntime.customerStreak = 0;
-          notifications.push({
-            id: generateNotificationId('patience_timeout'),
-            type: 'warning',
-            message: `${customer.name} 因等待太久而离开了，声望 -${reputationPenalty}`,
-            timestamp: Date.now(),
-          });
+          // 使用辅助函数处理顾客离开事件
+          const result = handleCustomerLeave(updatedCustomer, customersById, nextRuntime, notifications, reputation);
+          customersById = result.customersById;
+          reputation = result.reputation;
+          notifications = result.notifications;
           continue;
         }
 

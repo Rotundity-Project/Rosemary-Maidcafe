@@ -56,6 +56,7 @@ export function generateRandomMaid(usedImages: string[] = []): Maid {
 /**
  * 计算女仆服务效率
  * 基于女仆的属性计算，体力低于20%时效率减半
+ * 优化：减少中间计算步骤，提升性能
  * Requirements: 2.4
  */
 export function calculateEfficiency(maid: Maid): number {
@@ -65,11 +66,11 @@ export function calculateEfficiency(maid: Maid): number {
     return 0;
   }
   
-  // 提取并缓存 clamp 后的值，避免重复计算
-  const charm = clamp(maid.stats.charm, 0, 100);
-  const skill = clamp(maid.stats.skill, 0, 100);
-  const speed = clamp(maid.stats.speed, 0, 100);
-  const mood = clamp(maid.mood, 0, 100);
+  // 提取属性值并归一化 (0-100范围)
+  const charm = Math.max(0, Math.min(100, maid.stats.charm));
+  const skill = Math.max(0, Math.min(100, maid.stats.skill));
+  const speed = Math.max(0, Math.min(100, maid.stats.speed));
+  const mood = Math.max(0, Math.min(100, maid.mood));
   
   // 基础效率 = (魅力 + 技能 + 速度) / 3
   const baseEfficiency = (charm + skill + speed) / 3;
@@ -77,15 +78,12 @@ export function calculateEfficiency(maid: Maid): number {
   // 心情影响效率 (心情100时为1.0，心情0时为0.5)
   const moodModifier = 0.5 + (mood / 200);
   
-  // 计算效率
-  let efficiency = baseEfficiency * moodModifier;
-  
+  // 计算效率并应用体力惩罚
   // 体力低于20%时效率减半 (Requirements: 2.4)
-  if (maid.stamina < 20) {
-    efficiency *= 0.5;
-  }
+  const staminaMultiplier = maid.stamina < 20 ? 0.5 : 1.0;
+  const efficiency = baseEfficiency * moodModifier * staminaMultiplier;
   
-  return clamp(efficiency, 0, 100);
+  return Math.max(0, Math.min(100, efficiency));
 }
 
 /**

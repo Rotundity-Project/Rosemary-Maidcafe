@@ -46,12 +46,19 @@ export function GameUI() {
   // Handle hire maid
   const handleHireMaid = useCallback((maid: Maid) => {
     const hireCost = hireCostByLevel[0];
+    const maxMaids = state.facility.cafeLevel + 2;
+    
+    // 检查女仆数量是否已达上限
+    if (state.maids.length >= maxMaids) {
+      return;
+    }
+    
     if (state.finance.gold >= hireCost) {
       dispatch({ type: 'HIRE_MAID', maid });
       dispatch({ type: 'DEDUCT_GOLD', amount: hireCost });
     }
     setShowHireMaidModal(false);
-  }, [dispatch, state.finance.gold]);
+  }, [dispatch, state.finance.gold, state.maids.length, state.facility.cafeLevel]);
 
   // Handle load game
   const handleLoadGame = useCallback((loadedState: GameState) => {
