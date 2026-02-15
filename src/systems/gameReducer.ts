@@ -11,6 +11,7 @@ import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
 import { calculateDailyOperatingCost, processEndOfDay } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
+import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId } from '@/utils';
 
 /**
@@ -20,26 +21,6 @@ function getNextSeason(currentSeason: Season): Season {
   const seasons: Season[] = ['spring', 'summer', 'autumn', 'winter'];
   const currentIndex = seasons.indexOf(currentSeason);
   return seasons[(currentIndex + 1) % 4];
-}
-
-/**
- * 计算咖啡厅升级成本
- */
-function getCafeUpgradeCost(currentLevel: number): number {
-  return 500 * Math.pow(2, currentLevel - 1);
-}
-
-/**
- * 计算区域解锁成本
- */
-function getAreaUnlockCost(area: Area): number {
-  const costs: Record<Area, number> = {
-    main: 0,
-    outdoor: 2000,
-    vip_room: 5000,
-    stage: 10000,
-  };
-  return costs[area];
 }
 
 /**
