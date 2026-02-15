@@ -35,6 +35,14 @@ const customerPatienceRange: Record<CustomerType, { min: number; max: number }> 
   group: { min: 80, max: 100 },   // 团体顾客耐心较好
 };
 
+// 顾客生成间隔常量 (毫秒)
+const SPAWN_INTERVAL_CONFIG = {
+  BASE_INTERVAL: 30000,      // 基础间隔 30秒
+  MIN_INTERVAL: 10000,       // 最低间隔 10秒
+  REPUTATION_MODIFIER: 0.5,  // 声望100时减少50%
+  LEVEL_MODIFIER: 0.3,        // 等级10时减少30%
+} as const;
+
 /**
  * 根据权重随机选择顾客类型
  * Requirements: 3.2
@@ -349,17 +357,17 @@ export function updatePatience(customer: Customer, deltaMinutes: number): Custom
  * @param cafeLevel 咖啡厅等级 (1-10)
  */
 export function getSpawnInterval(reputation: number, cafeLevel: number): number {
-  // 基础间隔 30秒 (30000毫秒)
-  const baseInterval = 30000;
-  
   // 声望降低间隔 (声望100时减少50%)
-  const reputationModifier = 1 - (reputation / 100) * 0.5;
+  const reputationModifier = 1 - (reputation / 100) * SPAWN_INTERVAL_CONFIG.REPUTATION_MODIFIER;
   
   // 咖啡厅等级降低间隔 (等级10时减少30%)
-  const levelModifier = 1 - ((cafeLevel - 1) / 9) * 0.3;
+  const levelModifier = 1 - ((cafeLevel - 1) / 9) * SPAWN_INTERVAL_CONFIG.LEVEL_MODIFIER;
   
   // 最终间隔，最低10秒
-  const interval = Math.max(baseInterval * reputationModifier * levelModifier, 10000);
+  const interval = Math.max(
+    SPAWN_INTERVAL_CONFIG.BASE_INTERVAL * reputationModifier * levelModifier,
+    SPAWN_INTERVAL_CONFIG.MIN_INTERVAL
+  );
   
   return Math.round(interval);
 }

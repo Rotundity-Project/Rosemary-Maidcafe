@@ -12,7 +12,7 @@ import { calculateRewards, calculateSatisfaction, completeService, generateCusto
 import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
-import { generateId } from '@/utils';
+import { generateId, generateNotificationId } from '@/utils';
 
 
 /**
@@ -22,13 +22,6 @@ function getNextSeason(currentSeason: Season): Season {
   const seasons: Season[] = ['spring', 'summer', 'autumn', 'winter'];
   const currentIndex = seasons.indexOf(currentSeason);
   return seasons[(currentIndex + 1) % 4];
-}
-
-/**
- * 生成通知ID (使用共享工具函数)
- */
-function generateNotificationId(prefix: string): string {
-  return generateId(`notif_${prefix}`);
 }
 
 /**

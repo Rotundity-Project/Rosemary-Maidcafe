@@ -12,6 +12,13 @@ export function generateId(prefix: string = 'id'): string {
 }
 
 /**
+ * 生成通知ID (使用共享工具函数)
+ */
+export function generateNotificationId(prefix: string): string {
+  return generateId(`notif_${prefix}`);
+}
+
+/**
  * 从数组中随机选择一个元素
  */
 export function randomChoice<T>(arr: T[]): T {

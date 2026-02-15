@@ -57,9 +57,10 @@ export function generateRandomMaid(usedImages: string[] = []): Maid {
  * 计算女仆服务效率
  * 基于女仆的属性计算，体力低于20%时效率减半
  * 优化：减少中间计算步骤，提升性能
+ * 优化：加入角色效率加成 (getRoleEfficiencyBonus)
  * Requirements: 2.4
  */
-export function calculateEfficiency(maid: Maid): number {
+export function calculateEfficiency(maid: Maid, customerType: string = 'regular'): number {
   // 参数验证
   if (!maid || typeof maid.stats?.charm !== 'number' || typeof maid.stats?.skill !== 'number' || 
       typeof maid.stats?.speed !== 'number' || typeof maid.mood !== 'number' || typeof maid.stamina !== 'number') {
@@ -81,7 +82,11 @@ export function calculateEfficiency(maid: Maid): number {
   // 计算效率并应用体力惩罚
   // 体力低于20%时效率减半 (Requirements: 2.4)
   const staminaMultiplier = maid.stamina < 20 ? 0.5 : 1.0;
-  const efficiency = baseEfficiency * moodModifier * staminaMultiplier;
+  
+  // 角色效率加成 (不同角色对不同顾客类型有额外加成)
+  const roleBonus = getRoleEfficiencyBonus(maid, customerType);
+  
+  const efficiency = baseEfficiency * moodModifier * staminaMultiplier * roleBonus;
   
   return Math.max(0, Math.min(100, efficiency));
 }
