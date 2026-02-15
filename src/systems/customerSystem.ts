@@ -66,9 +66,9 @@ function selectCustomerType(reputation: number): CustomerType {
  * 生成顾客
  * Requirements: 3.1, 3.2
  * @param reputation 咖啡厅声望 (0-100)
- * @param _season 当前季节 (用于未来季节性顾客行为扩展)
+ * @param season 当前季节 (用于未来季节性顾客行为扩展)
  */
-export function generateCustomer(reputation: number, _season: Season): Customer {
+export function generateCustomer(reputation: number, season: Season): Customer {
   const type = selectCustomerType(reputation);
   const patienceRange = customerPatienceRange[type];
   

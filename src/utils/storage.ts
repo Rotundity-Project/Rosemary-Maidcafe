@@ -130,7 +130,7 @@ function validateGameState(state: GameState): boolean {
     'day', 'time', 'season', 'isPaused', 'isBusinessHours',
     'maids', 'customers', 'menuItems', 'facility', 'finance',
     'activeEvents', 'eventHistory', 'achievements', 'statistics',
-    'reputation', 'activePanel', 'notifications'
+    'reputation', 'activePanel', 'notifications', 'gameSpeed', 'tasks'
   ];
 
   for (const field of requiredFields) {
@@ -143,6 +143,7 @@ function validateGameState(state: GameState): boolean {
   if (typeof state.day !== 'number' || state.day < 1) return false;
   if (typeof state.time !== 'number' || state.time < 0) return false;
   if (typeof state.reputation !== 'number') return false;
+  if (typeof state.gameSpeed !== 'number') return false;
 
   // 检查数组字段
   if (!Array.isArray(state.maids)) return false;
@@ -150,11 +151,13 @@ function validateGameState(state: GameState): boolean {
   if (!Array.isArray(state.menuItems)) return false;
   if (!Array.isArray(state.achievements)) return false;
   if (!Array.isArray(state.notifications)) return false;
+  if (!Array.isArray(state.tasks)) return false;
 
   // 检查对象字段
   if (!state.facility || typeof state.facility !== 'object') return false;
   if (!state.finance || typeof state.finance !== 'object') return false;
   if (!state.statistics || typeof state.statistics !== 'object') return false;
+  if (!state.runtime || typeof state.runtime !== 'object') return false;
 
   return true;
 }

@@ -9,24 +9,11 @@ import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
 import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus } from '@/systems/maidSystem';
 import { checkAchievements } from '@/systems/achievementSystem';
 import { calculateRewards, calculateSatisfaction, completeService, generateCustomer, generateOrder, getSpawnInterval, handlePatienceTimeout, shouldCustomerLeave, startCustomerService, updateCustomerServiceProgress, updatePatience } from '@/systems/customerSystem';
-import { calculateDailyOperatingCost, processEndOfDay } from '@/systems/financeSystem';
+import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId } from '@/utils';
 
-/**
- * 开发环境日志开关
- */
-const DEBUG_MODE = process.env.NODE_ENV === 'development';
-
-/**
- * 开发环境日志函数
- */
-function debugLog(...args: unknown[]): void {
-  if (DEBUG_MODE) {
-    console.log('[GameReducer]', ...args);
-  }
-}
 
 /**
  * 计算下一个季节
@@ -495,6 +482,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         maids: state.maids.map(maid => ({
           ...maid,
           stamina: 100, // 新的一天体力恢复满
+          mood: 100, // 新的一天心情恢复满
           status: {
             isWorking: false,
             isResting: false,
