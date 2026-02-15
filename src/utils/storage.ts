@@ -18,13 +18,15 @@ export interface StorageResult<T> {
 }
 
 function prepareStateForSave(state: GameState): GameState {
+  // 保留 runtime 中的 customerStreak（用于连续服务成就）
+  const currentStreak = state.runtime?.customerStreak ?? 0;
   return {
     ...state,
     runtime: {
       customerSpawnMs: 0,
       customerStatusTicks: {},
       customersServedToday: 0,
-      customerStreak: 0,
+      customerStreak: currentStreak,
     },
     notifications: [],
     selectedMaidId: null,

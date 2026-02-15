@@ -685,6 +685,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // 计算奖励
       const rewards = calculateRewards(customer, maid);
       
+      // 判断是否为完美服务 (满意度 >= 90)
+      const isPerfectService = satisfaction >= 90;
+      
       // 更新女仆状态(释放)
       const updatedMaid = {
         ...maid,
@@ -717,6 +720,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           totalCustomersServed: state.statistics.totalCustomersServed + 1,
           totalRevenue: state.statistics.totalRevenue + rewards.gold + rewards.tip,
           totalTipsEarned: state.statistics.totalTipsEarned + rewards.tip,
+          // 追踪完美服务次数
+          perfectServicesCount: state.statistics.perfectServicesCount + (isPerfectService ? 1 : 0),
         },
       };
     }
