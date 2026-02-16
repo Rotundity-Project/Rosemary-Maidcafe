@@ -405,7 +405,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
         <div className="text-sm font-medium text-gray-700 mb-2">
           {maidPanel.assignRole}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-3">
           {roles.map((role) => (
             <button
               key={role}
@@ -424,6 +424,32 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
               {roleIcons[role]} {maidRoles[role]}
             </button>
           ))}
+        </div>
+        
+        {/* 职位说明 */}
+        <div className="p-3 bg-gray-50 rounded-xl space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-700">
+            <span>💡</span>
+            <span>职位说明</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-start gap-1.5">
+              <span className="text-pink-500">👋</span>
+              <span className="text-gray-600">迎宾：提高入座率，恢复耐心</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-blue-500">🍽️</span>
+              <span className="text-gray-600">服务员：点餐上餐，影响小费</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-amber-500">☕</span>
+              <span className="text-gray-600">咖啡师：制作饮品，影响销量</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-purple-500">🎭</span>
+              <span className="text-gray-600">表演者：舞台演出，增加满意度</span>
+            </div>
+          </div>
         </div>
       </div>
 
