@@ -293,6 +293,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           };
           tasks = applyTaskEvent(tasks, { type: 'serve_customers', amount: 1 });
           tasks = applyTaskEvent(tasks, { type: 'earn_gold', amount: rewards.gold + rewards.tip });
+          // VIP顾客服务任务
+          if (customer.type === 'vip') {
+            tasks = applyTaskEvent(tasks, { type: 'serve_vip', amount: 1 });
+          }
+          // 小费任务
+          if (rewards.tip > 0) {
+            tasks = applyTaskEvent(tasks, { type: 'earn_tips', amount: rewards.tip });
+          }
+          // 满意度任务
+          tasks = applyTaskEvent(tasks, { type: 'maintain_satisfaction', value: satisfaction });
+          // 累计收入任务（使用当前金币作为累计值）
+          tasks = applyTaskEvent(tasks, { type: 'total_revenue', amount: state.finance.gold });
+          // 累计顾客任务
+          tasks = applyTaskEvent(tasks, { type: 'total_customers', amount: state.statistics.totalCustomersServed + 1 });
         } else {
           customersById.set(customer.id, updateCustomerServiceProgress(customer, newProgress));
         }
