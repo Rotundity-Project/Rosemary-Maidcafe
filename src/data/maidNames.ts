@@ -21,6 +21,8 @@ export const personalityDescriptions: Record<MaidPersonality, string> = {
   shy: '害羞内向，但服务细心',
   energetic: '精力充沛，行动迅速',
   elegant: '优雅端庄，举止得体',
+  gentle: '温柔体贴，关怀备至',
+  playful: '俏皮可爱，活泼有趣',
 };
 
 export const personalityStatBonuses: Record<MaidPersonality, { charm: number; skill: number; stamina: number; speed: number }> = {
@@ -29,6 +31,8 @@ export const personalityStatBonuses: Record<MaidPersonality, { charm: number; sk
   shy: { charm: 0, skill: 5, stamina: 10, speed: 5 },
   energetic: { charm: 5, skill: 5, stamina: 0, speed: 10 },
   elegant: { charm: 15, skill: 5, stamina: 0, speed: 0 },
+  gentle: { charm: 8, skill: 5, stamina: 8, speed: 4 },
+  playful: { charm: 12, skill: 3, stamina: 3, speed: 7 },
 };
 
 export const hireCostByLevel: number[] = [

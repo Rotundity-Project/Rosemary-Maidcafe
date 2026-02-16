@@ -30,6 +30,8 @@ const personalityLabels: Record<MaidPersonality, string> = {
   shy: '害羞',
   energetic: '活力',
   elegant: '优雅',
+  gentle: '温柔',
+  playful: '俏皮',
 };
 
 const personalityEmojis: Record<MaidPersonality, string> = {
@@ -38,6 +40,8 @@ const personalityEmojis: Record<MaidPersonality, string> = {
   shy: '😳',
   energetic: '🤩',
   elegant: '🥰',
+  gentle: '🌸',
+  playful: '🎀',
 };
 
 export function MaidDetailPanel({ maid, onRoleChange, onToggleRest }: MaidDetailPanelProps) {

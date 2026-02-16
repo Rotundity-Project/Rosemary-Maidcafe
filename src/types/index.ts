@@ -9,7 +9,7 @@ export interface MaidStats {
 
 export type MaidRole = 'greeter' | 'server' | 'barista' | 'entertainer';
 
-export type MaidPersonality = 'cheerful' | 'cool' | 'shy' | 'energetic' | 'elegant';
+export type MaidPersonality = 'cheerful' | 'cool' | 'shy' | 'energetic' | 'elegant' | 'gentle' | 'playful';
 
 export interface MaidStatus {
   isWorking: boolean;
@@ -189,10 +189,15 @@ export type TaskType = 'daily' | 'growth';
 
 export type TaskConditionType =
   | 'serve_customers'
+  | 'serve_vip'
   | 'earn_gold'
+  | 'earn_tips'
   | 'hire_maids'
   | 'unlock_menu_items'
-  | 'upgrade_cafe';
+  | 'upgrade_cafe'
+  | 'maintain_satisfaction'
+  | 'total_revenue'
+  | 'total_customers';
 
 export interface TaskCondition {
   type: TaskConditionType;

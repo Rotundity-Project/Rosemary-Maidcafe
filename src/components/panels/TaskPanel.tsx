@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useGame } from '@/components/game/GameProvider';
+import { useI18n } from '@/i18n';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -9,6 +10,7 @@ import { Task } from '@/types';
 
 export function TaskPanel() {
   const { state, dispatch } = useGame();
+  const { t } = useI18n();
   const { tasks } = state;
 
   const { dailyTasks, growthTasks } = useMemo(() => {
@@ -27,9 +29,9 @@ export function TaskPanel() {
   return (
     <div className="min-h-full flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-800">🎯 任务</h2>
+        <h2 className="text-xl font-bold text-gray-800">🎯 {t.task}</h2>
         <div className="text-sm text-gray-500">
-          已完成 {completedCount} / {tasks.length}
+          {t.taskPanel.completed} {completedCount} / {tasks.length}
         </div>
       </div>
 
@@ -38,7 +40,7 @@ export function TaskPanel() {
           <div className="flex items-center gap-4">
             <div className="text-4xl">🎯</div>
             <div className="flex-1">
-              <div className="text-sm text-gray-500 mb-1">任务进度</div>
+              <div className="text-sm text-gray-500 mb-1">{t.taskPanel.taskProgress}</div>
               <ProgressBar value={completedCount} max={tasks.length} color="pink" size="lg" showLabel />
             </div>
           </div>
@@ -46,14 +48,21 @@ export function TaskPanel() {
       </Card>
 
       <div className="flex-1 min-h-0 overflow-auto space-y-4">
-        <TaskSection title="📅 每日任务" tasks={dailyTasks} onClaim={claim} />
-        <TaskSection title="🌱 成长任务" tasks={growthTasks} onClaim={claim} />
+        <TaskSection title={`📅 ${t.taskPanel.dailyTasks}`} tasks={dailyTasks} onClaim={claim} t={t} />
+        <TaskSection title={`🌱 ${t.taskPanel.growthTasks}`} tasks={growthTasks} onClaim={claim} t={t} />
       </div>
     </div>
   );
 }
 
-function TaskSection({ title, tasks, onClaim }: { title: string; tasks: Task[]; onClaim: (taskId: string) => void }) {
+interface TaskSectionProps {
+  title: string;
+  tasks: Task[];
+  onClaim: (taskId: string) => void;
+  t: any;
+}
+
+function TaskSection({ title, tasks, onClaim, t }: TaskSectionProps) {
   if (tasks.length === 0) {
     return null;
   }
@@ -64,7 +73,7 @@ function TaskSection({ title, tasks, onClaim }: { title: string; tasks: Task[]; 
       <CardBody>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onClaim={onClaim} />
+            <TaskCard key={task.id} task={task} onClaim={onClaim} t={t} />
           ))}
         </div>
       </CardBody>
@@ -72,7 +81,13 @@ function TaskSection({ title, tasks, onClaim }: { title: string; tasks: Task[]; 
   );
 }
 
-function TaskCard({ task, onClaim }: { task: Task; onClaim: (taskId: string) => void }) {
+interface TaskCardProps {
+  task: Task;
+  onClaim: (taskId: string) => void;
+  t: any;
+}
+
+function TaskCard({ task, onClaim, t }: TaskCardProps) {
   const canClaim = task.completed && !task.claimed;
   const progressLabel = `${task.progress} / ${task.condition.target}`;
 
@@ -105,7 +120,7 @@ function TaskCard({ task, onClaim }: { task: Task; onClaim: (taskId: string) => 
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">{progressLabel}</div>
           {task.claimed ? (
-            <span className="text-xs font-medium text-gray-400">已领取</span>
+            <span className="text-xs font-medium text-gray-400">{t.taskPanel.claimed}</span>
           ) : (
             <Button
               size="sm"
@@ -113,7 +128,7 @@ function TaskCard({ task, onClaim }: { task: Task; onClaim: (taskId: string) => 
               disabled={!canClaim}
               onClick={() => onClaim(task.id)}
             >
-              {canClaim ? '领取奖励' : task.completed ? '可领取' : '未完成'}
+              {canClaim ? t.taskPanel.claimReward : task.completed ? t.taskPanel.claimable : t.taskPanel.incomplete}
             </Button>
           )}
         </div>

@@ -538,4 +538,7 @@ export const defaultMenuItems: MenuItem[] = [
   { id: 'anniversary-set', name: '周年庆套餐', nameEn: 'Anniversary Set', category: 'special', basePrice: 198, currentPrice: 198, unlocked: false, unlockCost: 2000, popularity: 0, prepTime: 200, season: null, icon: '🎉' },
   { id: 'white-day-set', name: '白色情人节套餐', nameEn: 'White Day Set', category: 'special', basePrice: 178, currentPrice: 178, unlocked: false, unlockCost: 1600, popularity: 0, prepTime: 190, season: 'spring', icon: '🤍' },
   { id: 'hanami-set', name: '赏花套餐', nameEn: 'Hanami Set', category: 'special', basePrice: 138, currentPrice: 138, unlocked: false, unlockCost: 1200, popularity: 0, prepTime: 150, season: 'spring', icon: '🌸' },
+  // New Drinks - Added during optimization
+  { id: 'cola', name: '可乐', nameEn: 'Cola', category: 'drinks', basePrice: 18, currentPrice: 18, unlocked: false, unlockCost: 100, popularity: 0, prepTime: 15, season: null, icon: '🥤' },
+  { id: 'milk-tea-pearl', name: '珍珠奶茶', nameEn: 'Bubble Tea', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 45, season: null, icon: '🧋' },
 ];

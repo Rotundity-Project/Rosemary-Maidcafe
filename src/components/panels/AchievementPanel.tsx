@@ -3,19 +3,11 @@
 import React, { useState } from 'react';
 import { Achievement } from '@/types';
 import { useGame } from '@/components/game/GameProvider';
+import { useI18n } from '@/i18n';
 import { Card, CardHeader, CardBody, StatCard } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
 type FilterType = 'all' | 'unlocked' | 'locked';
-
-const conditionTypeLabels: Record<string, string> = {
-  totalCustomersServed: '服务顾客',
-  totalRevenue: '累计收入',
-  totalDaysPlayed: '经营天数',
-  maidsHired: '雇佣女仆',
-  totalTipsEarned: '累计小费',
-  perfectServicesCount: '完美服务',
-};
 
 const conditionTypeIcons: Record<string, string> = {
   totalCustomersServed: '👥',
@@ -28,9 +20,12 @@ const conditionTypeIcons: Record<string, string> = {
 
 export function AchievementPanel() {
   const { state } = useGame();
+  const { t } = useI18n();
   const [filter, setFilter] = useState<FilterType>('all');
 
   const { achievements, statistics } = state;
+  const achievementPanel = t.achievementPanel;
+  const achievementStats = achievementPanel.statistics as unknown as Record<string, string>;
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
   const totalCount = achievements.length;
@@ -70,10 +65,10 @@ export function AchievementPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-800">
-          🏆 成就系统
+          🏆 {achievementPanel.achievementSystem}
         </h2>
         <div className="text-sm text-gray-500">
-          已解锁 {unlockedCount} / {totalCount}
+          {achievementPanel.unlocked} {unlockedCount} / {totalCount}
         </div>
       </div>
 
@@ -83,7 +78,7 @@ export function AchievementPanel() {
           <div className="flex items-center gap-4">
             <div className="text-4xl">🏆</div>
             <div className="flex-1">
-              <div className="text-sm text-gray-500 mb-1">成就进度</div>
+              <div className="text-sm text-gray-500 mb-1">{achievementPanel.achievementProgress}</div>
               <ProgressBar
                 value={unlockedCount}
                 max={totalCount}
@@ -99,32 +94,32 @@ export function AchievementPanel() {
       {/* Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard
-          label="服务顾客"
+          label={achievementStats.totalCustomersServed}
           value={statistics.totalCustomersServed}
           icon={<span className="text-xl">👥</span>}
         />
         <StatCard
-          label="累计收入"
+          label={achievementStats.totalRevenue}
           value={statistics.totalRevenue}
           icon={<span className="text-xl">💰</span>}
         />
         <StatCard
-          label="经营天数"
+          label={achievementStats.totalDaysPlayed}
           value={statistics.totalDaysPlayed}
           icon={<span className="text-xl">📅</span>}
         />
         <StatCard
-          label="雇佣女仆"
+          label={achievementStats.maidsHired}
           value={statistics.maidsHired}
           icon={<span className="text-xl">👧</span>}
         />
         <StatCard
-          label="累计小费"
+          label={achievementStats.totalTipsEarned}
           value={statistics.totalTipsEarned}
           icon={<span className="text-xl">💵</span>}
         />
         <StatCard
-          label="完美服务"
+          label={achievementStats.perfectServicesCount}
           value={statistics.perfectServicesCount}
           icon={<span className="text-xl">⭐</span>}
         />
@@ -135,18 +130,18 @@ export function AchievementPanel() {
         <FilterButton
           active={filter === 'all'}
           onClick={() => setFilter('all')}
-          label={`全部 (${totalCount})`}
+          label={`${achievementPanel.all} (${totalCount})`}
         />
         <FilterButton
           active={filter === 'unlocked'}
           onClick={() => setFilter('unlocked')}
-          label={`已解锁 (${unlockedCount})`}
+          label={`${achievementPanel.unlocked} (${unlockedCount})`}
           color="green"
         />
         <FilterButton
           active={filter === 'locked'}
           onClick={() => setFilter('locked')}
-          label={`未解锁 (${totalCount - unlockedCount})`}
+          label={`${achievementPanel.locked} (${totalCount - unlockedCount})`}
           color="gray"
         />
       </div>
@@ -158,7 +153,7 @@ export function AchievementPanel() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <span>{conditionTypeIcons[type] || '🎯'}</span>
-                <span>{conditionTypeLabels[type] || type}</span>
+                <span>{achievementStats[type] || type}</span>
                 <span className="text-sm text-gray-500">
                   ({typeAchievements.filter((a) => a.unlocked).length}/{typeAchievements.length})
                 </span>
@@ -171,6 +166,7 @@ export function AchievementPanel() {
                     key={achievement.id}
                     achievement={achievement}
                     currentValue={getCurrentValue(achievement.condition.type)}
+                    t={t}
                   />
                 ))}
               </div>
@@ -181,7 +177,7 @@ export function AchievementPanel() {
         {filteredAchievements.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <div className="text-4xl mb-2">🏆</div>
-            <p>没有符合条件的成就</p>
+            <p>{achievementPanel.noMatchingAchievements}</p>
           </div>
         )}
       </div>
@@ -225,11 +221,13 @@ function FilterButton({ active, onClick, label, color = 'pink' }: FilterButtonPr
 interface AchievementCardProps {
   achievement: Achievement;
   currentValue: number;
+  t: any;
 }
 
-function AchievementCard({ achievement, currentValue }: AchievementCardProps) {
+function AchievementCard({ achievement, currentValue, t }: AchievementCardProps) {
   const { unlocked, name, description, reward, condition, unlockedDate } = achievement;
   const progress = Math.min((currentValue / condition.target) * 100, 100);
+  const achievementPanel = t.achievementPanel;
 
   return (
     <div
@@ -278,7 +276,7 @@ function AchievementCard({ achievement, currentValue }: AchievementCardProps) {
           {!unlocked && (
             <div className="mt-2">
               <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>进度</span>
+                <span>{achievementPanel.progress}</span>
                 <span>{currentValue} / {condition.target}</span>
               </div>
               <ProgressBar
@@ -295,7 +293,7 @@ function AchievementCard({ achievement, currentValue }: AchievementCardProps) {
             <span className={`text-sm ${
               unlocked ? 'text-yellow-600' : 'text-gray-500'
             }`}>
-              奖励: 💰 {reward}
+              {achievementPanel.reward}: 💰 {reward}
             </span>
             {unlocked && unlockedDate && (
               <span className="text-xs text-gray-400">
