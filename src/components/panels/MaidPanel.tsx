@@ -27,6 +27,14 @@ const roleColors: Record<MaidRole, string> = {
   entertainer: 'bg-purple-100 text-purple-700 border-purple-300',
 };
 
+// 角色说明
+const roleDescriptions: Record<MaidRole, string> = {
+  greeter: '在门口迎接顾客，提高入座率。影响顾客耐心恢复。',
+  server: '为顾客点餐上餐，影响小费收入。',
+  barista: '制作咖啡饮品，影响饮品销量。',
+  entertainer: '舞台表演，增加顾客满意度。',
+};
+
 const personalityEmojis: Record<MaidPersonality, string> = {
   cheerful: '😊',
   cool: '😎',
@@ -413,7 +421,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
               disabled={isResting}
               className={`
                 px-3 py-1.5 rounded-xl text-sm font-medium
-                transition-all duration-200 border touch-target
+                transition-all duration-200 border touch-target relative group
                 ${maid.role === role
                   ? roleColors[role] + ' border-current'
                   : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
@@ -422,6 +430,11 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
               `}
             >
               {roleIcons[role]} {maidRoles[role]}
+              {/* 角色说明 Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                {roleDescriptions[role]}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800" />
+              </div>
             </button>
           ))}
         </div>

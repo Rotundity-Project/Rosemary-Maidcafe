@@ -5,15 +5,33 @@ import { DailyFinance } from '@/types';
 import { useGame } from '@/components/game/GameProvider';
 import { useI18n } from '@/i18n';
 import { Card, CardHeader, CardBody, StatCard } from '@/components/ui/Card';
+import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 
 export function FinancePanel() {
   const { state } = useGame();
   const { t } = useI18n();
-  const { finance, day, maids } = state;
+  const { finance, day, maids, facility } = state;
   const financePanel = t.financePanel;
 
-  // Calculate daily wage expenses
-  const dailyWages = maids.length * 20; // Base wage per maid
+  // 计算每日运营成本
+  const dailyOperatingCost = calculateDailyOperatingCost(maids, facility);
+  
+  // 租金 = 基础租金 * 咖啡厅等级
+  const rent = 100 * facility.cafeLevel;
+  
+  // 水电费 = 基础水电 + 座位数 * 5
+  const utilities = 50 + facility.maxSeats * 5;
+  
+  // 女仆工资
+  const dailyWages = maids.reduce((total, maid) => {
+    return total + 30 + (maid.level - 1) * 5;
+  }, 0);
+  
+  // 设备维护费
+  const equipmentMaintenance = facility.equipment.reduce((total, eq) => {
+    return total + eq.level * 5;
+  }, 0);
+
   const todayProfit = finance.dailyRevenue - finance.dailyExpenses;
 
   // Get last 7 days of history (or less if not enough data)
@@ -157,34 +175,42 @@ export function FinancePanel() {
                     note={financePanel.maidCount.replace('{count}', String(maids.length))}
                   />
                   <ExpenseItem
-                    label={financePanel.otherExpenses}
-                    amount={Math.max(0, finance.dailyExpenses - dailyWages)}
+                    label={financePanel.rent}
+                    amount={rent}
                     type="expense"
-                    icon="📦"
+                    icon="🏠"
+                    note={`Lv.${facility.cafeLevel} × 100`}
                   />
+                  <ExpenseItem
+                    label={financePanel.utilities}
+                    amount={utilities}
+                    type="expense"
+                    icon="💡"
+                    note={`${facility.maxSeats}座 × 5 + 50`}
+                  />
+                  {equipmentMaintenance > 0 && (
+                    <ExpenseItem
+                      label="设备维护"
+                      amount={equipmentMaintenance}
+                      type="expense"
+                      icon="🔧"
+                    />
+                  )}
                 </div>
               </div>
 
               {/* Divider */}
               <div className="border-t border-gray-100" />
 
-              {/* Operating Costs Info */}
+              {/* Operating Costs Summary */}
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">
                   {financePanel.dailyOperatingCosts}
                 </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>👧 {financePanel.maidWages}</span>
-                    <span>{financePanel.perMaidPerDay}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>🏠 {financePanel.rent}</span>
-                    <span>{financePanel.basedOnLevel}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>💡 {financePanel.utilities}</span>
-                    <span>{financePanel.basedOnEquipment}</span>
+                <div className="p-3 bg-gray-50 rounded-xl">
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-gray-600">每日总开支</span>
+                    <span className="text-red-600">-{dailyOperatingCost}</span>
                   </div>
                 </div>
               </div>
