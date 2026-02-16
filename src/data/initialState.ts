@@ -69,6 +69,14 @@ export const initialGameState: GameState = {
   activePanel: 'cafe',
   notifications: [],
   dailySummaryOpen: false,
+  
+  // 新手引导 - 默认激活
+  guide: {
+    isActive: true,
+    currentStep: 'welcome',
+    completedSteps: [],
+    shownTips: [],
+  },
 };
 
 // 游戏常量

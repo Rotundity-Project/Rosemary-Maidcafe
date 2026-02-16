@@ -14,6 +14,7 @@ import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId, generateNotificationId } from '@/utils';
+import { getNextStepConfig, canAdvanceToNextStep, getGuideNotification, GUIDE_STEPS } from './guideSystem';
 
 
 // 状态更新辅助函数 - 减少代码重复
@@ -1099,6 +1100,100 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'RESET_GAME': {
       return initialGameState;
+    }
+
+    // ==================== 新手引导 ====================
+    case 'START_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          isActive: true,
+          currentStep: 'welcome',
+          completedSteps: [],
+          shownTips: [],
+        },
+        notifications: [
+          ...state.notifications,
+          getGuideNotification('welcome'),
+        ],
+      };
+    }
+
+    case 'NEXT_GUIDE_STEP': {
+      // 检查是否可以进入下一步
+      if (!canAdvanceToNextStep(state)) {
+        return state;
+      }
+      
+      const nextConfig = getNextStepConfig(state.guide.currentStep);
+      if (!nextConfig) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          currentStep: nextConfig.step,
+        },
+        notifications: [
+          ...state.notifications,
+          getGuideNotification(nextConfig.step),
+        ],
+      };
+    }
+
+    case 'COMPLETE_GUIDE_STEP': {
+      const isAlreadyCompleted = state.guide.completedSteps.includes(action.step);
+      if (isAlreadyCompleted) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          completedSteps: [...state.guide.completedSteps, action.step],
+        },
+      };
+    }
+
+    case 'END_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          isActive: false,
+          currentStep: 'complete',
+          completedSteps: [...state.guide.completedSteps, 'complete'],
+        },
+      };
+    }
+
+    case 'ADD_SHOWN_TIP': {
+      if (state.guide.shownTips.includes(action.tipId)) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          shownTips: [...state.guide.shownTips, action.tipId],
+        },
+      };
+    }
+
+    case 'SKIP_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          isActive: false,
+          currentStep: 'complete',
+          completedSteps: GUIDE_STEPS.map(s => s.step),
+          shownTips: [],
+        },
+      };
     }
 
     default:

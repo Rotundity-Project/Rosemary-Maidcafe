@@ -222,6 +222,27 @@ export interface Task {
   dayAssigned: number;
 }
 
+// ==================== 新手引导相关类型 ====================
+
+export type GuideStep = 
+  | 'welcome'
+  | 'hire_first_maid'
+  | 'assign_maid_role'
+  | 'start_business'
+  | 'serve_first_customer'
+  | 'check_finance'
+  | 'upgrade_facility'
+  | 'complete';
+
+export interface GuideState {
+  isActive: boolean;
+  currentStep: GuideStep;
+  completedSteps: GuideStep[];
+  shownTips: string[];  // 已显示的提示ID
+}
+
+export type TipPosition = 'top' | 'bottom' | 'left' | 'right';
+
 // ==================== 统计相关类型 ====================
 
 export interface GameStatistics {
@@ -296,6 +317,9 @@ export interface GameState {
   activePanel: PanelType;
   notifications: Notification[];
   dailySummaryOpen: boolean;
+  
+  // 新手引导
+  guide: GuideState;
 }
 
 
@@ -362,4 +386,12 @@ export type GameAction =
   
   // 存储
   | { type: 'LOAD_GAME'; state: GameState }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  
+  // 新手引导
+  | { type: 'START_GUIDE' }
+  | { type: 'NEXT_GUIDE_STEP' }
+  | { type: 'COMPLETE_GUIDE_STEP'; step: GuideStep }
+  | { type: 'END_GUIDE' }
+  | { type: 'ADD_SHOWN_TIP'; tipId: string }
+  | { type: 'SKIP_GUIDE' };
