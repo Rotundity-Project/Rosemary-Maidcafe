@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Maid, MaidRole, MaidPersonality } from '@/types';
 import { useGame } from '@/components/game/GameProvider';
+import { useI18n } from '@/i18n';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
@@ -11,13 +12,6 @@ import { BottomDrawer } from '@/components/ui/BottomDrawer';
 import { generateRandomMaid, getMaxMaids, getExperienceForLevel } from '@/systems/maidSystem';
 import { personalityDescriptions, hireCostByLevel } from '@/data/maidNames';
 import { getAllUsedImages } from '@/data/maidImages';
-
-const roleLabels: Record<MaidRole, string> = {
-  greeter: '迎宾',
-  server: '服务员',
-  barista: '咖啡师',
-  entertainer: '表演者',
-};
 
 const roleIcons: Record<MaidRole, string> = {
   greeter: '👋',
@@ -43,23 +37,18 @@ const personalityEmojis: Record<MaidPersonality, string> = {
   playful: '🎀',
 };
 
-const personalityLabels: Record<MaidPersonality, string> = {
-  cheerful: '开朗',
-  cool: '冷静',
-  shy: '害羞',
-  energetic: '活力',
-  elegant: '优雅',
-  gentle: '温柔',
-  playful: '俏皮',
-};
-
 export function MaidPanel() {
   const { state, dispatch } = useGame();
+  const { t } = useI18n();
   const [selectedMaid, setSelectedMaid] = useState<Maid | null>(null);
   const [showHireModal, setShowHireModal] = useState(false);
   const [candidates, setCandidates] = useState<Maid[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
+
+  const maidPanel = t.maidPanel;
+  const maidRoles = t.maidRoles;
+  const maidPersonalities = t.maidPersonalities;
 
   // Detect mobile viewport
   useEffect(() => {
@@ -140,10 +129,10 @@ export function MaidPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-800">
-          👧 女仆管理
+          👧 {maidPanel.maidManagement}
         </h2>
         <div className="text-sm text-gray-500">
-          {state.maids.length} / {maxMaids} 名女仆
+          {maidPanel.maidCount.replace('{count}', String(state.maids.length)).replace('{max}', String(maxMaids))}
         </div>
       </div>
 
@@ -155,21 +144,21 @@ export function MaidPanel() {
         className="w-full"
       >
         {canHireMore
-          ? `雇佣新女仆 (💰 ${hireCost})`
-          : '已达到最大女仆数量'}
+          ? `${maidPanel.hireNewMaid} (💰 ${hireCost})`
+          : maidPanel.maxMaidsReached}
       </Button>
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
         {/* Maid List - Full width on mobile, flex-1 on desktop */}
         <div className="flex-1 min-h-0 overflow-auto w-full">
           <Card className="h-full">
-            <CardHeader>已雇佣女仆</CardHeader>
+            <CardHeader>{maidPanel.hiredMaids}</CardHeader>
             <CardBody>
               {state.maids.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <div className="text-4xl mb-2">👧</div>
-                  <p>还没有雇佣女仆</p>
-                  <p className="text-sm">点击上方按钮雇佣第一位女仆吧！</p>
+                  <p>{maidPanel.noMaidsYet}</p>
+                  <p className="text-sm">{maidPanel.hireFirstMaidTip}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3">
@@ -179,6 +168,8 @@ export function MaidPanel() {
                       maid={maid}
                       selected={selectedMaid?.id === maid.id}
                       onClick={() => handleSelectMaid(maid)}
+                      maidPanel={maidPanel}
+                      maidRoles={maidRoles}
                     />
                   ))}
                 </div>
@@ -195,6 +186,9 @@ export function MaidPanel() {
               onAssignRole={handleAssignRole}
               onFire={handleFireMaid}
               onToggleRest={handleToggleRest}
+              maidPanel={maidPanel}
+              maidRoles={maidRoles}
+              maidPersonalities={maidPersonalities}
             />
           </div>
         )}
@@ -205,7 +199,7 @@ export function MaidPanel() {
         <BottomDrawer
           isOpen={showMobileDetail}
           onClose={handleCloseMobileDetail}
-          title={`${selectedMaid.name} 详情`}
+          title={`${selectedMaid.name} ${maidPanel.details}`}
           height="auto"
         >
           <MaidDetailCard
@@ -215,6 +209,9 @@ export function MaidPanel() {
             onToggleRest={handleToggleRest}
             onClose={handleCloseMobileDetail}
             isMobile={true}
+            maidPanel={maidPanel}
+            maidRoles={maidRoles}
+            maidPersonalities={maidPersonalities}
           />
         </BottomDrawer>
       )}
@@ -228,6 +225,9 @@ export function MaidPanel() {
           onHire={handleHireMaid}
           onClose={() => setShowHireModal(false)}
           onRefresh={handleOpenHireModal}
+          maidPanel={maidPanel}
+          maidRoles={maidRoles}
+          maidPersonalities={maidPersonalities}
         />
       )}
     </div>
@@ -240,9 +240,11 @@ interface MaidListItemProps {
   maid: Maid;
   selected: boolean;
   onClick: () => void;
+  maidPanel: any;
+  maidRoles: any;
 }
 
-function MaidListItem({ maid, selected, onClick }: MaidListItemProps) {
+function MaidListItem({ maid, selected, onClick, maidPanel, maidRoles }: MaidListItemProps) {
   const isLowStamina = maid.stamina < 20;
   const isResting = maid.status.isResting;
 
@@ -278,11 +280,11 @@ function MaidListItem({ maid, selected, onClick }: MaidListItemProps) {
           <div className="flex items-center gap-2 mt-1">
             {isResting ? (
               <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border-gray-300">
-                💤 休息中
+                💤 {maidPanel.rest}
               </span>
             ) : (
               <span className={`text-xs px-2 py-0.5 rounded-full ${roleColors[maid.role]}`}>
-                {roleIcons[maid.role]} {roleLabels[maid.role]}
+                {roleIcons[maid.role]} {maidRoles[maid.role]}
               </span>
             )}
           </div>
@@ -292,7 +294,7 @@ function MaidListItem({ maid, selected, onClick }: MaidListItemProps) {
         <StaminaBar value={maid.stamina} size="xs" />
       </div>
       {isLowStamina && !isResting && (
-        <div className="mt-1 text-xs text-red-500">⚠️ 体力不足</div>
+        <div className="mt-1 text-xs text-red-500">⚠️ {maidPanel.lowStaminaWarning}</div>
       )}
     </div>
   );
@@ -306,9 +308,12 @@ interface MaidDetailCardProps {
   onToggleRest: (maidId: string) => void;
   onClose?: () => void;
   isMobile?: boolean;
+  maidPanel: any;
+  maidRoles: any;
+  maidPersonalities: any;
 }
 
-function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isMobile = false }: MaidDetailCardProps) {
+function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isMobile = false, maidPanel, maidRoles, maidPersonalities }: MaidDetailCardProps) {
   const [showFireConfirm, setShowFireConfirm] = useState(false);
   const expForNextLevel = getExperienceForLevel(maid.level);
   const expProgress = (maid.experience / expForNextLevel) * 100;
@@ -345,12 +350,12 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
             </span>
             {isResting && (
               <span className="text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-600">
-                💤 休息中
+                💤 {maidPanel.rest}
               </span>
             )}
           </div>
           <div className="text-sm text-gray-500 mt-1">
-            {personalityLabels[maid.personality]}性格 · {roleLabels[maid.role]}
+            {maidPersonalities[maid.personality]}性格 · {maidRoles[maid.role]}
           </div>
         </div>
       </div>
@@ -363,25 +368,25 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2 mb-4">
         <div className="p-2 bg-pink-50 rounded-xl text-center">
-          <div className="text-pink-600">💕 魅力</div>
+          <div className="text-pink-600">💕 {maidPanel.charm}</div>
           <div className="text-lg font-bold text-gray-800">
             {maid.stats.charm}
           </div>
         </div>
         <div className="p-2 bg-blue-50 rounded-xl text-center">
-          <div className="text-blue-600">⭐ 技能</div>
+          <div className="text-blue-600">⭐ {maidPanel.skill}</div>
           <div className="text-lg font-bold text-gray-800">
             {maid.stats.skill}
           </div>
         </div>
         <div className="p-2 bg-green-50 rounded-xl text-center">
-          <div className="text-green-600">💪 体质</div>
+          <div className="text-green-600">💪 {maidPanel.stamina}</div>
           <div className="text-lg font-bold text-gray-800">
             {maid.stats.stamina}
           </div>
         </div>
         <div className="p-2 bg-yellow-50 rounded-xl text-center">
-          <div className="text-yellow-600">⚡ 速度</div>
+          <div className="text-yellow-600">⚡ {maidPanel.speed}</div>
           <div className="text-lg font-bold text-gray-800">
             {maid.stats.speed}
           </div>
@@ -398,7 +403,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
       {/* Role Assignment */}
       <div className="mb-4">
         <div className="text-sm font-medium text-gray-700 mb-2">
-          分配角色
+          {maidPanel.assignRole}
         </div>
         <div className="flex flex-wrap gap-2">
           {roles.map((role) => (
@@ -416,7 +421,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
                 ${isResting ? 'opacity-50 cursor-not-allowed' : ''}
               `}
             >
-              {roleIcons[role]} {roleLabels[role]}
+              {roleIcons[role]} {maidRoles[role]}
             </button>
           ))}
         </div>
@@ -430,7 +435,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
           onClick={() => onToggleRest(maid.id)}
           className="w-full"
         >
-          {isResting ? '🔔 结束休息' : '💤 安排休息'}
+          {isResting ? `🔔 ${maidPanel.endRest}` : `💤 ${maidPanel.arrangeRest}`}
         </Button>
       </div>
 
@@ -442,7 +447,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
           onClick={() => setShowFireConfirm(true)}
           className="w-full text-red-500 hover:bg-red-50"
         >
-          解雇女仆
+          {maidPanel.dismissMaid}
         </Button>
       ) : (
         <div className="flex gap-2">
@@ -452,7 +457,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
             onClick={() => handleFire(maid.id)}
             className="flex-1"
           >
-            确认解雇
+            {maidPanel.confirmDismiss}
           </Button>
           <Button
             variant="secondary"
@@ -460,7 +465,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
             onClick={() => setShowFireConfirm(false)}
             className="flex-1"
           >
-            取消
+            {maidPanel.cancel}
           </Button>
         </div>
       )}
@@ -491,6 +496,9 @@ interface HireMaidModalProps {
   onHire: (maid: Maid) => void;
   onClose: () => void;
   onRefresh: () => void;
+  maidPanel: any;
+  maidRoles: any;
+  maidPersonalities: any;
 }
 
 function HireMaidModal({
@@ -500,6 +508,9 @@ function HireMaidModal({
   onHire,
   onClose,
   onRefresh,
+  maidPanel,
+  maidRoles,
+  maidPersonalities,
 }: HireMaidModalProps) {
   const canAfford = gold >= hireCost;
 
@@ -509,7 +520,7 @@ function HireMaidModal({
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-800">
-              👧 雇佣新女仆
+              👧 {maidPanel.hireCandidates}
             </h3>
             <button
               onClick={onClose}
@@ -520,10 +531,10 @@ function HireMaidModal({
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-sm text-gray-500">
-              雇佣费用: 💰 {hireCost}
+              {maidPanel.hireCost}: 💰 {hireCost}
             </span>
             <span className={`text-sm ${canAfford ? 'text-green-600' : 'text-red-500'}`}>
-              当前金币: 💰 {gold}
+              {maidPanel.currentGold}: 💰 {gold}
             </span>
           </div>
         </div>
@@ -536,13 +547,16 @@ function HireMaidModal({
                 maid={candidate}
                 canAfford={canAfford}
                 onHire={() => onHire(candidate)}
+                maidPanel={maidPanel}
+                maidRoles={maidRoles}
+                maidPersonalities={maidPersonalities}
               />
             ))}
           </div>
 
           <div className="mt-4 flex justify-center">
             <Button variant="secondary" onClick={onRefresh}>
-              🔄 刷新候选人
+              🔄 {maidPanel.refreshCandidates}
             </Button>
           </div>
         </div>
@@ -556,9 +570,12 @@ interface CandidateCardProps {
   maid: Maid;
   canAfford: boolean;
   onHire: () => void;
+  maidPanel: any;
+  maidRoles: any;
+  maidPersonalities: any;
 }
 
-function CandidateCard({ maid, canAfford, onHire }: CandidateCardProps) {
+function CandidateCard({ maid, canAfford, onHire, maidPanel, maidRoles, maidPersonalities }: CandidateCardProps) {
   return (
     <div className="p-4 border-2 border-gray-100 rounded-2xl hover:border-pink-300 transition-colors">
       {/* Avatar and Name */}
@@ -570,7 +587,7 @@ function CandidateCard({ maid, canAfford, onHire }: CandidateCardProps) {
         <div className="flex items-center justify-center gap-1 mt-1">
           <span className="text-sm">{personalityEmojis[maid.personality]}</span>
           <span className="text-sm text-gray-500">
-            {personalityLabels[maid.personality]}
+            {maidPersonalities[maid.personality]}
           </span>
         </div>
       </div>
@@ -583,19 +600,19 @@ function CandidateCard({ maid, canAfford, onHire }: CandidateCardProps) {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
         <div className="flex items-center justify-between p-1.5 bg-pink-50 rounded-lg">
-          <span>💕 魅力</span>
+          <span>💕 {maidPanel.charm}</span>
           <span className="font-bold">{maid.stats.charm}</span>
         </div>
         <div className="flex items-center justify-between p-1.5 bg-blue-50 rounded-lg">
-          <span>⭐ 技能</span>
+          <span>⭐ {maidPanel.skill}</span>
           <span className="font-bold">{maid.stats.skill}</span>
         </div>
         <div className="flex items-center justify-between p-1.5 bg-green-50 rounded-lg">
-          <span>💪 体质</span>
+          <span>💪 {maidPanel.stamina}</span>
           <span className="font-bold">{maid.stats.stamina}</span>
         </div>
         <div className="flex items-center justify-between p-1.5 bg-yellow-50 rounded-lg">
-          <span>⚡ 速度</span>
+          <span>⚡ {maidPanel.speed}</span>
           <span className="font-bold">{maid.stats.speed}</span>
         </div>
       </div>
