@@ -413,7 +413,7 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
         <div className="text-sm font-medium text-gray-700 mb-2">
           {maidPanel.assignRole}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-3">
           {roles.map((role) => (
             <button
               key={role}
@@ -430,13 +430,34 @@ function MaidDetailCard({ maid, onAssignRole, onFire, onToggleRest, onClose, isM
               `}
             >
               {roleIcons[role]} {maidRoles[role]}
-              {/* 角色说明 Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
-                {roleDescriptions[role]}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800" />
-              </div>
             </button>
           ))}
+        </div>
+        
+        {/* 职位说明 */}
+        <div className="p-3 bg-gray-50 rounded-xl space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-700">
+            <span>💡</span>
+            <span>职位说明</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-start gap-1.5">
+              <span className="text-pink-500">👋</span>
+              <span className="text-gray-600">迎宾：提高入座率，恢复耐心</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-blue-500">🍽️</span>
+              <span className="text-gray-600">服务员：点餐上餐，影响小费</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-amber-500">☕</span>
+              <span className="text-gray-600">咖啡师：制作饮品，影响销量</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <span className="text-purple-500">🎭</span>
+              <span className="text-gray-600">表演者：舞台演出，增加满意度</span>
+            </div>
+          </div>
         </div>
       </div>
 
