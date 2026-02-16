@@ -9,7 +9,7 @@ export interface MaidStats {
 
 export type MaidRole = 'greeter' | 'server' | 'barista' | 'entertainer';
 
-export type MaidPersonality = 'cheerful' | 'cool' | 'shy' | 'energetic' | 'elegant';
+export type MaidPersonality = 'cheerful' | 'cool' | 'shy' | 'energetic' | 'elegant' | 'gentle' | 'playful';
 
 export interface MaidStatus {
   isWorking: boolean;

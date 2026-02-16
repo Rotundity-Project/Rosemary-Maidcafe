@@ -72,6 +72,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
+  // Track if user has interacted with the page
+  const hasUserInteracted = useRef(false);
+
   const ensureAudioContext = useCallback((): AudioContext | null => {
     if (typeof window === 'undefined') return null;
     const existing = audioContextRef.current;
@@ -80,6 +83,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const webkitAudioContext = (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     const Ctor = window.AudioContext || webkitAudioContext;
     if (!Ctor) return null;
+
+    // Only create AudioContext after user interaction to avoid autoplay warning
+    if (!hasUserInteracted.current) {
+      return null;
+    }
 
     const created = new Ctor();
     audioContextRef.current = created;
@@ -100,6 +108,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const onUserGesture = () => {
+      hasUserInteracted.current = true;
       void resumeIfNeeded();
     };
     window.addEventListener('pointerdown', onUserGesture);

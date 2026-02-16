@@ -46,6 +46,8 @@ const personalityEmojis: Record<MaidPersonality, string> = {
   shy: '😳',
   energetic: '⚡',
   elegant: '✨',
+  gentle: '🌸',
+  playful: '🎀',
 };
 
 export function MaidCard({
