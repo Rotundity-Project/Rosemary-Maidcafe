@@ -78,7 +78,15 @@ export function Modal({
           sm:rounded-2xl sm:mx-4
           flex flex-col
           max-h-screen sm:max-h-[90vh]
+          /* Mobile optimizations */
+          pb-safe
         `}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}

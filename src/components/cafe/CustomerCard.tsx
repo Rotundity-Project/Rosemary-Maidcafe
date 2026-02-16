@@ -79,14 +79,15 @@ export function CustomerCard({
       onClick={onClick}
       className={`
         relative p-3 rounded-xl bg-white
-        border-2 transition-all duration-200
+        border-2 transition-all duration-150 active:scale-[0.99] touch-feedback
         ${selected 
           ? 'border-pink-500 shadow-lg shadow-pink-500/20' 
           : 'border-gray-100'
         }
-        ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300' : ''}
+        ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300 active:border-pink-400' : ''}
         ${isPatienceCritical ? 'motion-safe:animate-pulse' : ''}
       `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       {/* Customer Type Badge */}
       <div className="absolute -top-2 -right-2">
