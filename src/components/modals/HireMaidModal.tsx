@@ -104,8 +104,8 @@ export function HireMaidModal({
         </span>
       </div>
 
-      {/* Candidates Grid - Single column on mobile, 3 columns on desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4">
+      {/* Candidates - Horizontal scroll on mobile, grid on desktop */}
+      <div className="flex sm:grid sm:grid-cols-3 gap-3 mb-4 overflow-x-auto sm:overflow-visible scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
         {candidates.map((candidate) => (
           <CandidateCard
             key={candidate.id}
@@ -114,6 +114,7 @@ export function HireMaidModal({
             canAfford={canAfford}
             onSelect={() => setSelectedCandidate(candidate)}
             onHire={() => handleHire(candidate)}
+            isCompact
           />
         ))}
       </div>
@@ -151,9 +152,82 @@ interface CandidateCardProps {
   canAfford: boolean;
   onSelect: () => void;
   onHire: () => void;
+  isCompact?: boolean;
 }
 
-function CandidateCard({ maid, isSelected, canAfford, onSelect, onHire }: CandidateCardProps) {
+function CandidateCard({ maid, isSelected, canAfford, onSelect, onHire, isCompact }: CandidateCardProps) {
+  if (isCompact) {
+    // Mobile compact card - horizontal scroll
+    const totalStats = maid.stats.charm + maid.stats.skill + maid.stats.stamina + maid.stats.speed;
+    return (
+      <div
+        onClick={onSelect}
+        className={`
+          flex-shrink-0 w-[160px] p-3 rounded-xl cursor-pointer transition-all duration-150 active:scale-95 touch-feedback
+          border-2
+          ${isSelected
+            ? 'border-pink-500 bg-pink-50 shadow-lg'
+            : 'border-gray-100 bg-white hover:border-pink-300 active:border-pink-400'
+          }
+        `}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+      >
+        {/* Avatar and Name */}
+        <div className="flex items-center gap-2 mb-2">
+          <MaidAvatar src={maid.avatar} name={maid.name} size="md" />
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm text-gray-900 truncate">{maid.name}</div>
+            <div className="flex items-center gap-1">
+              <span>{personalityEmojis[maid.personality]}</span>
+              <span className="text-xs text-gray-500">{personalityLabels[maid.personality]}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats - 2x2 grid */}
+        <div className="grid grid-cols-2 gap-1 mb-2">
+          <div className="bg-pink-50 rounded px-1.5 py-1 flex justify-between text-xs">
+            <span>💕</span><span className="font-bold">{maid.stats.charm}</span>
+          </div>
+          <div className="bg-blue-50 rounded px-1.5 py-1 flex justify-between text-xs">
+            <span>⭐</span><span className="font-bold">{maid.stats.skill}</span>
+          </div>
+          <div className="bg-green-50 rounded px-1.5 py-1 flex justify-between text-xs">
+            <span>💪</span><span className="font-bold">{maid.stats.stamina}</span>
+          </div>
+          <div className="bg-yellow-50 rounded px-1.5 py-1 flex justify-between text-xs">
+            <span>⚡</span><span className="font-bold">{maid.stats.speed}</span>
+          </div>
+        </div>
+
+        {/* Total */}
+        <div className="text-center text-xs text-gray-500 mb-2">
+          总属性: <span className="font-bold text-purple-600">{totalStats}</span>
+        </div>
+
+        {/* Hire Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onHire();
+          }}
+          disabled={!canAfford}
+          className={`
+            w-full py-2 rounded-lg text-sm font-medium transition-all duration-150 active:scale-95
+            ${isSelected
+              ? 'bg-pink-500 text-white'
+              : 'bg-pink-100 text-pink-700'
+            }
+            ${!canAfford ? 'opacity-50 cursor-not-allowed' : 'active:bg-pink-600'}
+          `}
+        >
+          {canAfford ? '雇佣' : '不足'}
+        </button>
+      </div>
+    );
+  }
+
+  // Desktop card - vertical layout
   return (
     <div
       onClick={onSelect}
