@@ -1,9 +1,10 @@
 'use client';
 
-import { Maid, Finance, GameStatistics } from '@/types';
+import { Maid, Finance, GameStatistics, Facility } from '@/types';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { formatGold } from '@/utils/formatters';
+import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 
 interface DailySummaryModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface DailySummaryModalProps {
   day: number;
   finance: Finance;
   maids: Maid[];
+  facility: Facility;
   customersServedToday: number;
   statistics: GameStatistics;
 }
@@ -22,10 +24,14 @@ export function DailySummaryModal({
   onStartNewDay,
   day,
   finance,
-  maids: _maids,
+  maids,
+  facility,
   statistics,
 }: DailySummaryModalProps) {
-  const profit = finance.dailyRevenue - finance.dailyExpenses;
+  // 计算当日实际支出
+  const dailyOperatingCost = calculateDailyOperatingCost(maids, facility);
+  const totalExpenses = finance.dailyExpenses + dailyOperatingCost;
+  const profit = finance.dailyRevenue - totalExpenses;
   const isProfitable = profit >= 0;
 
   const handleStartNewDay = () => {
@@ -67,7 +73,7 @@ export function DailySummaryModal({
         <div className="p-4 sm:p-3 rounded-xl text-center bg-red-50">
           <div className="text-2xl sm:text-xl mb-1">💸</div>
           <div className="text-sm sm:text-xs text-gray-500 mb-1">支出</div>
-          <div className="font-bold text-base sm:text-base text-red-600">{formatGold(finance.dailyExpenses)}</div>
+          <div className="font-bold text-base sm:text-base text-red-600">{formatGold(totalExpenses)}</div>
         </div>
         <div className={`p-4 sm:p-3 rounded-xl text-center ${isProfitable ? 'bg-green-50' : 'bg-red-50'}`}>
           <div className="text-2xl sm:text-xl mb-1">{isProfitable ? '📈' : '📉'}</div>

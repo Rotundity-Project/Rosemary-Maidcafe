@@ -267,6 +267,14 @@ export const translations = {
       entertainer: '表演者',
     },
 
+    // 女仆角色说明
+    maidRoleDescriptions: {
+      greeter: '在门口迎接顾客，提高顾客入座率。影响顾客等待耐心恢复速度。',
+      server: '为顾客提供点餐和上餐服务，影响小费收入。',
+      barista: '制作咖啡和饮品，影响饮品销量和价格。',
+      entertainer: '在表演舞台演出，增加顾客满意度和消费意愿。',
+    },
+
     // 女仆性格
     maidPersonalities: {
       cheerful: '开朗',
@@ -547,6 +555,14 @@ export const translations = {
       server: 'Server',
       barista: 'Barista',
       entertainer: 'Entertainer',
+    },
+
+    // 女仆角色说明
+    maidRoleDescriptions: {
+      greeter: 'Greets customers at the entrance, improves seating rate. Affects customer patience recovery.',
+      server: 'Takes orders and serves food, affects tip income.',
+      barista: 'Makes coffee and drinks, affects drink sales and prices.',
+      entertainer: 'Performs on stage, increases customer satisfaction and spending.',
     },
 
     // 女仆性格

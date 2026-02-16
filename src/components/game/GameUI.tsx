@@ -159,6 +159,7 @@ export function GameUI() {
         day={state.day}
         finance={state.finance}
         maids={state.maids}
+        facility={state.facility}
         customersServedToday={state.runtime.customersServedToday}
         statistics={state.statistics}
       />
