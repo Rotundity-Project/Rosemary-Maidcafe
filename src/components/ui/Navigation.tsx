@@ -192,20 +192,22 @@ function NavBottomButton({ item, isActive, onClick }: NavBottomButtonProps) {
       onClick={onClick}
       className={`
         flex flex-col items-center justify-center gap-0.5 
-        min-w-[44px] min-h-[44px] px-2 py-1.5 rounded-xl
-        transition-all duration-200 active:scale-95 active:opacity-80 select-none
+        min-w-[48px] min-h-[48px] px-2 py-1.5 rounded-xl
+        transition-all duration-150 active:scale-95 active:opacity-70 select-none
+        touch-feedback
         ${
           isActive
             ? 'text-pink-600 bg-pink-50 shadow-sm'
             : 'text-gray-500 hover:text-pink-500 active:bg-pink-50/50'
         }
       `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
       aria-current={isActive ? 'page' : undefined}
     >
-      <span className={`text-xl ${isActive ? 'scale-110' : ''} transition-transform duration-200`}>
+      <span className={`text-2xl ${isActive ? 'scale-110' : ''} transition-transform duration-200`}>
         {item.icon}
       </span>
-      <span className={`text-[10px] font-medium ${isActive ? 'font-semibold' : ''}`}>
+      <span className={`text-[11px] font-medium ${isActive ? 'font-semibold' : ''}`}>
         {item.shortLabel || item.label}
       </span>
     </button>

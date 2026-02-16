@@ -52,12 +52,12 @@ export function Seat({
       onClick={handleClick}
       className={`
         relative p-2 rounded-lg min-h-[72px]
-        transition-all duration-200
+        transition-all duration-150 active:scale-[0.98] touch-feedback
         ${isEmpty 
           ? `
             bg-gray-50 
             border border-dashed border-gray-200
-            ${onSeatClick ? 'cursor-pointer hover:border-pink-300 hover:bg-pink-50' : ''}
+            ${onSeatClick ? 'cursor-pointer hover:border-pink-300 hover:bg-pink-50 active:bg-pink-100' : ''}
           `
           : `
             bg-white border
@@ -65,12 +65,13 @@ export function Seat({
               ? 'border-pink-500 shadow-md' 
               : 'border-gray-100'
             }
-            ${onCustomerClick ? 'cursor-pointer hover:border-pink-300' : ''}
+            ${onCustomerClick ? 'cursor-pointer hover:border-pink-300 active:border-pink-400' : ''}
             ${isPatienceCritical ? 'motion-safe:animate-pulse border-red-400' : ''}
           `
         }
         ${isHighlighted ? 'ring-2 ring-pink-400 ring-offset-1' : ''}
       `}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       {isEmpty ? (
         /* Empty Seat - Compact */

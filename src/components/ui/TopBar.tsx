@@ -83,7 +83,7 @@ export function TopBar() {
       </div>
 
       {/* Mobile layout (< 640px): Compact two-row layout */}
-      <div className="flex sm:hidden flex-col gap-2 max-w-7xl mx-auto">
+      <div className="flex sm:hidden flex-col gap-2 max-w-7xl mx-auto safe-area-top">
         {/* Row 1: Icon, Time, Pause button, Speed Control */}
         <div className="flex items-center justify-between gap-2">
           {/* Left: Game icon only (no title text on mobile) */}
@@ -92,7 +92,7 @@ export function TopBar() {
           </div>
 
           {/* Center: Time display */}
-          <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-2 py-1 border border-pink-100 flex-1 justify-center">
+          <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-3 py-1.5 border border-pink-100 flex-1 justify-center">
             <span className="text-base">🕐</span>
             <span className="font-mono text-base font-semibold text-gray-800">
               {formatGameTime(time)}
@@ -102,11 +102,12 @@ export function TopBar() {
           {/* Right: Pause button with touch-target size */}
           <button
             onClick={handleTogglePause}
-            className={`touch-target flex items-center justify-center rounded-lg transition-all duration-150 active:scale-95 ${
+            className={`touch-target-lg flex items-center justify-center rounded-lg transition-all duration-150 active:scale-95 min-w-[48px] min-h-[48px] ${
               isPaused 
                 ? 'bg-pink-500 text-white' 
                 : 'bg-pink-100 text-pink-700 border border-pink-200'
             }`}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
             aria-label={isPaused ? '继续游戏' : '暂停游戏'}
           >
             {isPaused ? <PlayIcon /> : <PauseIcon />}
@@ -114,31 +115,31 @@ export function TopBar() {
         </div>
 
         {/* Row 2: Resources (Gold, Reputation, Day/Season) and Speed Control */}
-        <div className="flex items-center justify-between gap-1.5">
+        <div className="flex items-center justify-between gap-2">
           {/* Gold */}
-          <div className="flex items-center gap-1 bg-yellow-50 px-1.5 py-1 rounded-lg border border-yellow-100 flex-1 justify-center">
-            <span className="text-sm">💰</span>
+          <div className="flex items-center gap-1.5 bg-yellow-50 px-2 py-1.5 rounded-lg border border-yellow-100 flex-1 justify-center">
+            <span className="text-base">💰</span>
             <span className="font-semibold text-yellow-700 text-sm">
               {formatGold(finance.gold)}
             </span>
           </div>
 
           {/* Reputation */}
-          <div className="flex items-center gap-1 bg-purple-50 px-1.5 py-1 rounded-lg border border-purple-100 flex-1 justify-center">
-            <span className="text-sm">⭐</span>
+          <div className="flex items-center gap-1.5 bg-purple-50 px-2 py-1.5 rounded-lg border border-purple-100 flex-1 justify-center">
+            <span className="text-base">⭐</span>
             <span className="font-semibold text-purple-700 text-sm">
               {reputation}
             </span>
           </div>
 
           {/* Day/Season */}
-          <div className="flex items-center gap-1 bg-gray-50 px-1.5 py-1 rounded-lg border border-gray-100 flex-1 justify-center">
-            <span className="text-sm">{getSeasonIcon(season)}</span>
+          <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 flex-1 justify-center">
+            <span className="text-base">{getSeasonIcon(season)}</span>
             <span className="text-gray-600 text-sm font-medium">D{day}</span>
           </div>
 
           {/* Speed Control - Compact version for mobile */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-1">
             {[
               { value: 0.5, label: '0.5x', icon: '🐢' },
               { value: 1, label: '1x', icon: '🚶' },
@@ -149,13 +150,14 @@ export function TopBar() {
                 key={option.value}
                 onClick={() => handleSpeedChange(option.value as typeof gameSpeed)}
                 className={`
-                  flex items-center justify-center px-1.5 py-1 rounded text-xs font-medium
-                  transition-all duration-200
+                  flex items-center justify-center px-2 py-1.5 rounded text-xs font-medium
+                  transition-all duration-150 active:scale-95 touch-feedback
                   ${gameSpeed === option.value
                     ? 'bg-white text-pink-600 shadow-sm'
                     : 'text-gray-600 hover:bg-white/50'
                   }
                 `}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
                 aria-label={`游戏速度 ${option.label}`}
               >
                 <span>{option.icon}</span>

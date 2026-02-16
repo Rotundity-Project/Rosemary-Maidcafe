@@ -1892,6 +1892,45 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* 移动端优化：更好的触摸反馈类 */
+.touch-feedback {
+  @apply transition-all duration-150;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-feedback:active {
+  @apply scale-95 opacity-80;
+}
+
+.touch-feedback-lg {
+  @apply transition-all duration-150;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-feedback-lg:active {
+  @apply scale-95 opacity-70;
+}
+
+/* 移动端优化：安全的底部填充 */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* 移动端优化：更大的触摸目标 */
+.touch-target-lg {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* 移动端优化：防止滚动反弹 */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
 /* 底部抽屉基础样式 */
 .bottom-drawer {
   @apply fixed bottom-0 left-0 right-0 z-50;
