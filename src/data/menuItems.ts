@@ -541,4 +541,30 @@ export const defaultMenuItems: MenuItem[] = [
   // New Drinks - Added during optimization
   { id: 'cola', name: '可乐', nameEn: 'Cola', category: 'drinks', basePrice: 18, currentPrice: 18, unlocked: false, unlockCost: 100, popularity: 0, prepTime: 15, season: null, icon: '🥤' },
   { id: 'milk-tea-pearl', name: '珍珠奶茶', nameEn: 'Bubble Tea', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 45, season: null, icon: '🧋' },
+
+  // ==================== 中国传统节日限定菜单 ====================
+  // 春节系列 (Spring Festival - 春季)
+  { id: 'tanghulu', name: '糖葫芦', nameEn: 'Candied Haws', category: 'desserts', basePrice: 25, currentPrice: 25, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 15, season: 'spring', icon: '🍡' },
+  { id: 'nian Gao', name: '年糕', nameEn: 'Rice Cake', category: 'main', basePrice: 35, currentPrice: 35, unlocked: false, unlockCost: 250, popularity: 0, prepTime: 40, season: 'spring', icon: '🍰' },
+  { id: 'spring-festival-set', name: '春节吉祥套餐', nameEn: 'Spring Festival Set', category: 'special', basePrice: 168, currentPrice: 168, unlocked: false, unlockCost: 1500, popularity: 0, prepTime: 180, season: 'spring', icon: '🧧' },
+  
+  // 元宵节 (Lantern Festival - 春季)
+  { id: 'tangyuan', name: '汤圆', nameEn: 'Glutinous Rice Balls', category: 'desserts', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 200, popularity: 0, prepTime: 30, season: 'spring', icon: '🥣' },
+  { id: 'yuanxiao-set', name: '元宵团圆套餐', nameEn: 'Lantern Festival Set', category: 'special', basePrice: 128, currentPrice: 128, unlocked: false, unlockCost: 1100, popularity: 0, prepTime: 150, season: 'spring', icon: '🏮' },
+  
+  // 端午节 (Dragon Boat Festival - 夏季)
+  { id: 'zongzi', name: '粽子', nameEn: 'Rice Dumpling', category: 'main', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 35, season: 'summer', icon: '🎋' },
+  { id: 'dragon-boat-set', name: '端午安康套餐', nameEn: 'Dragon Boat Set', category: 'special', basePrice: 118, currentPrice: 118, unlocked: false, unlockCost: 1000, popularity: 0, prepTime: 140, season: 'summer', icon: '🐉' },
+  
+  // 中秋节强化版 (Mid-Autumn Festival - 秋季)
+  { id: 'mooncake-lotus', name: '莲蓉月饼', nameEn: 'Lotus Seed Paste Mooncake', category: 'desserts', basePrice: 45, currentPrice: 45, unlocked: false, unlockCost: 350, popularity: 0, prepTime: 25, season: 'autumn', icon: '🥮' },
+  { id: 'mooncake-red-bean', name: '红豆月饼', nameEn: 'Red Bean Mooncake', category: 'desserts', basePrice: 42, currentPrice: 42, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 25, season: 'autumn', icon: '🥮' },
+  
+  // 重阳节 (Double Ninth Festival - 秋季)
+  { id: 'chrysanthemum-tea', name: '菊花茶', nameEn: 'Chrysanthemum Tea', category: 'drinks', basePrice: 26, currentPrice: 26, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 30, season: 'autumn', icon: '🌼' },
+  { id: 'double-ninth-set', name: '重阳登高套餐', nameEn: 'Double Ninth Set', category: 'special', basePrice: 98, currentPrice: 98, unlocked: false, unlockCost: 800, popularity: 0, prepTime: 120, season: 'autumn', icon: '🌿' },
+  
+  // 冬季暖饮系列
+  { id: 'ginger-tea', name: '姜茶', nameEn: 'Ginger Tea', category: 'drinks', basePrice: 22, currentPrice: 22, unlocked: false, unlockCost: 150, popularity: 0, prepTime: 25, season: 'winter', icon: '🫖' },
+  { id: 'red-bean-soup', name: '红豆汤', nameEn: 'Red Bean Soup', category: 'drinks', basePrice: 24, currentPrice: 24, unlocked: false, unlockCost: 160, popularity: 0, prepTime: 30, season: 'winter', icon: '🍵' },
 ];
