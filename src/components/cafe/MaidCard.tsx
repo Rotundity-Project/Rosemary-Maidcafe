@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Maid, MaidRole, MaidPersonality } from '@/types';
 import { StaminaBar } from '@/components/ui/ProgressBar';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
@@ -60,6 +60,14 @@ export function MaidCard({
   const isResting = maid.status.isResting;
   const isWorking = maid.status.isWorking;
 
+  // Entrance animation state
+  const [isNew, setIsNew] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsNew(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (compact) {
     return (
       <div
@@ -69,6 +77,7 @@ export function MaidCard({
           ${selected ? 'ring-2 ring-pink-500 ring-offset-2 rounded-full' : ''}
           ${onClick ? 'hover:scale-105' : ''}
           ${isResting ? 'opacity-60' : ''}
+          ${isNew ? 'animate-scale-in' : ''}
         `}
       >
         <MaidAvatar src={maid.avatar} name={maid.name} size="sm" />
@@ -94,6 +103,7 @@ export function MaidCard({
         }
         ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300 active:border-pink-400' : ''}
         ${isResting ? 'opacity-75' : ''}
+        ${isNew ? 'animate-scale-in' : ''}
       `}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
