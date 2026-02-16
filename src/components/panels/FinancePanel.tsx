@@ -32,7 +32,9 @@ export function FinancePanel() {
     return total + eq.level * 5;
   }, 0);
 
-  const todayProfit = finance.dailyRevenue - finance.dailyExpenses;
+  // 今日支出 = 已记录的支出 + 当天运营成本
+  const todayExpenses = finance.dailyExpenses + dailyOperatingCost;
+  const todayProfit = finance.dailyRevenue - todayExpenses;
 
   // Get last 7 days of history (or less if not enough data)
   const recentHistory = finance.history.slice(-7);
@@ -46,7 +48,7 @@ export function FinancePanel() {
   const maxValue = Math.max(
     ...recentHistory.map((d) => Math.max(d.revenue, d.expenses)),
     finance.dailyRevenue,
-    finance.dailyExpenses,
+    todayExpenses,
     100
   );
 
@@ -77,7 +79,7 @@ export function FinancePanel() {
         />
         <StatCard
           label={financePanel.todayExpenses}
-          value={`-${finance.dailyExpenses}`}
+          value={`-${todayExpenses}`}
           icon={<span className="text-xl">📉</span>}
           trend="down"
         />
