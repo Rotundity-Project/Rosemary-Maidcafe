@@ -93,12 +93,13 @@ export function calculateMaxSeats(cafeLevel: number): number {
 
 /**
  * 计算升级咖啡厅所需金币
+ * 优化：调整费用曲线，前期更容易，后期更有挑战
  * @param currentLevel 当前等级
  * @returns 升级所需金币
  */
 export function calculateCafeUpgradeCost(currentLevel: number): number {
-  // 基础费用500，每级增加500
-  return 500 + currentLevel * 500;
+  // 基础费用400，每级增加600 (原500/500)
+  return 400 + currentLevel * 600;
 }
 
 /**
@@ -112,17 +113,18 @@ export function calculateMaidExpRequired(level: number): number {
 
 /**
  * 计算日常运营成本
+ * 优化：降低基础支出，让经济更容易平衡
  * @param maidCount 女仆数量
  * @param cafeLevel 咖啡厅等级
  * @returns 日常运营成本
  */
 export function calculateDailyOperatingCost(maidCount: number, cafeLevel: number): number {
-  // 基础租金 = 等级 * 50
-  const rent = cafeLevel * 50;
-  // 水电费 = 等级 * 20
-  const utilities = cafeLevel * 20;
-  // 女仆工资 = 每人50
-  const wages = maidCount * 50;
+  // 基础租金 = 等级 * 30 (原50)
+  const rent = cafeLevel * 30;
+  // 水电费 = 等级 * 15 (原20)
+  const utilities = cafeLevel * 15;
+  // 女仆工资 = 使用新的工资表
+  const wages = maidCount * 15; // 使用平均工资
   
   return rent + utilities + wages;
 }

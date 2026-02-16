@@ -36,17 +36,17 @@ export const personalityStatBonuses: Record<MaidPersonality, { charm: number; sk
 };
 
 export const hireCostByLevel: number[] = [
-  100,  // Level 1
-  200,  // Level 2
-  350,  // Level 3
-  550,  // Level 4
-  800,  // Level 5
+  80,   // Level 1 - 降低20%
+  150,  // Level 2 - 降低25%
+  250,  // Level 3 - 降低29%
+  400,  // Level 4 - 降低27%
+  600,  // Level 5 - 降低25%
 ];
 
 export const dailyWageByLevel: number[] = [
-  20,   // Level 1
-  35,   // Level 2
-  55,   // Level 3
-  80,   // Level 4
-  110,  // Level 5
+  15,   // Level 1 - 降低25%
+  25,   // Level 2 - 降低29%
+  40,   // Level 3 - 降低27%
+  60,   // Level 4 - 降低25%
+  85,   // Level 5 - 降低23%
 ];

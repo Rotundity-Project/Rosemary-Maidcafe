@@ -36,9 +36,9 @@ export const initialGameState: GameState = {
     unlockedAreas: ['main'],
   },
   
-  // 财务 - 初始金币1000
+  // 财务 - 初始金币2000（优化：提升初始资金，让新手有更充裕的起步空间）
   finance: {
-    gold: 1000,
+    gold: 2000,
     dailyRevenue: 0,
     dailyExpenses: 0,
     history: [],
