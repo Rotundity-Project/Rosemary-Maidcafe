@@ -1,4 +1,4 @@
-import { Customer, CustomerType, CustomerStatus, Order, OrderItem, MenuItem, Maid, Season } from '@/types';
+import { Customer, CustomerType, CustomerStatus, Order, OrderItem, MenuItem, Maid, Season, Weather } from '@/types';
 import { generateId, randomChoice, randomInt, clamp } from '@/utils';
 
 // 顾客名字池
@@ -46,8 +46,10 @@ const SPAWN_INTERVAL_CONFIG = {
 /**
  * 根据权重随机选择顾客类型
  * Requirements: 3.2
+ * @param reputation 咖啡厅声望
+ * @param weather 当前天气 (影响顾客类型概率)
  */
-function selectCustomerType(reputation: number): CustomerType {
+function selectCustomerType(reputation: number, weather: Weather): CustomerType {
   const types: CustomerType[] = ['regular', 'vip', 'critic', 'group'];
   
   // 边界处理：确保 reputation 在有效范围内
@@ -57,7 +59,28 @@ function selectCustomerType(reputation: number): CustomerType {
   const weights = types.map(type => {
     const config = customerTypeWeights[type];
     // 声望越高，特殊顾客出现概率越高 (reputationBonus 0-0.2 之间)
-    return config.baseWeight + (clampedReputation / 100) * config.reputationBonus * config.baseWeight;
+    let weight = config.baseWeight + (clampedReputation / 100) * config.reputationBonus * config.baseWeight;
+    
+    // 天气影响顾客类型
+    switch (weather) {
+      case 'sunny':
+        // 晴天：VIP和团体顾客概率增加
+        if (type === 'vip') weight *= 1.3;
+        if (type === 'group') weight *= 1.2;
+        break;
+      case 'rainy':
+      case 'snowy':
+        // 雨雪天：普通顾客更多，VIP更少
+        if (type === 'regular') weight *= 1.2;
+        if (type === 'vip') weight *= 0.7;
+        break;
+      case 'cloudy':
+      // 阴天：无调整
+      default:
+        break;
+    }
+    
+    return weight;
   });
   
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -77,10 +100,11 @@ function selectCustomerType(reputation: number): CustomerType {
  * 生成顾客
  * Requirements: 3.1, 3.2
  * @param reputation 咖啡厅声望 (0-100)
- * @param season 当前季节 (用于未来季节性顾客行为扩展)
+ * @param season 当前季节
+ * @param weather 当前天气 (影响顾客行为)
  */
-export function generateCustomer(reputation: number, season: Season): Customer {
-  const type = selectCustomerType(reputation);
+export function generateCustomer(reputation: number, season: Season, weather: Weather): Customer {
+  const type = selectCustomerType(reputation, weather);
   const patienceRange = customerPatienceRange[type];
   
   const firstName = randomChoice(customerFirstNames);
