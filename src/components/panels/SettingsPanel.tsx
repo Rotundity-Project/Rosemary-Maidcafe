@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useGame } from '@/components/game/GameProvider';
 import { useAudio } from '@/components/game/AudioProvider';
+import { useI18n } from '@/i18n';
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -11,6 +13,7 @@ import { deleteSave, exportSave, downloadSave, saveGame } from '@/utils/storage'
 export function SettingsPanel() {
   const { state, dispatch } = useGame();
   const { settings, setMuted, setBgmEnabled, setSfxEnabled, setBgmVolume, setSfxVolume, playSfx } = useAudio();
+  const { t, language, setLanguage } = useI18n();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteStep, setDeleteStep] = useState(0);
 
@@ -241,6 +244,16 @@ export function SettingsPanel() {
                 className="w-full accent-pink-500 disabled:opacity-50"
               />
             </div>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Language Settings */}
+      <Card>
+        <CardHeader>🌐 {t.language}</CardHeader>
+        <CardBody>
+          <div className="flex justify-center">
+            <LanguageSwitcher size="lg" />
           </div>
         </CardBody>
       </Card>
