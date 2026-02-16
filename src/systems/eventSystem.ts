@@ -1,5 +1,5 @@
 import { GameEvent, GameState, Season, EventEffect } from '@/types';
-import { positiveEvents, negativeEvents, seasonalEvents } from '@/data/events';
+import { mergedPositiveEvents, mergedNegativeEvents, mergedSeasonalEvents, allEvents } from '@/data/events';
 
 /**
  * 事件系统 - 处理游戏中的随机事件、季节事件和事件效果
@@ -37,12 +37,12 @@ export function rollForEvent(day: number, season: Season): GameEvent | null {
   const eventTypeRoll = Math.random();
   if (eventTypeRoll < POSITIVE_EVENT_WEIGHT) {
     // 触发正面事件
-    const randomIndex = Math.floor(Math.random() * positiveEvents.length);
-    return positiveEvents[randomIndex];
+    const randomIndex = Math.floor(Math.random() * mergedPositiveEvents.length);
+    return mergedPositiveEvents[randomIndex];
   } else {
     // 触发负面事件
-    const randomIndex = Math.floor(Math.random() * negativeEvents.length);
-    return negativeEvents[randomIndex];
+    const randomIndex = Math.floor(Math.random() * mergedNegativeEvents.length);
+    return mergedNegativeEvents[randomIndex];
   }
 }
 
@@ -52,7 +52,7 @@ export function rollForEvent(day: number, season: Season): GameEvent | null {
  * @returns 该季节的事件数组
  */
 export function getSeasonalEvents(season: Season): GameEvent[] {
-  return seasonalEvents[season] || [];
+  return mergedSeasonalEvents[season] || [];
 }
 
 /**
@@ -189,8 +189,8 @@ export function isEventActive(events: GameEvent[], eventId: string): boolean {
  * @returns 所有事件的数组
  */
 export function getAllEvents(): GameEvent[] {
-  const allSeasonalEvents = Object.values(seasonalEvents).flat();
-  return [...positiveEvents, ...negativeEvents, ...allSeasonalEvents];
+  const allSeasonalEvents = Object.values(mergedSeasonalEvents).flat();
+  return [...mergedPositiveEvents, ...mergedNegativeEvents, ...allSeasonalEvents];
 }
 
 /**
