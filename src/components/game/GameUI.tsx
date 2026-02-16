@@ -110,8 +110,10 @@ export function GameUI() {
       {/* Top Bar - Requirements: 9.2 */}
       <TopBar />
       
-      {/* Navigation - Requirements: 9.3 */}
-      <Navigation />
+      {/* Navigation - Desktop only, mobile uses bottom nav */}
+      <div className="hidden sm:block">
+        <Navigation />
+      </div>
       
       {/* Main Content Area with Side Navigation for Landscape - Requirements: 8.3, 9.1 */}
       <div className="flex-1 flex overflow-hidden">
