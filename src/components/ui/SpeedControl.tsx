@@ -15,7 +15,23 @@ const speedOptions: { value: GameSpeed; label: string; icon: string }[] = [
   { value: 4, label: '4x', icon: '⚡' },
 ];
 
+// 触觉反馈函数
+const triggerHaptic = (type: 'light' | 'medium' = 'light') => {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    const patterns = {
+      light: 10,
+      medium: 25,
+    };
+    navigator.vibrate(patterns[type]);
+  }
+};
+
 export function SpeedControl({ currentSpeed, onSpeedChange }: SpeedControlProps) {
+  const handleSpeedChange = useCallback((speed: GameSpeed) => {
+    triggerHaptic('light');
+    onSpeedChange(speed);
+  }, [onSpeedChange]);
+
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     let newIndex = index;
     
@@ -24,19 +40,23 @@ export function SpeedControl({ currentSpeed, onSpeedChange }: SpeedControlProps)
       case 'ArrowDown':
         e.preventDefault();
         newIndex = (index + 1) % speedOptions.length;
+        triggerHaptic('light');
         break;
       case 'ArrowLeft':
       case 'ArrowUp':
         e.preventDefault();
         newIndex = (index - 1 + speedOptions.length) % speedOptions.length;
+        triggerHaptic('light');
         break;
       case 'Home':
         e.preventDefault();
         newIndex = 0;
+        triggerHaptic('medium');
         break;
       case 'End':
         e.preventDefault();
         newIndex = speedOptions.length - 1;
+        triggerHaptic('medium');
         break;
       default:
         return;
@@ -60,7 +80,7 @@ export function SpeedControl({ currentSpeed, onSpeedChange }: SpeedControlProps)
         {speedOptions.map((option, index) => (
           <button
             key={option.value}
-            onClick={() => onSpeedChange(option.value)}
+            onClick={() => handleSpeedChange(option.value)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={`
               flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium
@@ -73,7 +93,8 @@ export function SpeedControl({ currentSpeed, onSpeedChange }: SpeedControlProps)
             role="radio"
             aria-checked={currentSpeed === option.value}
             aria-label={`游戏速度 ${option.label}`}
-            tabIndex={currentSpeed === option.value ? 0 : -1}
+            // 所有按钮都可聚焦，支持 Tab 导航
+            tabIndex={0}
           >
             <span>{option.icon}</span>
             <span>{option.label}</span>

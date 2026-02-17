@@ -1,6 +1,7 @@
 'use client';
 
-import React, { ButtonHTMLAttributes, ReactNode } from 'react';
+import React, { ButtonHTMLAttributes, ReactNode, useCallback } from 'react';
+import { lightTap, supportsHapticFeedback } from '@/utils/haptic';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
