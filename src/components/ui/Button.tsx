@@ -67,7 +67,6 @@ export function Button({
 
       onClick={handleClick}
 
-
       {...props}
     >
       {isLoading ? (
