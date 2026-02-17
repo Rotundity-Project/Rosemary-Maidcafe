@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Customer, CustomerType, CustomerStatus } from '@/types';
 import { PatienceBar } from '@/components/ui/ProgressBar';
 
@@ -43,6 +43,15 @@ export function CustomerCard({
 }: CustomerCardProps) {
   const isPatienceLow = customer.patience < 30;
   const isPatienceCritical = customer.patience < 15;
+  
+  // Entrance animation state
+  const [isNew, setIsNew] = useState(true);
+  
+  useEffect(() => {
+    // Trigger entrance animation shortly after mount
+    const timer = setTimeout(() => setIsNew(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (compact) {
     return (
@@ -52,6 +61,7 @@ export function CustomerCard({
           relative cursor-pointer transition-all duration-200
           ${selected ? 'ring-2 ring-pink-500 ring-offset-2' : ''}
           ${onClick ? 'hover:scale-105' : ''}
+          ${isNew ? 'animate-scale-in' : ''}
         `}
       >
         <div className="text-3xl">{customer.avatar}</div>
@@ -86,6 +96,7 @@ export function CustomerCard({
         }
         ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300 active:border-pink-400' : ''}
         ${isPatienceCritical ? 'motion-safe:animate-pulse' : ''}
+        ${isNew ? 'animate-scale-in' : ''}
       `}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >

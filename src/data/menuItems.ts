@@ -541,4 +541,60 @@ export const defaultMenuItems: MenuItem[] = [
   // New Drinks - Added during optimization
   { id: 'cola', name: '可乐', nameEn: 'Cola', category: 'drinks', basePrice: 18, currentPrice: 18, unlocked: false, unlockCost: 100, popularity: 0, prepTime: 15, season: null, icon: '🥤' },
   { id: 'milk-tea-pearl', name: '珍珠奶茶', nameEn: 'Bubble Tea', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 45, season: null, icon: '🧋' },
+
+  // ==================== 中国传统节日限定菜单 ====================
+  // 春节系列 (Spring Festival - 春季)
+  { id: 'tanghulu', name: '糖葫芦', nameEn: 'Candied Haws', category: 'desserts', basePrice: 25, currentPrice: 25, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 15, season: 'spring', icon: '🍡' },
+  { id: 'nian Gao', name: '年糕', nameEn: 'Rice Cake', category: 'main', basePrice: 35, currentPrice: 35, unlocked: false, unlockCost: 250, popularity: 0, prepTime: 40, season: 'spring', icon: '🍰' },
+  { id: 'spring-festival-set', name: '春节吉祥套餐', nameEn: 'Spring Festival Set', category: 'special', basePrice: 168, currentPrice: 168, unlocked: false, unlockCost: 1500, popularity: 0, prepTime: 180, season: 'spring', icon: '🧧' },
+  
+  // 元宵节 (Lantern Festival - 春季)
+  { id: 'tangyuan', name: '汤圆', nameEn: 'Glutinous Rice Balls', category: 'desserts', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 200, popularity: 0, prepTime: 30, season: 'spring', icon: '🥣' },
+  { id: 'yuanxiao-set', name: '元宵团圆套餐', nameEn: 'Lantern Festival Set', category: 'special', basePrice: 128, currentPrice: 128, unlocked: false, unlockCost: 1100, popularity: 0, prepTime: 150, season: 'spring', icon: '🏮' },
+  
+  // 端午节 (Dragon Boat Festival - 夏季)
+  { id: 'zongzi', name: '粽子', nameEn: 'Rice Dumpling', category: 'main', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 35, season: 'summer', icon: '🎋' },
+  { id: 'dragon-boat-set', name: '端午安康套餐', nameEn: 'Dragon Boat Set', category: 'special', basePrice: 118, currentPrice: 118, unlocked: false, unlockCost: 1000, popularity: 0, prepTime: 140, season: 'summer', icon: '🐉' },
+  
+  // 中秋节强化版 (Mid-Autumn Festival - 秋季)
+  { id: 'mooncake-lotus', name: '莲蓉月饼', nameEn: 'Lotus Seed Paste Mooncake', category: 'desserts', basePrice: 45, currentPrice: 45, unlocked: false, unlockCost: 350, popularity: 0, prepTime: 25, season: 'autumn', icon: '🥮' },
+  { id: 'mooncake-red-bean', name: '红豆月饼', nameEn: 'Red Bean Mooncake', category: 'desserts', basePrice: 42, currentPrice: 42, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 25, season: 'autumn', icon: '🥮' },
+  
+  // 重阳节 (Double Ninth Festival - 秋季)
+  { id: 'chrysanthemum-tea', name: '菊花茶', nameEn: 'Chrysanthemum Tea', category: 'drinks', basePrice: 26, currentPrice: 26, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 30, season: 'autumn', icon: '🌼' },
+  { id: 'double-ninth-set', name: '重阳登高套餐', nameEn: 'Double Ninth Set', category: 'special', basePrice: 98, currentPrice: 98, unlocked: false, unlockCost: 800, popularity: 0, prepTime: 120, season: 'autumn', icon: '🌿' },
+  
+  // 冬季暖饮系列
+  { id: 'ginger-tea', name: '姜茶', nameEn: 'Ginger Tea', category: 'drinks', basePrice: 22, currentPrice: 22, unlocked: false, unlockCost: 150, popularity: 0, prepTime: 25, season: 'winter', icon: '🫖' },
+  { id: 'red-bean-soup', name: '红豆汤', nameEn: 'Red Bean Soup', category: 'drinks', basePrice: 24, currentPrice: 24, unlocked: false, unlockCost: 160, popularity: 0, prepTime: 30, season: 'winter', icon: '🍵' },
+
+  // ==================== 奶茶系列扩展 (Bubble Tea Series) ====================
+  { id: 'milk-tea-classic', name: '原味奶茶', nameEn: 'Classic Milk Tea', category: 'drinks', basePrice: 26, currentPrice: 26, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 35, season: null, icon: '🧋' },
+  { id: 'milk-tea-taro', name: '芋泥奶茶', nameEn: 'Taro Milk Tea', category: 'drinks', basePrice: 35, currentPrice: 35, unlocked: false, unlockCost: 280, popularity: 0, prepTime: 45, season: null, icon: '🧋' },
+  { id: 'milk-tea-strawberry', name: '草莓奶茶', nameEn: 'Strawberry Milk Tea', category: 'drinks', basePrice: 33, currentPrice: 33, unlocked: false, unlockCost: 260, popularity: 0, prepTime: 40, season: 'spring', icon: '🍓' },
+  { id: 'milk-tea-mango', name: '芒果奶茶', nameEn: 'Mango Milk Tea', category: 'drinks', basePrice: 34, currentPrice: 34, unlocked: false, unlockCost: 270, popularity: 0, prepTime: 40, season: 'summer', icon: '🥭' },
+  { id: 'milk-tea-brown-sugar', name: '黑糖奶茶', nameEn: 'Brown Sugar Milk Tea', category: 'drinks', basePrice: 38, currentPrice: 38, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 45, season: null, icon: '🧋' },
+  { id: 'milk-tea-matcha', name: '抹茶奶茶', nameEn: 'Matcha Milk Tea', category: 'drinks', basePrice: 40, currentPrice: 40, unlocked: false, unlockCost: 350, popularity: 0, prepTime: 50, season: null, icon: '🍵' },
+  { id: 'cheese-tea', name: '芝士奶盖茶', nameEn: 'Cheese Foam Tea', category: 'drinks', basePrice: 42, currentPrice: 42, unlocked: false, unlockCost: 380, popularity: 0, prepTime: 50, season: null, icon: '🧀' },
+  { id: 'cheese-tea-mango', name: '芝士芒果茶', nameEn: 'Cheese Mango Tea', category: 'drinks', basePrice: 45, currentPrice: 45, unlocked: false, unlockCost: 400, popularity: 0, prepTime: 50, season: 'summer', icon: '🥭' },
+  { id: 'milk-tea-coconut', name: '椰奶奶茶', nameEn: 'Coconut Milk Tea', category: 'drinks', basePrice: 36, currentPrice: 36, unlocked: false, unlockCost: 300, popularity: 0, prepTime: 40, season: 'summer', icon: '🥥' },
+  { id: 'red-bean-milk-tea', name: '红豆奶茶', nameEn: 'Red Bean Milk Tea', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 250, popularity: 0, prepTime: 40, season: 'winter', icon: '🫘' },
+
+  // ==================== 果汁系列扩展 (Juice Series) ====================
+  { id: 'orange-juice', name: '鲜橙汁', nameEn: 'Fresh Orange Juice', category: 'drinks', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 200, popularity: 0, prepTime: 30, season: null, icon: '🍊' },
+  { id: 'apple-juice', name: '苹果汁', nameEn: 'Apple Juice', category: 'drinks', basePrice: 26, currentPrice: 26, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 25, season: null, icon: '🍎' },
+  { id: 'grape-juice', name: '葡萄汁', nameEn: 'Grape Juice', category: 'drinks', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 30, season: null, icon: '🍇' },
+  { id: 'watermelon-juice', name: '西瓜汁', nameEn: 'Watermelon Juice', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 240, popularity: 0, prepTime: 35, season: 'summer', icon: '🍉' },
+  { id: 'pineapple-juice', name: '菠萝汁', nameEn: 'Pineapple Juice', category: 'drinks', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 30, season: 'summer', icon: '🍍' },
+  { id: 'mango-juice', name: '芒果汁', nameEn: 'Mango Juice', category: 'drinks', basePrice: 35, currentPrice: 35, unlocked: false, unlockCost: 280, popularity: 0, prepTime: 35, season: 'summer', icon: '🥭' },
+  { id: 'mixed-fruit-juice', name: '混合果汁', nameEn: 'Mixed Fruit Juice', category: 'drinks', basePrice: 38, currentPrice: 38, unlocked: false, unlockCost: 320, popularity: 0, prepTime: 40, season: null, icon: '🧃' },
+  { id: 'kiwi-juice', name: '奇异果汁', nameEn: 'Kiwi Juice', category: 'drinks', basePrice: 36, currentPrice: 36, unlocked: false, unlockCost: 300, popularity: 0, prepTime: 35, season: null, icon: '🥝' },
+  { id: 'peach-juice', name: '水蜜桃汁', nameEn: 'Peach Juice', category: 'drinks', basePrice: 34, currentPrice: 34, unlocked: false, unlockCost: 280, popularity: 0, prepTime: 35, season: 'summer', icon: '🍑' },
+  { id: 'strawberry-juice', name: '草莓汁', nameEn: 'Strawberry Juice', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 250, popularity: 0, prepTime: 30, season: 'spring', icon: '🍓' },
+
+  // ==================== 气泡水系列 (Sparkling Water Series) ====================
+  { id: 'sparkling-water', name: '气泡水', nameEn: 'Sparkling Water', category: 'drinks', basePrice: 20, currentPrice: 20, unlocked: false, unlockCost: 120, popularity: 0, prepTime: 15, season: null, icon: '💧' },
+  { id: 'lemon-sparkling', name: '柠檬气泡水', nameEn: 'Lemon Sparkling', category: 'drinks', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 200, popularity: 0, prepTime: 25, season: 'summer', icon: '🍋' },
+  { id: 'peach-sparkling', name: '桃子气泡水', nameEn: 'Peach Sparkling', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 240, popularity: 0, prepTime: 25, season: 'summer', icon: '🍑' },
+  { id: 'yogurt-sparkling', name: '酸奶气泡水', nameEn: 'Yogurt Sparkling', category: 'drinks', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 30, season: null, icon: '🥛' },
 ];

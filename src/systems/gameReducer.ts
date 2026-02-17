@@ -361,7 +361,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           break;
         }
 
-        const newCustomer = generateCustomer(reputation, state.season);
+        const newCustomer = generateCustomer(reputation, state.season, state.weather);
         const order = generateOrder(newCustomer, state.menuItems, state.season);
 
         customersById.set(newCustomer.id, {
