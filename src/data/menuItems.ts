@@ -569,6 +569,8 @@ export const defaultMenuItems: MenuItem[] = [
   { id: 'red-bean-soup', name: '红豆汤', nameEn: 'Red Bean Soup', category: 'drinks', basePrice: 24, currentPrice: 24, unlocked: false, unlockCost: 160, popularity: 0, prepTime: 30, season: 'winter', icon: '🍵' },
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 
   // ==================== 奶茶系列扩展 (Bubble Tea Series) ====================
   { id: 'milk-tea-classic', name: '原味奶茶', nameEn: 'Classic Milk Tea', category: 'drinks', basePrice: 26, currentPrice: 26, unlocked: false, unlockCost: 180, popularity: 0, prepTime: 35, season: null, icon: '🧋' },
@@ -599,5 +601,6 @@ export const defaultMenuItems: MenuItem[] = [
   { id: 'lemon-sparkling', name: '柠檬气泡水', nameEn: 'Lemon Sparkling', category: 'drinks', basePrice: 28, currentPrice: 28, unlocked: false, unlockCost: 200, popularity: 0, prepTime: 25, season: 'summer', icon: '🍋' },
   { id: 'peach-sparkling', name: '桃子气泡水', nameEn: 'Peach Sparkling', category: 'drinks', basePrice: 32, currentPrice: 32, unlocked: false, unlockCost: 240, popularity: 0, prepTime: 25, season: 'summer', icon: '🍑' },
   { id: 'yogurt-sparkling', name: '酸奶气泡水', nameEn: 'Yogurt Sparkling', category: 'drinks', basePrice: 30, currentPrice: 30, unlocked: false, unlockCost: 220, popularity: 0, prepTime: 30, season: null, icon: '🥛' },
+>>>>>>> origin/main
 >>>>>>> origin/main
 ];

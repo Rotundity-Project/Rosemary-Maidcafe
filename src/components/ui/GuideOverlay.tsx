@@ -21,6 +21,10 @@ export function GuideOverlay() {
   // 检查是否应该显示引导
   const shouldShowGuide = state.guide?.isActive && state.guide?.currentStep !== 'complete';
 =======
+<<<<<<< HEAD
+  // 检查是否应该显示引导
+  const shouldShowGuide = state.guide?.isActive && state.guide?.currentStep !== 'complete';
+=======
   // 空值检查
   const guide = state.guide;
   const guideIsActive = guide?.isActive ?? false;
@@ -28,6 +32,7 @@ export function GuideOverlay() {
   
   // 检查是否应该显示引导
   const shouldShowGuide = guideIsActive && currentStep !== 'complete';
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
   
@@ -44,6 +49,9 @@ export function GuideOverlay() {
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/main
 >>>>>>> origin/main
       if (state.guide.currentStep !== 'welcome') {
         dispatch({ type: 'COMPLETE_GUIDE_STEP', step: state.guide.currentStep as GuideStep });
@@ -53,6 +61,8 @@ export function GuideOverlay() {
   }, [state, dispatch]);
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
       if (currentStep !== 'welcome') {
         dispatch({ type: 'COMPLETE_GUIDE_STEP', step: currentStep as GuideStep });
@@ -60,6 +70,7 @@ export function GuideOverlay() {
       dispatch({ type: 'NEXT_GUIDE_STEP' });
     }
   }, [state, dispatch, currentStep]);
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
   
@@ -141,7 +152,11 @@ export function GuideOverlay() {
 <<<<<<< HEAD
             {state.guide.currentStep === 'welcome' ? '开始引导' : '下一步'}
 =======
+<<<<<<< HEAD
+            {state.guide.currentStep === 'welcome' ? '开始引导' : '下一步'}
+=======
             {currentStep === 'welcome' ? '开始引导' : '下一步'}
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
           </button>
