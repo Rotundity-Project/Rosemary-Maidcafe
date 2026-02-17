@@ -2,6 +2,47 @@ import { GameState, Maid } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
 import { getRandomMaidImage, maidImagePool } from '@/data/maidImages';
 
+/**
+ * 比较版本号
+ * @param v1 版本号1
+ * @param v2 版本号2
+ * @returns -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2
+ */
+export function compareVersion(v1: string, v2: string): number {
+  const parts1 = v1.split('.').map(Number);
+  const parts2 = v2.split('.').map(Number);
+  
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const p1 = parts1[i] ?? 0;
+    const p2 = parts2[i] ?? 0;
+    if (p1 < p2) return -1;
+    if (p1 > p2) return 1;
+  }
+  return 0;
+}
+
+/**
+ * 检查版本是否兼容
+ * @param version 存档版本
+ * @returns 是否兼容
+ */
+export function isVersionCompatible(version: string): boolean {
+  const currentVersion = GAME_CONSTANTS.SAVE_VERSION;
+  const minVersion = GAME_CONSTANTS.MIN_SUPPORTED_VERSION;
+  
+  // 版本相同或高于当前版本（存档比游戏新，可能是未来版本）
+  if (compareVersion(version, currentVersion) >= 0) {
+    return true;
+  }
+  
+  // 版本低于当前但高于最低支持版本
+  if (compareVersion(version, minVersion) >= 0) {
+    return true;
+  }
+  
+  return false;
+}
+
 // 存储数据结构
 export interface SaveData {
   version: string;
@@ -85,7 +126,17 @@ export function validateSaveData(data: unknown): StorageResult<SaveData> {
 
   // 检查必要字段
   if (!saveData.version || typeof saveData.version !== 'string') {
-    return { success: false, error: '存档版本信息缺失' };
+    // 兼容旧版存档（无版本号）
+    console.warn('存档缺少版本信息，尝试兼容处理...');
+    saveData.version = '0.0.0';
+  }
+
+  // 检查版本兼容性
+  if (!isVersionCompatible(saveData.version)) {
+    return { 
+      success: false, 
+      error: `存档版本 ${saveData.version} 不受支持。当前游戏版本: ${GAME_CONSTANTS.SAVE_VERSION}，最低支持版本: ${GAME_CONSTANTS.MIN_SUPPORTED_VERSION}` 
+    };
   }
 
   if (!saveData.timestamp || typeof saveData.timestamp !== 'number') {

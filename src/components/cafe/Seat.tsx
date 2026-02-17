@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Customer, CustomerStatus } from '@/types';
 import { PatienceBar } from '@/components/ui/ProgressBar';
+import { lightTap, supportsHapticFeedback } from '@/utils/haptic';
 
 interface SeatProps {
   seatId: string;
@@ -36,13 +37,16 @@ export function Seat({
   const isPatienceLow = customer && customer.patience < 30;
   const isPatienceCritical = customer && customer.patience < 15;
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
+    if (supportsHapticFeedback()) {
+      lightTap();
+    }
     if (customer && onCustomerClick) {
       onCustomerClick(customer.id);
     } else if (isEmpty && onSeatClick) {
       onSeatClick(seatId);
     }
-  };
+  }, [customer, isEmpty, onCustomerClick, onSeatClick, seatId]);
 
   // Extract seat number from seatId
   const seatNumber = seatId.replace('seat-', '');
