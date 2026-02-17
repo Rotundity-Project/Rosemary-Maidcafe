@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Maid, MaidRole, MaidPersonality } from '@/types';
 import { StaminaBar } from '@/components/ui/ProgressBar';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
+import { lightTap, supportsHapticFeedback } from '@/utils/haptic';
 
 interface MaidCardProps {
   maid: Maid;
@@ -60,24 +61,22 @@ export function MaidCard({
   const isResting = maid.status.isResting;
   const isWorking = maid.status.isWorking;
 
-  // Entrance animation state
-  const [isNew, setIsNew] = useState(true);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => setIsNew(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const handleClick = useCallback(() => {
+    if (onClick && supportsHapticFeedback()) {
+      lightTap();
+    }
+    onClick?.();
+  }, [onClick]);
 
   if (compact) {
     return (
       <div
-        onClick={onClick}
+        onClick={handleClick}
         className={`
           relative cursor-pointer transition-all duration-200
           ${selected ? 'ring-2 ring-pink-500 ring-offset-2 rounded-full' : ''}
           ${onClick ? 'hover:scale-105' : ''}
           ${isResting ? 'opacity-60' : ''}
-          ${isNew ? 'animate-scale-in' : ''}
         `}
       >
         <MaidAvatar src={maid.avatar} name={maid.name} size="sm" />
@@ -93,7 +92,7 @@ export function MaidCard({
 
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         relative p-3 rounded-xl bg-white
         border-2 transition-all duration-150 active:scale-[0.99] touch-feedback
@@ -103,7 +102,6 @@ export function MaidCard({
         }
         ${onClick ? 'cursor-pointer hover:shadow-md hover:border-pink-300 active:border-pink-400' : ''}
         ${isResting ? 'opacity-75' : ''}
-        ${isNew ? 'animate-scale-in' : ''}
       `}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >

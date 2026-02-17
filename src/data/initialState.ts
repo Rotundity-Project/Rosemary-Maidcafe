@@ -113,4 +113,5 @@ export const GAME_CONSTANTS = {
   // 存储
   SAVE_KEY: 'rosemary-maid-cafe-save',
   SAVE_VERSION: '1.0.0',
+  MIN_SUPPORTED_VERSION: '0.1.0', // 最低支持的存档版本
 };
