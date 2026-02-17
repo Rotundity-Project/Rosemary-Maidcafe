@@ -139,7 +139,11 @@ export function TopBar() {
           </div>
 
           {/* Speed Control - Compact version for mobile */}
-          <div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-1">
+          <div 
+            className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-1"
+            role="radiogroup"
+            aria-label="游戏速度控制"
+          >
             {[
               { value: 0.5, label: '0.5x', icon: '🐢' },
               { value: 1, label: '1x', icon: '🚶' },
@@ -149,16 +153,37 @@ export function TopBar() {
               <button
                 key={option.value}
                 onClick={() => handleSpeedChange(option.value as typeof gameSpeed)}
+                onKeyDown={(e) => {
+                  const options = [0.5, 1, 2, 4];
+                  const currentIndex = options.indexOf(gameSpeed);
+                  let newIndex = currentIndex;
+                  
+                  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    newIndex = (currentIndex + 1) % options.length;
+                  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    newIndex = (currentIndex - 1 + options.length) % options.length;
+                  } else {
+                    return;
+                  }
+                  
+                  handleSpeedChange(options[newIndex] as typeof gameSpeed);
+                }}
                 className={`
                   flex items-center justify-center px-2 py-1.5 rounded text-xs font-medium
                   transition-all duration-150 active:scale-95 touch-feedback
+                  focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1
                   ${gameSpeed === option.value
                     ? 'bg-white text-pink-600 shadow-sm'
                     : 'text-gray-600 hover:bg-white/50'
                   }
                 `}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
+                role="radio"
+                aria-checked={gameSpeed === option.value}
                 aria-label={`游戏速度 ${option.label}`}
+                tabIndex={gameSpeed === option.value ? 0 : -1}
               >
                 <span>{option.icon}</span>
               </button>
