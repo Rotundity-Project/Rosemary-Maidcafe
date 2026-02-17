@@ -42,6 +42,13 @@ export function Button({
 }: ButtonProps) {
   const isDisabled = disabled || isLoading;
 
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isDisabled && supportsHapticFeedback()) {
+      lightTap();
+    }
+    props.onClick?.(e);
+  }, [isDisabled, props]);
+
   return (
     <button
       className={`
@@ -57,6 +64,7 @@ export function Button({
       `}
       disabled={isDisabled}
       style={{ WebkitTapHighlightColor: 'transparent' }}
+      onClick={handleClick}
       {...props}
     >
       {isLoading ? (
