@@ -42,7 +42,14 @@
 - [x] 优化加载状态 ✅ 2026-02-17
 - [x] 女仆列表滑动手势支持 ✅ 2026-02-17
 - [x] **优化游戏速度切换按钮的可访问性** ✅ 2026-02-17
-- [ ] 添加触觉反馈（移动端）
+  - 修复 tabIndex 问题，所有按钮现在都可通过 Tab 键访问
+  - 添加触觉反馈（navigator.vibrate）
+  - 分支：`perf/mobile-haptic-feedback`
+
+- [x] **添加触觉反馈（移动端）** ✅ 2026-02-17
+  - 为 SpeedControl 和 Button 组件添加触觉反馈
+  - 支持轻触和中等强度触觉
+  - 分支：`perf/mobile-haptic-feedback`
 
 ---
 
