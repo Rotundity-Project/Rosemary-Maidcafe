@@ -124,9 +124,9 @@
 
 ### In Progress
 - [x] 存档兼容性修复 (分支: fix/save-compatibility) ✅ 已提交
-- [x] 移动端 UI 优化 (分支: mobile-ui-optimize)
+- [x] 优化 (分支:移动端 UI  mobile-ui-optimize)
 - [x] 速度切换按钮可访问性优化 (分支: perf/speed-control-a11y) ✅ 已提交
-- [ ] 添加触觉反馈（移动端）
+- [x] 添加触觉反馈（移动端）(分支: perf/mobile-haptic-feedback) ✅ 已提交
 
 ---
 
@@ -147,4 +147,4 @@
 
 ---
 
-*最后更新：2026-02-17 11:01*
+*最后更新：2026-02-17 11:15*
