@@ -52,8 +52,10 @@ export function Button({
         ${variantStyles[variant]}
         ${sizeStyles[size]}
         ${className}
+        touch-feedback btn-mobile-press mobile-no-tap-highlight
       `}
       disabled={isDisabled}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
       {...props}
     >
       {isLoading ? (

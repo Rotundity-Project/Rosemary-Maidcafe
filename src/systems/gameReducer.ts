@@ -5,6 +5,7 @@ import {
   DailyFinance,
   Season,
   Customer,
+  GuideStep,
 } from '@/types';
 import { initialGameState, GAME_CONSTANTS } from '@/data/initialState';
 import { calculateEfficiency, startService, updateMaidStamina, updateMaidMood, updateServiceProgress as updateMaidServiceProgress, addExperience, getRoleEfficiencyBonus, isMaidTired } from '@/systems/maidSystem';
@@ -14,6 +15,7 @@ import { calculateDailyOperatingCost } from '@/systems/financeSystem';
 import { applyTaskEvent, claimTaskReward, refreshDailyTasks } from '@/systems/taskSystem';
 import { getCafeUpgradeCost, getAreaUnlockCost } from '@/systems/facilitySystem';
 import { generateId, generateNotificationId } from '@/utils';
+import { getNextStepConfig, canAdvanceToNextStep, getGuideNotification, GUIDE_STEPS } from './guideSystem';
 
 
 // 状态更新辅助函数 - 减少代码重复
@@ -1090,15 +1092,172 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     // ==================== 存储 ====================
     case 'LOAD_GAME': {
+      // 数据迁移：确保旧版本存档缺失字段有默认值
+      const loadedState = action.state;
+      
+      // 默认运行时数据
+      const defaultRuntime = {
+        customerSpawnMs: 0,
+        customerStatusTicks: {} as Record<string, number>,
+        customersServedToday: 0,
+        customerStreak: 0,
+      };
+      
+      // 默认新手引导数据
+      const defaultGuide = {
+        isActive: true,
+        currentStep: 'welcome' as GuideStep,
+        completedSteps: [] as GuideStep[],
+        shownTips: [] as string[],
+      };
+      
+      // 默认统计数据
+      const defaultStatistics = {
+        totalCustomersServed: 0,
+        totalRevenue: 0,
+        totalDaysPlayed: 0,
+        totalTipsEarned: 0,
+        perfectServicesCount: 0,
+        maidsHired: 0,
+      };
+      
+      // 默认财务历史
+      const defaultFinanceHistory: DailyFinance[] = [];
+      
       return {
-        ...action.state,
-        runtime: action.state.runtime ?? { customerSpawnMs: 0, customerStatusTicks: {}, customersServedToday: 0, customerStreak: 0 },
+        ...loadedState,
+        // 运行时数据迁移
+        runtime: {
+          ...defaultRuntime,
+          ...loadedState.runtime,
+        },
+        // 新手引导数据迁移（旧存档可能没有guide系统）
+        guide: loadedState.guide ? {
+          isActive: loadedState.guide.isActive ?? defaultGuide.isActive,
+          currentStep: (loadedState.guide.currentStep as GuideStep) ?? defaultGuide.currentStep,
+          completedSteps: (loadedState.guide.completedSteps as GuideStep[]) ?? defaultGuide.completedSteps,
+          shownTips: loadedState.guide.shownTips ?? defaultGuide.shownTips,
+        } : defaultGuide,
+        // 统计数据迁移
+        statistics: {
+          ...defaultStatistics,
+          ...loadedState.statistics,
+        },
+        // 财务历史迁移
+        finance: {
+          gold: loadedState.finance?.gold ?? 2000,
+          dailyRevenue: loadedState.finance?.dailyRevenue ?? 0,
+          dailyExpenses: loadedState.finance?.dailyExpenses ?? 0,
+          history: loadedState.finance?.history ?? defaultFinanceHistory,
+        },
+        // UI状态重置
         dailySummaryOpen: false,
+        notifications: loadedState.notifications ?? [],
+        // 确保必要字段存在
+        selectedMaidId: loadedState.selectedMaidId ?? null,
+        selectedCustomerId: loadedState.selectedCustomerId ?? null,
+        activePanel: loadedState.activePanel ?? 'cafe',
+        activeEvents: loadedState.activeEvents ?? [],
+        eventHistory: loadedState.eventHistory ?? [],
       };
     }
 
     case 'RESET_GAME': {
       return initialGameState;
+    }
+
+    // ==================== 新手引导 ====================
+    case 'START_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          isActive: true,
+          currentStep: 'welcome',
+          completedSteps: [],
+          shownTips: [],
+        },
+        notifications: [
+          ...state.notifications,
+          getGuideNotification('welcome'),
+        ],
+      };
+    }
+
+    case 'NEXT_GUIDE_STEP': {
+      // 检查是否可以进入下一步
+      if (!canAdvanceToNextStep(state)) {
+        return state;
+      }
+      
+      const nextConfig = getNextStepConfig(state.guide.currentStep);
+      if (!nextConfig) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          currentStep: nextConfig.step,
+        },
+        notifications: [
+          ...state.notifications,
+          getGuideNotification(nextConfig.step),
+        ],
+      };
+    }
+
+    case 'COMPLETE_GUIDE_STEP': {
+      const isAlreadyCompleted = state.guide.completedSteps.includes(action.step);
+      if (isAlreadyCompleted) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          completedSteps: [...state.guide.completedSteps, action.step],
+        },
+      };
+    }
+
+    case 'END_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          isActive: false,
+          currentStep: 'complete',
+          completedSteps: [...state.guide.completedSteps, 'complete'],
+        },
+      };
+    }
+
+    case 'ADD_SHOWN_TIP': {
+      if (state.guide.shownTips.includes(action.tipId)) {
+        return state;
+      }
+
+      return {
+        ...state,
+        guide: {
+          ...state.guide,
+          shownTips: [...state.guide.shownTips, action.tipId],
+        },
+      };
+    }
+
+    case 'SKIP_GUIDE': {
+      return {
+        ...state,
+        guide: {
+          isActive: false,
+          currentStep: 'complete',
+          completedSteps: GUIDE_STEPS.map(s => s.step),
+          shownTips: [],
+        },
+      };
     }
 
     default:

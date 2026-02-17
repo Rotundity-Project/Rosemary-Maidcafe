@@ -1926,6 +1926,203 @@ body {
   min-height: 48px;
 }
 
+/* ============================================
+   移动端交互增强 (Mobile Interaction Enhancement)
+   添加于: 2026-02-17
+   ============================================ */
+
+/* 移动端按钮按下效果 - 更明显的视觉反馈 */
+@media (hover: none) and (pointer: coarse) {
+  /* 按钮按下时更明显的缩放 */
+  .btn-mobile-press:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+  
+  /* 卡片按下效果 */
+  .card-mobile-press:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* 列表项按下效果 */
+  .list-item-mobile-press:active {
+    background-color: var(--surface-active);
+    transform: scale(0.99);
+  }
+}
+
+/* 移动端专用：禁用链接/按钮的默认高亮颜色 */
+.mobile-no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 移动端滚动毛玻璃效果 */
+.mobile-glass-scroll {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 移动端安全区域底部导航 */
+.mobile-nav-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+}
+
+/* 移动端弹出层背景 */
+.mobile-modal-bg {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* 移动端：更好的按钮点击区域 */
+@media (max-width: 640px) {
+  /* 增大移动端按钮的点击区域 */
+  .btn, .btn-sm, .btn-lg, button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 移动端列表项更大的点击区域 */
+  .list-item, .menu-item, .maid-item, .customer-item {
+    min-height: 56px;
+    padding: 12px;
+  }
+  
+  /* 移动端底部抽屉手柄更易于点击 */
+  .bottom-drawer-handle {
+    height: 24px;
+    padding: 8px;
+  }
+  
+  /* 移动端关闭按钮更大 */
+  .close-btn-mobile {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* 移动端：更好的滑动手势提示 */
+.swipe-hint {
+  position: relative;
+}
+
+.swipe-hint::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23A0AEC0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .swipe-hint::after {
+    display: none;
+  }
+}
+
+/* 移动端：防止意外缩放 */
+.meta-viewport-scale {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+/* 移动端选择反馈 - 更明显的选中状态 */
+@media (max-width: 640px) {
+  .mobile-selectable.selected {
+    background-color: var(--primary-50);
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 2px var(--primary-100);
+  }
+  
+  .mobile-selectable:active {
+    background-color: var(--primary-100);
+  }
+}
+
+/* 移动端加载状态优化 */
+.mobile-loading {
+  position: relative;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+}
+
+/* 移动端骨架屏优化 */
+@media (max-width: 640px) {
+  .skeleton {
+    border-radius: 8px;
+  }
+  
+  .skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .skeleton-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .skeleton-card {
+    height: 80px;
+  }
+}
+
+/* 移动端通知位置调整 */
+@media (max-width: 640px) {
+  .notification-container {
+    top: auto;
+    bottom: 80px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+  
+  .notification-item {
+    margin-bottom: 8px;
+  }
+}
+
+/* 移动端 Tab 切换优化 */
+@media (max-width: 640px) {
+  .tab-scroll {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .tab-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tab-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
 /* 移动端优化：防止滚动反弹 */
 .overscroll-contain {
   overscroll-behavior: contain;

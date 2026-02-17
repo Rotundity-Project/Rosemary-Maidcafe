@@ -33,3 +33,5 @@ export { MaidAvatar } from './MaidAvatar';
 export type { MaidAvatarSize } from './MaidAvatar';
 
 export { SpeedControl } from './SpeedControl';
+
+export { GuideOverlay } from './GuideOverlay';
