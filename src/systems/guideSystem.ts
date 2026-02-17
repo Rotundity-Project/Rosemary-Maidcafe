@@ -94,10 +94,13 @@ export function getCurrentStepConfig(state: GameState): GuideStepConfig | null {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   // 空值检查：如果没有引导状态，返回null
   if (!state.guide || !state.guide.currentStep) {
     return null;
   }
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
@@ -133,10 +136,13 @@ export function getGuideProgress(state: GameState): number {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   // 空值检查
   if (!state.guide || !state.guide.completedSteps) {
     return 0;
   }
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
@@ -159,10 +165,13 @@ export function shouldShowGuideBubble(state: GameState): boolean {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   // 空值检查
   if (!state.guide) {
     return false;
   }
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
@@ -228,6 +237,9 @@ export function getActiveTip(state: GameState): TipConfig | null {
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
@@ -245,6 +257,8 @@ export function getActiveTip(state: GameState): TipConfig | null {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
   // 空值检查
   if (!state.guide || !state.guide.isActive) return null;
@@ -252,6 +266,7 @@ export function getActiveTip(state: GameState): TipConfig | null {
   for (const tip of GAME_TIPS) {
     // 检查是否已经显示过
     if (state.guide.shownTips?.includes(tip.id)) continue;
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
