@@ -132,7 +132,7 @@ export function validateSaveData(data: unknown): StorageResult<SaveData> {
   }
 
   // 检查版本兼容性
-  if (!isVersionCompatible(saveData.version)) {
+  if (!isVersionCompatible(String(saveData.version))) {
     return { 
       success: false, 
       error: `存档版本 ${saveData.version} 不受支持。当前游戏版本: ${GAME_CONSTANTS.SAVE_VERSION}，最低支持版本: ${GAME_CONSTANTS.MIN_SUPPORTED_VERSION}` 

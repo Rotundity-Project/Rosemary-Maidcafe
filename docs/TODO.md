@@ -28,7 +28,7 @@
 ### H1. 存档兼容性修复
 - [x] 添加 `LOAD_GAME` action 数据迁移逻辑 ✅ 2026-02-17
 - [x] 确保旧版本存档缺失字段有默认值 ✅ 2026-02-17
-- [ ] 添加存档版本校验
+- [x] 添加存档版本校验 ✅ 2026-02-17
 
 ### H2. 数值平衡优化
 - [x] 调整初始资金和收入 ✅
@@ -47,7 +47,8 @@
   - 分支：`perf/mobile-haptic-feedback`
 
 - [x] **添加触觉反馈（移动端）** ✅ 2026-02-17
-  - 为 SpeedControl 和 Button 组件添加触觉反馈
+  - 为 SpeedControl、MaidCard、Seat 组件添加触觉反馈
+  - 添加 `supportsHapticFeedback()` 工具函数
   - 支持轻触和中等强度触觉
   - 分支：`perf/mobile-haptic-feedback`
 
