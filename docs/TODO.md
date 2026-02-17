@@ -15,19 +15,13 @@
   - 修复文件：多个 UI 组件
   - 状态：✅ 已合并
 
-- [x] **存档兼容性修复** - 完善 LOAD_GAME 数据迁移逻辑
-  - 分支：`fix/save-compatibility`
-  - 修复文件：`src/systems/gameReducer.ts`
-  - 原因：旧版本存档可能缺失 guide、runtime、statistics 等字段
-  - 状态：✅ 已提交到分支
-
 ---
 
 ## 优先级：高 (High)
 
 ### H1. 存档兼容性修复
-- [x] 添加 `LOAD_GAME` action 数据迁移逻辑 ✅ 2026-02-17
-- [x] 确保旧版本存档缺失字段有默认值 ✅ 2026-02-17
+- [ ] 添加 `LOAD_GAME` action 数据迁移逻辑
+- [ ] 确保旧版本存档缺失字段有默认值
 - [ ] 添加存档版本校验
 
 ### H2. 数值平衡优化
@@ -115,7 +109,7 @@
 ## 进行中
 
 ### In Progress
-- [x] 存档兼容性修复 (分支: fix/save-compatibility) ✅ 已提交
+- [ ] 存档兼容性修复 (分支: fix/save-compatibility)
 - [ ] 移动端 UI 优化 (分支: mobile-ui-optimize)
 - [ ] 角色指引优化 (分支: guide-optimize)
 
@@ -138,4 +132,4 @@
 
 ---
 
-*最后更新：2026-02-17 08:30*
+*最后更新：2026-02-17 04:45*
