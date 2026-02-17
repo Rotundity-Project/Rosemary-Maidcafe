@@ -1,6 +1,7 @@
 'use client';
 
-import React, { ButtonHTMLAttributes, ReactNode } from 'react';
+import React, { ButtonHTMLAttributes, ReactNode, useCallback } from 'react';
+import { lightTap, supportsHapticFeedback } from '@/utils/haptic';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -41,19 +42,32 @@ export function Button({
 }: ButtonProps) {
   const isDisabled = disabled || isLoading;
 
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isDisabled && supportsHapticFeedback()) {
+      lightTap();
+    }
+    props.onClick?.(e);
+  }, [isDisabled, props]);
+
   return (
     <button
       className={`
         inline-flex items-center justify-center gap-2
         font-medium rounded-lg border
-        transition-colors duration-200
+        transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
+        hover:scale-[1.02] active:scale-[0.98]
         ${variantStyles[variant]}
         ${sizeStyles[size]}
         ${className}
+        touch-feedback btn-mobile-press mobile-no-tap-highlight
       `}
       disabled={isDisabled}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+
+      onClick={handleClick}
+
       {...props}
     >
       {isLoading ? (

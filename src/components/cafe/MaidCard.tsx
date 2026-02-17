@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Maid, MaidRole, MaidPersonality } from '@/types';
 import { StaminaBar } from '@/components/ui/ProgressBar';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
+import { lightTap, supportsHapticFeedback } from '@/utils/haptic';
 
 interface MaidCardProps {
   maid: Maid;
@@ -60,10 +61,17 @@ export function MaidCard({
   const isResting = maid.status.isResting;
   const isWorking = maid.status.isWorking;
 
+  const handleClick = useCallback(() => {
+    if (onClick && supportsHapticFeedback()) {
+      lightTap();
+    }
+    onClick?.();
+  }, [onClick]);
+
   if (compact) {
     return (
       <div
-        onClick={onClick}
+        onClick={handleClick}
         className={`
           relative cursor-pointer transition-all duration-200
           ${selected ? 'ring-2 ring-pink-500 ring-offset-2 rounded-full' : ''}
@@ -84,7 +92,7 @@ export function MaidCard({
 
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         relative p-3 rounded-xl bg-white
         border-2 transition-all duration-150 active:scale-[0.99] touch-feedback
