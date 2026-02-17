@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { MaidAvatar } from '@/components/ui/MaidAvatar';
 import { StaminaBar, MoodBar, ExperienceBar } from '@/components/ui/ProgressBar';
 import { BottomDrawer } from '@/components/ui/BottomDrawer';
+import { SwipeableListItem } from '@/components/ui/SwipeableListItem';
 import { generateRandomMaid, getMaxMaids, getExperienceForLevel } from '@/systems/maidSystem';
 import { personalityDescriptions, hireCostByLevel } from '@/data/maidNames';
 import { getAllUsedImages } from '@/data/maidImages';
@@ -176,6 +177,7 @@ export function MaidPanel() {
                       maid={maid}
                       selected={selectedMaid?.id === maid.id}
                       onClick={() => handleSelectMaid(maid)}
+                      onToggleRest={() => handleToggleRest(maid.id)}
                       maidPanel={maidPanel}
                       maidRoles={maidRoles}
                     />
@@ -248,17 +250,24 @@ interface MaidListItemProps {
   maid: Maid;
   selected: boolean;
   onClick: () => void;
+  onToggleRest?: () => void;
   maidPanel: any;
   maidRoles: any;
 }
 
-function MaidListItem({ maid, selected, onClick, maidPanel, maidRoles }: MaidListItemProps) {
+function MaidListItem({ maid, selected, onClick, onToggleRest, maidPanel, maidRoles }: MaidListItemProps) {
   const isLowStamina = maid.stamina < 20;
   const isResting = maid.status.isResting;
 
-  return (
+  const handleSwipeLeft = () => {
+    // Swipe left to toggle rest status
+    if (onToggleRest) {
+      onToggleRest();
+    }
+  };
+
+  const content = (
     <div
-      onClick={onClick}
       className={`
         p-3 rounded-xl cursor-pointer transition-all duration-200
         border-2
@@ -304,8 +313,29 @@ function MaidListItem({ maid, selected, onClick, maidPanel, maidRoles }: MaidLis
       {isLowStamina && !isResting && (
         <div className="mt-1 text-xs text-red-500">⚠️ {maidPanel.lowStaminaWarning}</div>
       )}
+      {!isResting && (
+        <div className="mt-1 text-[10px] text-gray-400 text-right">← 滑动切换休息</div>
+      )}
     </div>
   );
+
+  // Use SwipeableListItem on mobile, regular div on desktop
+  if (onToggleRest) {
+    return (
+      <SwipeableListItem
+        onSwipeLeft={handleSwipeLeft}
+        leftAction={{
+          label: isResting ? '工作' : '休息',
+          icon: isResting ? '🔔' : '💤',
+          color: isResting ? '#10b981' : '#f59e0b'
+        }}
+      >
+        {content}
+      </SwipeableListItem>
+    );
+  }
+
+  return <div onClick={onClick}>{content}</div>;
 }
 
 // Maid Detail Card Component
