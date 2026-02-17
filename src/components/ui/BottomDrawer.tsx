@@ -202,7 +202,7 @@ export function BottomDrawer({
             {showCloseButton && (
               <button
                 onClick={handleClose}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors touch-target"
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors touch-target close-btn-mobile btn-mobile-press mobile-no-tap-highlight"
                 aria-label="关闭"
               >
                 <svg

@@ -84,6 +84,31 @@ export const GUIDE_STEPS: GuideStepConfig[] = [
 
 // 获取当前步骤配置
 export function getCurrentStepConfig(state: GameState): GuideStepConfig | null {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  // 空值检查：如果没有引导状态，返回null
+  if (!state.guide || !state.guide.currentStep) {
+    return null;
+  }
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   const currentStep = state.guide.currentStep;
   return GUIDE_STEPS.find(s => s.step === currentStep) || null;
 }
@@ -104,6 +129,31 @@ export function canAdvanceToNextStep(state: GameState): boolean {
 
 // 获取引导进度百分比
 export function getGuideProgress(state: GameState): number {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  // 空值检查
+  if (!state.guide || !state.guide.completedSteps) {
+    return 0;
+  }
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   const completedSteps = state.guide.completedSteps.length;
   const totalSteps = GUIDE_STEPS.length - 1; // 排除complete步骤
   return Math.min(100, Math.round((completedSteps / totalSteps) * 100));
@@ -111,6 +161,31 @@ export function getGuideProgress(state: GameState): number {
 
 // 判断是否应该显示引导气泡
 export function shouldShowGuideBubble(state: GameState): boolean {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  // 空值检查
+  if (!state.guide) {
+    return false;
+  }
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   return state.guide.isActive && state.guide.currentStep !== 'complete';
 }
 
@@ -162,11 +237,56 @@ export const GAME_TIPS: TipConfig[] = [
 
 // 获取当前应该显示的提示
 export function getActiveTip(state: GameState): TipConfig | null {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
   if (!state.guide.isActive) return null;
   
   for (const tip of GAME_TIPS) {
     // 检查是否已经显示过
     if (state.guide.shownTips.includes(tip.id)) continue;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+  // 空值检查
+  if (!state.guide || !state.guide.isActive) return null;
+  
+  for (const tip of GAME_TIPS) {
+    // 检查是否已经显示过
+    if (state.guide.shownTips?.includes(tip.id)) continue;
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
+>>>>>>> origin/main
     
     // 检查条件
     if (tip.condition && !tip.condition(state)) continue;
