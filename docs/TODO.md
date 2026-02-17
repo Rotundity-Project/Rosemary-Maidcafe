@@ -15,19 +15,13 @@
   - 修复文件：多个 UI 组件
   - 状态：✅ 已合并
 
-- [x] **存档兼容性修复** - 完善 LOAD_GAME 数据迁移逻辑
-  - 分支：`fix/save-compatibility`
-  - 修复文件：`src/systems/gameReducer.ts`
-  - 原因：旧版本存档可能缺失 guide、runtime、statistics 等字段
-  - 状态：✅ 已提交到分支
-
 ---
 
 ## 优先级：高 (High)
 
 ### H1. 存档兼容性修复
-- [x] 添加 `LOAD_GAME` action 数据迁移逻辑 ✅ 2026-02-17
-- [x] 确保旧版本存档缺失字段有默认值 ✅ 2026-02-17
+- [ ] 添加 `LOAD_GAME` action 数据迁移逻辑
+- [ ] 确保旧版本存档缺失字段有默认值
 - [ ] 添加存档版本校验
 
 ### H2. 数值平衡优化
@@ -41,15 +35,8 @@
 - [x] 添加更多动画效果 ✅ 2026-02-17
 - [x] 优化加载状态 ✅ 2026-02-17
 - [x] 女仆列表滑动手势支持 ✅ 2026-02-17
-- [x] **优化游戏速度切换按钮的可访问性** ✅ 2026-02-17
-  - 修复 tabIndex 问题，所有按钮现在都可通过 Tab 键访问
-  - 添加触觉反馈（navigator.vibrate）
-  - 分支：`perf/mobile-haptic-feedback`
-
-- [x] **添加触觉反馈（移动端）** ✅ 2026-02-17
-  - 为 SpeedControl 和 Button 组件添加触觉反馈
-  - 支持轻触和中等强度触觉
-  - 分支：`perf/mobile-haptic-feedback`
+- [ ] 优化游戏速度切换按钮的可访问性
+- [ ] 添加触觉反馈（移动端）
 
 ---
 
@@ -122,10 +109,9 @@
 ## 进行中
 
 ### In Progress
-- [x] 存档兼容性修复 (分支: fix/save-compatibility) ✅ 已提交
-- [x] 移动端 UI 优化 (分支: mobile-ui-optimize)
-- [x] 速度切换按钮可访问性优化 (分支: perf/speed-control-a11y) ✅ 已提交
-- [ ] 添加触觉反馈（移动端）
+- [ ] 存档兼容性修复 (分支: fix/save-compatibility)
+- [ ] 移动端 UI 优化 (分支: mobile-ui-optimize)
+- [ ] 角色指引优化 (分支: guide-optimize)
 
 ---
 
@@ -146,4 +132,4 @@
 
 ---
 
-*最后更新：2026-02-17 11:01*
+*最后更新：2026-02-17 04:45*

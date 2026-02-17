@@ -64,6 +64,7 @@ export function Button({
       `}
       disabled={isDisabled}
       style={{ WebkitTapHighlightColor: 'transparent' }}
+<<<<<<< HEAD
       onClick={handleClick}
       {...props}
     >
