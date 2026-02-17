@@ -2,7 +2,6 @@
 
 import React, { useCallback, KeyboardEvent } from 'react';
 import { GameSpeed } from '@/types';
-import { selectionFeedback, supportsHapticFeedback } from '@/utils/haptic';
 
 interface SpeedControlProps {
   currentSpeed: GameSpeed;
