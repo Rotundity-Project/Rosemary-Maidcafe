@@ -86,10 +86,29 @@ export function TopBar() {
       <div className="flex sm:hidden flex-col gap-2 max-w-7xl mx-auto safe-area-top">
         {/* Row 1: Icon, Time, Pause button, Speed Control */}
         <div className="flex items-center justify-between gap-2">
-          {/* Left: Game icon only (no title text on mobile) */}
-          <div className="flex items-center">
-            <span className="text-xl" aria-label="迷迭香咖啡厅">🌿</span>
-          </div>
+          {/* Left: Start/Pause button - larger for easy touch */}
+          <button
+            onClick={handleTogglePause}
+            className={`touch-target-lg flex items-center justify-center rounded-xl transition-all duration-150 active:scale-95 px-4 py-2 ${
+              isPaused 
+                ? 'bg-pink-500 text-white shadow-lg' 
+                : 'bg-pink-100 text-pink-700 border border-pink-200'
+            }`}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            aria-label={isPaused ? '开始游戏' : '暂停游戏'}
+          >
+            {isPaused ? (
+              <span className="flex items-center gap-1.5">
+                <PlayIcon />
+                <span className="text-sm font-medium">开始</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <PauseIcon />
+                <span className="text-sm font-medium">暂停</span>
+              </span>
+            )}
+          </button>
 
           {/* Center: Time display */}
           <div className="flex items-center gap-1.5 bg-pink-50 rounded-lg px-3 py-1.5 border border-pink-100 flex-1 justify-center">
@@ -189,6 +208,7 @@ export function TopBar() {
               </button>
             ))}
           </div>
+
         </div>
       </div>
     </header>
